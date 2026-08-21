@@ -1,0 +1,1792 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CardioInsight V3.3 – Stress & Exercise Evaluation Suite</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --blue:#2563eb;--blue-d:#1d4ed8;--blue-bg:#eff6ff;--blue-b:#bfdbfe;
+  --ok:#10b981;--ok-bg:#ecfdf5;--ok-b:#6ee7b7;--ok-d:#059669;--ok-t:#065f46;
+  --warn:#f59e0b;--warn-bg:#fffbeb;--warn-b:#fde68a;--warn-d:#b45309;--warn-t:#78350f;
+  --bad:#ef4444;--bad-bg:#fef2f2;--bad-b:#fca5a5;--bad-d:#dc2626;--bad-t:#7f1d1d;
+  --pur:#7c3aed;--pur-bg:#f5f3ff;--pur-b:#c4b5fd;--pur-d:#6d28d9;
+  --page:#eef2f7;--card:#fff;--brd:#e2e8f0;--brd2:#f1f5f9;
+  --t1:#0f172a;--t2:#475569;--t3:#94a3b8;--t4:#cbd5e1;
+  --ff:'Plus Jakarta Sans',sans-serif;--fm:'JetBrains Mono',monospace;
+  --topbar:54px;
+}
+html,body{font-family:var(--ff);color:var(--t1);background:var(--page)}
+body{display:flex;flex-direction:column;min-height:100vh}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-thumb{background:var(--t4);border-radius:99px}
+
+
+/* V3.0 clinical calculation + validation hardening */
+.validation-note{font-size:8.5px;line-height:1.45;margin-top:3px;color:var(--t3)}
+@media(max-width:600px){
+  .hint-bar{flex-wrap:wrap;overflow-wrap:anywhere}
+  .summary-layout,.acsm-clinical-layout{grid-template-columns:1fr!important}
+  .summary-tiles{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  .summary-tiles .sum-tile:last-child{grid-column:1 / -1}
+  .pdf-page{min-width:0;overflow:hidden}
+  .pdf-page .two-col{grid-template-columns:1fr!important}
+  .pdf-page .rh-title{font-size:17px}
+  .proto-box,.ptbl-wrap{max-width:100%;overflow-x:auto}
+}
+
+/* ── TOPBAR ── */
+.topbar{height:var(--topbar);flex-shrink:0;position:sticky;top:0;z-index:100;
+  background:linear-gradient(135deg,#0a1628 0%,#112264 50%,#1e1060 100%);
+  display:flex;align-items:center;justify-content:space-between;padding:0 18px;
+  box-shadow:0 2px 16px rgba(0,0,0,.4)}
+.tb-brand{display:flex;align-items:center;gap:10px}
+.tb-logo{width:36px;height:36px;border-radius:10px;flex-shrink:0;
+  background:linear-gradient(135deg,#ec4899,#8b5cf6);
+  display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(139,92,246,.5)}
+.tb-appname{font-size:15px;font-weight:800;color:#fff;letter-spacing:-.2px;line-height:1.1}
+.tb-appsub{font-size:9px;color:rgba(255,255,255,.45);letter-spacing:.3px;margin-top:1px}
+.tb-pills{display:flex;align-items:center;gap:6px}
+.tb-pill{padding:3px 10px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);
+  border-radius:99px;font-size:9.5px;font-weight:600;color:rgba(255,255,255,.7);white-space:nowrap}
+.tb-pdf-btn{display:flex;align-items:center;gap:5px;padding:5px 13px;
+  background:linear-gradient(135deg,#10b981,#059669);
+  border:none;border-radius:8px;cursor:pointer;font-family:var(--ff);
+  font-size:11.5px;font-weight:700;color:#fff;
+  box-shadow:0 2px 8px rgba(16,185,129,.45);transition:.15s;flex-shrink:0}
+.tb-pdf-btn:hover{opacity:.88;transform:translateY(-1px)}
+
+/* ── LAYOUT ── */
+.app-body{flex:1}
+
+/* ── HINT BAR ── */
+.hint-bar{
+  background:linear-gradient(135deg,#f0f9ff,#fdf4ff);
+  border-bottom:1px solid #c7d2fe;
+  padding:7px 20px;font-size:10px;color:#3730a3;
+  display:flex;align-items:center;gap:8px;
+  position:sticky;top:var(--topbar);z-index:90;
+}
+
+/* ── FORM PANEL ── */
+.form-panel{background:#fff;border-bottom:2px solid var(--brd);padding:14px 20px 16px}
+.form-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;max-width:1400px;margin:0 auto}
+.form-col{}
+
+/* ── RESULTS ── */
+.results-wrap{padding:16px 20px;background:var(--page);max-width:1400px;margin:0 auto}
+
+/* ── FORM ELEMENTS ── */
+.sh{display:flex;align-items:center;gap:7px;margin:10px 0 7px;padding-bottom:6px;border-bottom:2px solid}
+.sh-ic{width:24px;height:24px;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sh-tx{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.8px}
+.sh.c-blue{border-color:#dbeafe}.sh.c-blue .sh-ic{background:#dbeafe}.sh.c-blue .sh-tx{color:#1e40af}
+.sh.c-green{border-color:#d1fae5}.sh.c-green .sh-ic{background:#d1fae5}.sh.c-green .sh-tx{color:#065f46}
+.sh.c-pur{border-color:#ede9fe}.sh.c-pur .sh-ic{background:#ede9fe}.sh.c-pur .sh-tx{color:#5b21b6}
+.sh.c-pink{border-color:#fce7f3}.sh.c-pink .sh-ic{background:#fce7f3}.sh.c-pink .sh-tx{color:#9d174d}
+.sh.c-gold{border-color:#fef3c7}.sh.c-gold .sh-ic{background:#fef3c7}.sh.c-gold .sh-tx{color:#92400e}
+.sh.c-teal{border-color:#ccfbf1}.sh.c-teal .sh-ic{background:#ccfbf1}.sh.c-teal .sh-tx{color:#0f766e}
+.sh.c-red{border-color:#fee2e2}.sh.c-red .sh-ic{background:#fee2e2}.sh.c-red .sh-tx{color:#991b1b}
+.fg{margin-bottom:6px}
+.fl{font-size:10px;font-weight:600;color:var(--t2);margin-bottom:2px;display:flex;align-items:center;justify-content:space-between}
+.fu{font-size:8px;color:var(--t3);font-family:var(--fm);background:var(--brd2);padding:1px 5px;border-radius:3px}
+.fi{width:100%;padding:6px 10px;border:1.5px solid var(--brd);border-radius:7px;font-size:12px;font-weight:600;color:var(--t1);font-family:var(--ff);outline:none;background:#fff;transition:.12s}
+.fi:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,.08)}
+.fi::placeholder{font-weight:400;color:var(--t4)}
+.fsel{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='11' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center;padding-right:24px}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.hrmax-box{background:linear-gradient(135deg,#f5f3ff,#eff6ff);border:1.5px solid #c4b5fd;border-radius:8px;padding:7px 10px;margin-bottom:6px}
+.hrmax-box .hb-lbl{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:#6d28d9;margin-bottom:2px}
+.hrmax-box .hb-val{font-size:18px;font-weight:800;color:#4c1d95;font-family:var(--fm);line-height:1}
+.hrmax-box .hb-fm{font-size:8px;color:#8b5cf6;font-family:var(--fm);margin-top:1px}
+.mod-toggle{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:7px}
+.mod-btn{padding:8px 5px;border:2px solid var(--brd);border-radius:8px;background:#fff;cursor:pointer;text-align:center;font-size:11px;font-weight:700;color:var(--t2);transition:.15s;font-family:var(--ff)}
+.mod-btn.act-tm{border-color:var(--blue);background:var(--blue-bg);color:var(--blue-d)}
+.mod-btn.act-er{border-color:var(--pur);background:var(--pur-bg);color:var(--pur-d)}
+.mod-btn:hover:not(.act-tm):not(.act-er){border-color:var(--t3);background:var(--brd2)}
+.btn-calc{padding:9px 20px;background:linear-gradient(135deg,#ec4899,#8b5cf6);color:#fff;border:none;border-radius:9px;font-size:13px;font-weight:800;font-family:var(--ff);cursor:pointer;box-shadow:0 4px 16px rgba(139,92,246,.4);display:inline-flex;align-items:center;gap:7px;transition:.15s;white-space:nowrap;width:100%;justify-content:center;margin-bottom:7px}
+.btn-calc:hover{transform:translateY(-1px);opacity:.93}
+.btn-reset{width:100%;padding:7px;background:transparent;border:1.5px solid var(--brd);border-radius:8px;font-size:11px;font-weight:600;font-family:var(--ff);cursor:pointer;color:var(--t2);transition:.12s;margin-bottom:8px}
+.btn-reset:hover{border-color:var(--bad);color:var(--bad)}
+.form-note{font-size:8.5px;color:var(--t3);line-height:1.7}
+
+/* ── PDF OVERLAY ── */
+#pdf-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;align-items:center;justify-content:center}
+#pdf-overlay.show{display:flex}
+.pdf-spinner-box{background:#fff;border-radius:16px;padding:30px 40px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.pdf-spinner{width:44px;height:44px;border:4px solid var(--brd);border-top-color:#10b981;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 14px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.pdf-spinner-txt{font-size:13px;font-weight:700;color:var(--t1);margin-bottom:4px}
+.pdf-spinner-sub{font-size:11px;color:var(--t3)}
+
+/* ── PLACEHOLDER ── */
+.placeholder{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:300px;text-align:center;padding:40px 20px}
+.placeholder svg{opacity:.15;margin-bottom:18px}
+.placeholder h3{font-size:17px;font-weight:800;color:var(--t3);margin-bottom:6px}
+.placeholder p{font-size:11.5px;color:var(--t4);line-height:1.7}
+
+/* ── REPORT CARDS ── */
+.pdf-page{width:100%}
+.rcard{background:var(--card);border-radius:12px;border:1.5px solid var(--brd);overflow:hidden;margin-bottom:12px}
+.rh-title{font-size:20px;font-weight:800;color:var(--t1);line-height:1.1;letter-spacing:-.3px}
+.rh-badge{display:inline-flex;align-items:center;gap:5px;padding:5px 14px;background:var(--ok-bg);border:1.5px solid var(--ok-b);border-radius:99px;font-size:11px;font-weight:700;color:var(--ok-d);white-space:nowrap;flex-shrink:0}
+.rh-badge::before{content:'';width:7px;height:7px;background:var(--ok);border-radius:50%}
+.rh-mc{display:flex;align-items:center;gap:9px}
+.rh-mc-ic{width:30px;height:30px;background:var(--blue-bg);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.rh-mc-lbl{font-size:8.5px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--t3)}
+.rh-mc-val{font-size:13px;font-weight:700;color:var(--t1)}
+.pat-doc-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.stb{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.7px;color:var(--t2);margin-bottom:10px;display:flex;align-items:center;gap:7px}
+.stb::before{content:'';display:block;width:3px;height:14px;border-radius:2px;flex-shrink:0;background:var(--blue)}
+.proto-box{background:linear-gradient(135deg,#f0f9ff,#fdf4ff);border:1px solid #c7d2fe;border-radius:10px;padding:12px 16px;margin-bottom:12px}
+.proto-box-title{font-size:10px;font-weight:800;color:#3730a3;text-transform:uppercase;letter-spacing:.6px;margin-bottom:5px}
+.proto-box-note{font-size:10px;color:#4338ca;line-height:1.65;margin-bottom:8px}
+table.proto-tbl{width:100%;border-collapse:collapse;font-size:9.5px}
+table.proto-tbl th{padding:4px 8px;background:rgba(99,102,241,.1);font-weight:700;text-align:center;color:#3730a3;border-bottom:1px solid #c7d2fe}
+table.proto-tbl td{padding:4px 8px;text-align:center;border-bottom:1px solid #e0e7ff;color:var(--t1)}
+table.proto-tbl tr:last-child td{border-bottom:none}
+table.proto-tbl td:first-child{font-weight:700;text-align:left}
+.sum-tile{border-radius:12px;border:2px solid;padding:13px 8px;text-align:center}
+.sum-tile.ok{background:var(--ok-bg);border-color:var(--ok-b)}
+.sum-tile.warn{background:var(--warn-bg);border-color:var(--warn-b)}
+.sum-tile.bad{background:var(--bad-bg);border-color:var(--bad-b)}
+.sum-ico{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;margin:0 auto 7px}
+.sum-tile.ok .sum-ico{background:rgba(16,185,129,.18)}
+.sum-tile.warn .sum-ico{background:rgba(245,158,11,.15)}
+.sum-tile.bad .sum-ico{background:rgba(239,68,68,.12)}
+.sum-lbl{font-size:7.5px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;margin-bottom:3px}
+.sum-tile.ok .sum-lbl{color:var(--ok-d)}.sum-tile.warn .sum-lbl{color:var(--warn-d)}.sum-tile.bad .sum-lbl{color:var(--bad-d)}
+.sum-val{font-size:22px;font-weight:800;line-height:1;font-family:var(--fm)}
+.sum-tile.ok .sum-val{color:var(--ok-d)}.sum-tile.warn .sum-val{color:var(--warn-d)}.sum-tile.bad .sum-val{color:var(--bad-d)}
+.sum-tag{font-size:8px;font-weight:600;opacity:.65;text-transform:uppercase;letter-spacing:.3px;margin-top:2px}
+.sum-tile.ok .sum-tag{color:var(--ok-d)}.sum-tile.warn .sum-tag{color:var(--warn-d)}.sum-tile.bad .sum-tag{color:var(--bad-d)}
+.sum-unit{font-size:9px;font-weight:700;margin-top:2px}
+.sum-tile.ok .sum-unit{color:var(--ok-d)}.sum-tile.warn .sum-unit{color:var(--warn-d)}.sum-tile.bad .sum-unit{color:var(--bad-d)}
+.acsm-card{background:var(--card);border-radius:12px;border:1.5px solid var(--brd);overflow:hidden;margin-bottom:12px}
+.acsm-head{padding:11px 16px;background:linear-gradient(135deg,#f5f3ff,#eff6ff);border-bottom:1px solid var(--brd);display:flex;align-items:center;justify-content:space-between}
+.acsm-title{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:#4c1d95}
+.acsm-body{padding:14px 16px}
+.acsm-result-big{text-align:center;padding:12px;border-radius:10px;margin-bottom:12px;border:1.5px solid}
+.acsm-big-val{font-size:30px;font-weight:800;font-family:var(--fm);line-height:1}
+.acsm-big-cat{font-size:13px;font-weight:800;margin-top:4px}
+.acsm-big-fm{font-size:8.5px;margin-top:5px;font-family:var(--fm);opacity:.7}
+.pct-bar{display:flex;border-radius:8px;overflow:hidden;height:26px;margin-bottom:5px;border:1px solid var(--brd)}
+.pct-seg{flex:1;display:flex;align-items:center;justify-content:center;font-size:7.5px;font-weight:700;color:rgba(255,255,255,.9)}
+.pct-seg.dim{opacity:.3}
+.pct-labels{display:flex;justify-content:space-between;font-size:8px;color:var(--t3);margin-bottom:10px}
+.acsm-ref-table{width:100%;border-collapse:collapse;font-size:9.5px}
+.acsm-ref-table th{padding:5px 10px;background:var(--brd2);font-weight:700;text-align:left;font-size:9px;color:var(--t2);border-bottom:1px solid var(--brd)}
+.acsm-ref-table td{padding:5px 10px;border-bottom:1px solid var(--brd2)}
+.acsm-ref-table tr:last-child td{border-bottom:none}
+.acsm-ref-table tr.current-row td{background:#fefce8;font-weight:700}
+.kc{background:var(--brd2);border-radius:8px;border:1px solid var(--brd);padding:9px 8px;text-align:center}
+.kc-lbl{font-size:7.5px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--t3);margin-bottom:3px}
+.kc-val{font-size:18px;font-weight:800;line-height:1;color:var(--t1)}
+.kc-val.ok{color:var(--ok-d)}.kc-val.warn{color:var(--warn-d)}.kc-val.bad{color:var(--bad-d)}.kc-val.blue{color:var(--blue-d)}
+.kc-unit{font-size:8px;color:var(--t2);margin-top:2px;line-height:1.3}
+.alert{padding:10px 14px;border-radius:9px;border-left:4px solid;font-size:10.5px;line-height:1.75;margin-bottom:12px;display:flex;gap:9px;align-items:flex-start}
+.alert.ok{background:var(--ok-bg);border-color:var(--ok);color:var(--ok-t)}
+.alert.warn{background:var(--warn-bg);border-color:var(--warn);color:var(--warn-t)}
+.alert.bad{background:var(--bad-bg);border-color:var(--bad);color:var(--bad-t)}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.col-stack{display:flex;flex-direction:column;gap:12px}
+.ptbl-wrap{background:var(--card);border-radius:12px;border:1.5px solid var(--brd);overflow:hidden}
+.ptbl-head{padding:10px 14px;background:linear-gradient(135deg,var(--brd2),#fff);border-bottom:1px solid var(--brd);font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:var(--t2)}
+table.ptbl{width:100%;border-collapse:collapse}
+table.ptbl td{padding:7px 12px;font-size:10px;border-bottom:1px solid var(--brd2);vertical-align:middle}
+table.ptbl tr:last-child td{border-bottom:none}
+table.ptbl td:first-child{color:var(--t2);font-weight:500;width:44%}
+table.ptbl td:nth-child(2){font-weight:700;color:var(--t1);font-family:var(--fm);font-size:10.5px}
+table.ptbl td:nth-child(3){width:18px;text-align:center}
+table.ptbl td:last-child{font-size:9px;color:var(--t3);text-align:right}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%}
+.dot.ok{background:var(--ok)}.dot.warn{background:var(--warn)}.dot.bad{background:var(--bad)}.dot.gray{background:var(--t4)}
+.hemo-wrap{background:var(--card);border-radius:12px;border:1.5px solid var(--brd);overflow:hidden}
+.hemo-row{display:flex;justify-content:space-between;align-items:center;padding:7px 14px;border-bottom:1px solid var(--brd2)}
+.hemo-row:last-child{border-bottom:none}
+.hemo-lbl{font-size:10px;color:var(--t2);font-weight:500}
+.hemo-val{font-size:11px;font-weight:700;color:var(--t1);font-family:var(--fm)}
+.hemo-val.blue{color:var(--blue-d)}
+.ci-wrap{background:var(--card);border-radius:12px;border:1.5px solid var(--brd);overflow:hidden}
+.ci-top{padding:14px 16px;border-bottom:1px solid var(--brd2)}
+.ci-head-lbl{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.7px;color:var(--t3);margin-bottom:5px}
+.ci-big-row{display:flex;align-items:flex-end;gap:4px;margin-bottom:6px}
+.ci-big-num{font-size:44px;font-weight:800;font-family:var(--fm);line-height:1}
+.ci-big-pct{font-size:20px;font-weight:700;margin-bottom:4px}
+.ci-pill{display:inline-flex;padding:4px 13px;border-radius:8px;font-size:11px;font-weight:800;border:1.5px solid;margin-bottom:8px}
+.ci-sublbl{font-size:10.5px;font-weight:600;color:var(--t2);margin-bottom:5px}
+.ci-formula{font-size:8.5px;font-family:var(--fm);color:var(--t3);line-height:1.85;border-top:1px solid var(--brd2);padding-top:7px}
+.ci-gauge-wrap{padding:12px 16px;border-bottom:1px solid var(--brd2)}
+.ci-gauge-lbl{font-size:9.5px;font-weight:700;color:var(--t3);margin-bottom:6px;display:flex;align-items:center;gap:8px}
+.ci-gauge-lbl strong{font-family:var(--fm);color:var(--t1)}
+.ci-track{height:10px;border-radius:99px;position:relative;overflow:visible;background:linear-gradient(90deg,#fee2e2 0%,#fde68a 45%,#bbf7d0 100%);margin-bottom:4px}
+.ci-cut{position:absolute;top:-5px;width:2px;height:20px;border-radius:2px;opacity:.5}
+.ci-needle{position:absolute;top:50%;transform:translate(-50%,-50%);width:16px;height:16px;border-radius:50%;background:#fff;border:2.5px solid #0f172a;box-shadow:0 1px 6px rgba(0,0,0,.25);z-index:2}
+.ci-tlabels{display:flex;justify-content:space-between;font-size:8px;color:var(--t3);font-family:var(--fm)}
+.ci-mets-grid{display:grid;grid-template-columns:repeat(4,1fr);border-bottom:1px solid var(--brd2)}
+.ci-met{padding:10px 8px;text-align:center;border-right:1px solid var(--brd2)}
+.ci-met:last-child{border-right:none}
+.ci-met-lbl{font-size:7.5px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--t3);margin-bottom:3px}
+.ci-met-val{font-size:17px;font-weight:800;font-family:var(--fm);color:var(--t1)}
+.ci-met-val.pur{color:var(--pur-d)}
+.ci-met-unit{font-size:8px;color:var(--t2);margin-top:1px}
+.ci-karv-grid{display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--brd2)}
+.ci-kv{padding:9px 12px;text-align:center;border-right:1px solid var(--brd2)}
+.ci-kv:last-child{border-right:none}
+.ci-kv-lbl{font-size:8.5px;color:var(--t3);font-weight:600;margin-bottom:2px}
+.ci-kv-val{font-size:20px;font-weight:800;font-family:var(--fm);color:var(--t1)}
+.ci-kv-unit{font-size:8px;color:var(--t3)}
+.ci-alert{padding:10px 14px;font-size:10.5px;line-height:1.7;border-bottom:1px solid var(--brd2)}
+.ci-fn{padding:9px 14px;font-size:9px;font-family:var(--fm);color:var(--t3);line-height:1.8}
+.concl-wrap{background:var(--card);border-radius:12px;border:1.5px solid var(--brd);overflow:hidden}
+.concl-head{padding:10px 15px;background:linear-gradient(135deg,var(--brd2),#fff);border-bottom:1px solid var(--brd);display:flex;align-items:center;gap:8px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:var(--t1)}
+.concl-body{padding:13px 16px;font-size:10.5px;color:var(--t2);line-height:1.8}
+/* Kesimpulan Expertise box */
+.expertise-box{background:linear-gradient(135deg,#fffbeb,#fff7ed);border:1.5px solid var(--warn-b);border-radius:10px;padding:12px 16px;margin-top:10px}
+.expertise-lbl{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:var(--warn-d);margin-bottom:5px}
+.expertise-txt{font-size:11px;color:var(--t1);line-height:1.75;font-style:italic}
+.sign-wrap{background:var(--card);border-radius:12px;border:1.5px solid var(--brd);padding:20px 16px;display:flex;flex-direction:column;align-items:center;text-align:center}
+.sign-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--t3);margin-bottom:16px}
+.sign-space{width:200px;height:56px}
+.sign-line{width:180px;height:1.5px;background:var(--brd);margin:0 0 10px}
+.sign-name{font-size:13px;font-weight:800;color:var(--t1)}
+.sign-spec{font-size:10px;color:var(--t2);margin-top:2px}
+.sign-sip{font-size:9px;color:var(--t3);font-family:var(--fm);margin-top:2px}
+.qr-box{width:64px;height:64px;background:var(--brd2);border:1.5px solid var(--brd);border-radius:8px;display:flex;align-items:center;justify-content:center;margin-top:12px}
+.rep-footer{background:var(--card);border-radius:12px;border:1.5px solid var(--brd);padding:10px 18px;display:flex;align-items:center;justify-content:space-between;font-size:9px;color:var(--t3);gap:12px;margin-bottom:4px}
+
+
+/* Legacy responsive rules retained */
+.summary-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(220px,auto);gap:8px;margin-bottom:8px;align-items:start}
+.summary-tiles{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:7px}
+.acsm-clinical-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;margin-bottom:8px}
+.kc.warn{background:var(--warn-bg);border-color:var(--warn-b)}
+.kc-val.warn{color:var(--warn-d)}
+@media(max-width:900px){.summary-layout{grid-template-columns:1fr}.summary-layout>div:last-child{min-width:0!important}.acsm-clinical-layout{grid-template-columns:1fr}}
+@media(max-width:600px){.topbar{padding:0 10px}.tb-appname{font-size:13px}.tb-appsub{font-size:8px}.tb-logo{width:34px;height:34px}.tb-pill{display:none}.tb-pdf-btn{padding:6px 9px;font-size:10px}.hint-bar{position:relative;top:auto;padding:7px 12px;display:block;font-size:10px;line-height:1.5}.form-panel{padding:10px 12px 12px}.form-grid{grid-template-columns:1fr!important;gap:8px}.results-wrap{padding:10px}.summary-tiles{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}.summary-tiles .sum-tile{min-width:0;padding:10px 7px;border-radius:10px}.summary-tiles .sum-lbl{font-size:8px;line-height:1.25}.summary-tiles .sum-val{font-size:19px!important}.summary-tiles .sum-unit{font-size:8px;line-height:1.25}.summary-tiles .sum-tag{font-size:7px}.summary-tiles .sum-ico{width:28px;height:28px}.proto-box{padding:9px 10px;overflow-x:auto}table.proto-tbl{min-width:420px}.acsm-clinical-layout{grid-template-columns:1fr}.acsm-card{min-width:0}.pat-doc-row{grid-template-columns:1fr!important}.fi{font-size:13px;padding:8px 9px}}
+
+
+/* V3.0 clinical-audit refinements */
+.validation-banner{padding:9px 12px;border-radius:9px;border:1px solid var(--brd);font-size:9px;line-height:1.6;margin:7px 0;background:#f8fafc;color:var(--t2)}
+.validation-banner.warn{background:#fffbeb;border-color:#fcd34d;color:#78350f}
+.validation-banner.bad{background:#fef2f2;border-color:#fca5a5;color:#7f1d1d}
+.reference-note{font-size:8px;color:var(--t3);line-height:1.55}
+
+/* ── PRINT ── */
+
+/* V3.2 MOBILE REPORT HARDENING — prevent clipped generated report content */
+@media(max-width:700px){
+  html,body{width:100%;max-width:100%;overflow-x:hidden}
+  #main_panel{width:100%;max-width:100%;min-width:0;overflow-x:hidden}
+  #main_panel .pdf-page{width:100%;max-width:100%;min-width:0;overflow:hidden}
+  #main_panel .rcard{width:100%;max-width:100%;min-width:0}
+  #main_panel .rcard > div > div[style*="grid-template-columns:1fr 1fr 1fr"]{grid-template-columns:1fr!important}
+  #main_panel .rh-badge{white-space:normal!important;text-align:center;line-height:1.25;max-width:100%}
+  #main_panel .rh-title{font-size:16px!important;line-height:1.2;overflow-wrap:anywhere}
+  #main_panel .rh-mc-val{overflow-wrap:anywhere;word-break:break-word}
+  #main_panel .summary-layout,#main_panel .acsm-clinical-layout,#main_panel .two-col{grid-template-columns:1fr!important}
+  #main_panel .summary-layout>div,#main_panel .acsm-clinical-layout>div,#main_panel .two-col>div{min-width:0!important;max-width:100%!important}
+  #main_panel .summary-tiles{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  #main_panel .summary-tiles .sum-tile{min-width:0!important;overflow:hidden}
+  #main_panel .proto-box,#main_panel .ptbl-wrap{max-width:100%;min-width:0;overflow-x:auto}
+  #main_panel .proto-box table,#main_panel .ptbl-wrap table{min-width:520px}
+  #main_panel .ci-wrap{width:100%;max-width:100%;min-width:0;overflow:hidden}
+  #main_panel .ci-top,#main_panel .ci-gauge-wrap,#main_panel .ci-alert,#main_panel .ci-fn{min-width:0;max-width:100%}
+  #main_panel .ci-big-num{font-size:34px!important}
+  #main_panel .ci-formula{overflow-wrap:anywhere;word-break:break-word;font-size:8px}
+  #main_panel .ci-gauge-lbl{flex-wrap:wrap;line-height:1.4}
+  #main_panel .ci-tlabels{font-size:7px}
+  #main_panel .ci-mets-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  #main_panel .ci-met{min-width:0!important;padding:9px 6px!important;overflow:hidden}
+  #main_panel .ci-met-lbl{font-size:7px;line-height:1.25;overflow-wrap:anywhere}
+  #main_panel .ci-met-val{font-size:16px!important}
+  #main_panel .ci-karv-grid{grid-template-columns:1fr 1fr!important}
+  #main_panel .ci-kv{min-width:0;padding:8px 5px!important}
+  #main_panel .ci-kv-lbl{font-size:7.5px;line-height:1.3;overflow-wrap:anywhere}
+  #main_panel .ci-kv-val{font-size:18px!important}
+  #main_panel .hemo-wrap{min-width:0;max-width:100%;overflow:hidden}
+  #main_panel .hemo-row{gap:8px;align-items:flex-start}
+  #main_panel .hemo-lbl{min-width:0;flex:1;line-height:1.35}
+  #main_panel .hemo-val{min-width:0;max-width:58%;white-space:normal!important;text-align:right;overflow-wrap:anywhere;word-break:break-word;line-height:1.35}
+  #main_panel .concl-wrap,#main_panel .sign-wrap{min-width:0;max-width:100%;overflow:hidden}
+  #main_panel .concl-body,#main_panel .validation-banner,#main_panel .expertise-box,#main_panel .expertise-txt{overflow-wrap:anywhere;word-break:break-word}
+  #main_panel .concl-body{font-size:10.5px;line-height:1.65}
+  #main_panel .rep-footer{display:block!important;white-space:normal!important;overflow-wrap:anywhere;word-break:break-word}
+  #main_panel .rep-footer span{display:block!important;white-space:normal!important;margin-top:4px}
+}
+@media(min-width:701px) and (max-width:900px){
+  #main_panel .ci-mets-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  #main_panel .rcard > div > div[style*="grid-template-columns:1fr 1fr 1fr"]{grid-template-columns:1fr 1fr!important}
+}
+
+@media print{
+  body{background:#fff!important}
+  .topbar,.hint-bar,.form-panel,#pdf-overlay{display:none!important}
+  .results-wrap{padding:0!important;max-width:100%!important;margin:0!important}
+  @page{size:A4 portrait;margin:8mm 10mm}
+  .pdf-page{page-break-after:always;break-after:page;padding:4mm 0}
+  .pdf-page:last-child{page-break-after:avoid;break-after:avoid}
+  /* Tighten all card spacing */
+  .rcard,.acsm-card,.proto-box,.alert{margin-bottom:7px!important}
+  .two-col{display:grid!important;grid-template-columns:1fr 1fr!important;gap:8px!important;margin-bottom:7px!important}
+  .pat-doc-row{display:grid!important;grid-template-columns:1fr 1fr!important;gap:8px!important;margin-bottom:7px!important}
+  .col-stack{display:flex!important;flex-direction:column!important;gap:7px!important}
+  .rcard,.acsm-card,.ptbl-wrap,.hemo-wrap,.ci-wrap,.concl-wrap,.sign-wrap{
+    box-shadow:none!important;page-break-inside:avoid;break-inside:avoid}
+  /* Remove formula display */
+  .acsm-big-fm,.ci-formula{display:none!important}
+  /* Tighten padding */
+  .rh{padding:10px 14px!important}
+  .acsm-body{padding:10px 14px!important}
+  .acsm-result-big{padding:8px!important;margin-bottom:8px!important}
+  .concl-body{padding:10px 14px!important}
+  .ci-top{padding:10px 14px!important}
+  .ptbl-head{padding:7px 12px!important}
+  table.ptbl td{padding:4px 10px!important;font-size:9.5px!important}
+  .hemo-row{padding:5px 12px!important}
+  .ci-mets-grid{display:grid!important;grid-template-columns:repeat(4,1fr)!important}
+  .ci-karv-grid{display:grid!important;grid-template-columns:1fr 1fr!important}
+  .rep-footer{display:flex!important;flex-direction:row!important;font-size:8px!important;margin-bottom:0!important}
+  /* Hide proto legend, show cleaner */
+  .proto-box-note{font-size:9px!important;margin-bottom:5px!important}
+  .ci-fn{font-size:8px!important;padding:6px 12px!important}
+  .ci-gauge-wrap{padding:8px 12px!important}
+  .ci-met{padding:7px 6px!important}
+  .ci-kv{padding:7px 10px!important}
+  .stb{margin-bottom:7px!important}
+  .sum-tile{padding:10px 7px!important}
+  .sum-val{font-size:19px!important}
+}
+/* ── RESPONSIVE ── */
+@media(max-width:1100px){.form-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:600px){
+  .form-grid{grid-template-columns:1fr}
+  .two-col{grid-template-columns:1fr}
+  .pat-doc-row{grid-template-columns:1fr}
+  .tb-pills{display:none}
+}
+
+/* Legacy mobile rules retained */
+@media(max-width:600px){
+  .summary-grid{grid-template-columns:repeat(2,minmax(0,1fr)) !important;}
+  .sum-tile{min-width:0 !important;}
+  .two-col,.report-grid{grid-template-columns:1fr !important;}
+  .hint-bar{flex-wrap:wrap !important;gap:6px !important;line-height:1.35;}
+  .proto-wrap,.ptbl-wrap,.ci-table-wrap{overflow-x:auto;max-width:100%;}
+  .proto-wrap table,.ptbl-wrap table,.ci-table-wrap table{min-width:520px;}
+  .section-head{overflow-wrap:anywhere;}
+  body{overflow-x:hidden;}
+}
+
+/* V3.3 MOBILE PARAMETER TABLE FIX — no horizontal swipe required */
+table.ptbl{table-layout:fixed;width:100%;max-width:100%;}
+table.ptbl td{min-width:0;overflow-wrap:anywhere;word-break:break-word;white-space:normal;}
+table.ptbl td:first-child{width:34%;}
+table.ptbl td:nth-child(2){width:29%;}
+table.ptbl td:nth-child(3){width:7%;}
+table.ptbl td:last-child{width:30%;}
+@media(max-width:700px){
+  #main_panel .ptbl-wrap{width:100%;max-width:100%;min-width:0;overflow:hidden;}
+  #main_panel table.ptbl{width:100%!important;min-width:0!important;max-width:100%!important;table-layout:fixed!important;}
+  #main_panel table.ptbl td{padding:7px 7px!important;font-size:9px!important;line-height:1.35;overflow-wrap:anywhere!important;word-break:break-word!important;white-space:normal!important;}
+  #main_panel table.ptbl td:first-child{width:34%!important;}
+  #main_panel table.ptbl td:nth-child(2){width:29%!important;font-size:9px!important;}
+  #main_panel table.ptbl td:nth-child(3){width:7%!important;text-align:center!important;}
+  #main_panel table.ptbl td:last-child{width:30%!important;font-size:8px!important;text-align:right!important;}
+  #main_panel table.ptbl .dot{width:7px;height:7px;}
+}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<header class="topbar">
+  <div class="tb-brand">
+    <div class="tb-logo">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.3" stroke-linecap="round">
+        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78z" fill="rgba(255,255,255,.25)"/>
+      </svg>
+    </div>
+    <div>
+      <div class="tb-appname">CardioInsight</div>
+      <div class="tb-appsub">Stress &amp; Exercise Evaluation Suite</div>
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;gap:6px">
+    <div class="tb-pills">
+      <div class="tb-pill">🏃 Treadmill</div>
+      <div class="tb-pill">🚴 Ergocycle</div>
+      <div class="tb-pill">📊 ACSM GETP 12</div>
+      <div class="tb-pill">💓 Duke Score · HRR</div>
+    </div>
+    <button class="tb-pdf-btn" id="btn_pdf" onclick="exportPDF()">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+        <polyline points="14 2 14 8 20 8"/>
+        <line x1="12" y1="18" x2="12" y2="12"/><polyline points="9 15 12 18 15 15"/>
+      </svg>
+      <span>PDF</span>
+    </button>
+  </div>
+</header>
+
+<!-- PDF OVERLAY -->
+<div id="pdf-overlay">
+  <div class="pdf-spinner-box">
+    <div class="pdf-spinner"></div>
+    <div class="pdf-spinner-txt">Membuat PDF...</div>
+    <div class="pdf-spinner-sub">Mohon tunggu sebentar</div>
+  </div>
+</div>
+
+<div class="app-body">
+
+<!-- HINT BAR -->
+<div class="hint-bar">
+  💡 <strong>Isi semua data di bawah</strong> — lalu klik <strong>Hitung Semua</strong>. Laporan lengkap muncul di bawah form.
+</div>
+
+<!-- FORM PANEL -->
+<div class="form-panel">
+<div class="form-grid">
+
+  <!-- COL 1: IDENTITAS + DOKTER -->
+  <div>
+    <div class="sh c-blue">
+      <div class="sh-ic"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#1e40af" stroke-width="2.3" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></div>
+      <span class="sh-tx">Identitas Pasien</span>
+    </div>
+    <div class="fg"><label class="fl">Nama Pasien</label><input class="fi" id="inp_nama" type="text" value="Ahmad Rizki"></div>
+    <div class="frow">
+      <div class="fg"><label class="fl">Usia <span class="fu">tahun</span></label><input class="fi" id="inp_usia" type="number" value="55" min="10" max="100" oninput="autoHRMax()"></div>
+      <div class="fg"><label class="fl">Jenis Kelamin</label>
+        <select class="fi fsel" id="inp_jk">
+          <option value="M">Laki-laki</option>
+          <option value="P">Perempuan</option>
+        </select>
+      </div>
+    </div>
+    <div class="frow">
+      <div class="fg"><label class="fl">BB <span class="fu">kg</span></label><input class="fi" id="inp_bb_kg" type="number" value="70"></div>
+      <div class="fg"><label class="fl">Institusi / Klinik</label><input class="fi" id="inp_klinik" type="text" value="Klinik Jantung Sehat"></div>
+    </div>
+
+    <div class="sh c-green" style="margin-top:8px">
+      <div class="sh-ic"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#065f46" stroke-width="2.3" stroke-linecap="round"><circle cx="12" cy="7" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/><line x1="18" y1="10" x2="18" y2="16"/><line x1="15" y1="13" x2="21" y2="13"/></svg></div>
+      <span class="sh-tx">Dokter Penanggung Jawab</span>
+    </div>
+    <div class="fg"><label class="fl">Nama Dokter</label><input class="fi" id="inp_dokter" type="text" value="dr. Moh. Afies Sjughiarto.Sp.JP(K)MMRS"></div>
+    <div class="fg"><label class="fl">Spesialisasi</label><input class="fi" id="inp_spesialis" type="text" value="Spesialis Jantung &amp; Pembuluh Darah"></div>
+    <div class="fg"><label class="fl">No. SIP</label><input class="fi" id="inp_sip" type="text" value="1234/JK/2020"></div>
+  </div>
+
+  <!-- COL 2: DATA DASAR + FARMAKOLOGI -->
+  <div>
+    <div class="sh c-pur">
+      <div class="sh-ic"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#5b21b6" stroke-width="2.3" stroke-linecap="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78z"/></svg></div>
+      <span class="sh-tx">Data Dasar Pasien</span>
+    </div>
+    <div class="fg"><label class="fl">HR Istirahat <span class="fu">bpm</span></label><input class="fi" id="inp_hrrest" type="number" value="68"></div>
+    <div class="fg"><label class="fl">Beta-blocker?</label>
+      <select class="fi fsel" id="inp_betabl" onchange="autoHRMax()">
+        <option value="tidak">Tidak — predicted HRmax: 220 − usia</option>
+        <option value="ya">Ya — beta-blocker: interpretasi HR dengan caution</option>
+      </select>
+    </div>
+    <div class="hrmax-box">
+      <div class="hb-lbl">Predicted HRmax</div>
+      <div><span class="hb-val" id="hrmax_val">165</span> <span style="font-size:11px;color:#6d28d9;font-weight:700">bpm</span></div>
+      <div class="hb-fm">Estimasi: <span id="hrmax_fm">220 − 55 = 165</span></div>
+    </div>
+    <div class="fg"><label class="fl">HR Max Manual (opsional) <span class="fu">bpm</span></label><input class="fi" id="inp_hrmax" type="number" placeholder="Kosongkan = pakai formula" oninput="autoHRMax()"></div>
+
+    <div class="sh c-red" style="margin-top:8px">
+      <div class="sh-ic"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#991b1b" stroke-width="2.3" stroke-linecap="round"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2v-4M9 21H5a2 2 0 0 1-2-2v-4m0 0h18"/></svg></div>
+      <span class="sh-tx">Data Farmakologi</span>
+    </div>
+    <div class="frow">
+      <div class="fg"><label class="fl">Beta-blocker</label>
+        <select class="fi fsel" id="inp_farm_bb">
+          <option value="">— Tidak ada —</option>
+          <option value="Bisoprolol">Bisoprolol</option><option value="Metoprolol">Metoprolol</option>
+          <option value="Carvedilol">Carvedilol</option><option value="Atenolol">Atenolol</option>
+          <option value="Propranolol">Propranolol</option><option value="Nebivolol">Nebivolol</option>
+        </select>
+      </div>
+      <div class="fg" id="farm_bb_dose_row" style="display:none"><label class="fl">Dosis BB</label><input class="fi" id="inp_farm_bb_dose" type="text" placeholder="mis. 5 mg/hr"></div>
+    </div>
+    <div class="frow">
+      <div class="fg"><label class="fl">ACE-i / ARB</label>
+        <select class="fi fsel" id="inp_farm_acei">
+          <option value="">— Tidak ada —</option>
+          <option value="Ramipril">Ramipril</option><option value="Perindopril">Perindopril</option>
+          <option value="Lisinopril">Lisinopril</option><option value="Captopril">Captopril</option>
+          <option value="Valsartan">Valsartan (ARB)</option><option value="Candesartan">Candesartan (ARB)</option>
+          <option value="Losartan">Losartan (ARB)</option><option value="Sacubitril/Valsartan">Sacubitril/Valsartan</option>
+        </select>
+      </div>
+      <div class="fg" id="farm_acei_dose_row" style="display:none"><label class="fl">Dosis ACE-i</label><input class="fi" id="inp_farm_acei_dose" type="text" placeholder="mis. 5 mg/hr"></div>
+    </div>
+    <div class="frow">
+      <div class="fg"><label class="fl">Statin</label>
+        <select class="fi fsel" id="inp_farm_statin">
+          <option value="">— Tidak ada —</option>
+          <option value="Atorvastatin">Atorvastatin</option><option value="Rosuvastatin">Rosuvastatin</option>
+          <option value="Simvastatin">Simvastatin</option><option value="Pravastatin">Pravastatin</option>
+        </select>
+      </div>
+      <div class="fg" id="farm_statin_dose_row" style="display:none"><label class="fl">Dosis Statin</label><input class="fi" id="inp_farm_statin_dose" type="text" placeholder="mis. 20 mg/hr"></div>
+    </div>
+    <div class="frow">
+      <div class="fg"><label class="fl">Antiplatelet / Antikoagulan</label>
+        <select class="fi fsel" id="inp_farm_anti">
+          <option value="">— Tidak ada —</option>
+          <option value="Aspirin">Aspirin</option><option value="Clopidogrel">Clopidogrel</option>
+          <option value="Aspirin + Clopidogrel">Aspirin + Clopidogrel (DAPT)</option>
+          <option value="Ticagrelor">Ticagrelor</option><option value="Warfarin">Warfarin</option>
+          <option value="Rivaroxaban">Rivaroxaban</option><option value="Apixaban">Apixaban</option>
+        </select>
+      </div>
+      <div class="fg"><label class="fl">Nitrat</label>
+        <select class="fi fsel" id="inp_farm_nitrat">
+          <option value="">— Tidak ada —</option>
+          <option value="ISDN">ISDN</option><option value="ISMN">ISMN</option><option value="NTG patch">NTG Patch</option>
+        </select>
+      </div>
+    </div>
+    <div class="frow">
+      <div class="fg"><label class="fl">Diuretik</label>
+        <select class="fi fsel" id="inp_farm_diuretik">
+          <option value="">— Tidak ada —</option>
+          <option value="Furosemid">Furosemid</option><option value="HCT">HCT</option>
+          <option value="Spironolakton">Spironolakton</option><option value="Torasemid">Torasemid</option>
+        </select>
+      </div>
+      <div class="fg"><label class="fl">Obat Lain</label><input class="fi" id="inp_farm_lain" type="text" placeholder="mis. Digoxin 0.25 mg"></div>
+    </div>
+  </div>
+
+  <!-- COL 3: MODALITAS + STRESS & EXERCISE -->
+  <div>
+    <div class="sh c-teal">
+      <div class="sh-ic"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#0f766e" stroke-width="2.3" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg></div>
+      <span class="sh-tx">Modalitas &amp; Protokol</span>
+    </div>
+    <div class="mod-toggle">
+      <button class="mod-btn act-tm" id="btn_tm" onclick="setModal('treadmill')">🏃 Treadmill</button>
+      <button class="mod-btn" id="btn_er" onclick="setModal('ergocycle')">🚴 Ergocycle</button>
+    </div>
+    <div class="fg"><label class="fl">Protokol</label>
+      <select class="fi fsel" id="inp_proto">
+        <option value="bruce">Bruce Protocol</option>
+        <option value="modbruce">Modified Bruce Protocol</option>
+        <option value="naughton">Naughton Protocol</option>
+        <option value="balke">Balke-Ware Protocol</option>
+      </select>
+    </div>
+
+    <div class="sh c-pink" style="margin-top:8px">
+      <div class="sh-ic"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9d174d" stroke-width="2.3" stroke-linecap="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+      <span class="sh-tx">Stress &amp; Exercise</span>
+    </div>
+    <div class="fg"><label class="fl">HR Peak Exercise <span class="fu">bpm</span></label><input class="fi" id="inp_hrpost" type="number" value="128"></div>
+    <div class="frow"><div class="fg"><label class="fl">SBP Rest <span class="fu">mmHg</span></label><input class="fi" id="inp_sbp_rest" type="number" value="120"></div><div class="fg"><label class="fl">DBP Rest <span class="fu">mmHg</span></label><input class="fi" id="inp_dbp_rest" type="number" value="80"></div></div>
+    <div class="frow"><div class="fg"><label class="fl">SBP Peak <span class="fu">mmHg</span></label><input class="fi" id="inp_sbp" type="number" value="150"></div><div class="fg"><label class="fl">DBP Peak <span class="fu">mmHg</span></label><input class="fi" id="inp_dbp" type="number" value="80"></div></div>
+    <div class="fg"><label class="fl">HR 1 Menit Recovery <span class="fu">bpm</span></label><input class="fi" id="inp_hr1rec" type="number" placeholder="HR tepat 1 menit setelah terminasi exercise"></div>
+    <div class="fg"><label class="fl">Jenis Recovery</label>
+      <select class="fi fsel" id="inp_recovery_type">
+        <option value="passive">Abrupt stop / Supine recovery (cutoff 18 bpm*)</option>
+        <option value="active">Standard / Upright cool-down (cutoff 12 bpm*)</option>
+      </select>
+      <div style="font-size:9px;color:var(--t4);margin-top:3px">HRR₁ = HRpeak − HR pada 1 menit recovery. Referensi: ≤12 bpm abnormal pada standard exercise dengan cool-down; ≤18 bpm pada protokol abrupt-stop/stress-echo. Cutoff bergantung pada metode dan protokol. *Bukan batas universal.</div>
+    </div>
+    <div id="hrr_preview" style="display:none;border-radius:8px;padding:8px 11px;margin-bottom:7px;font-size:9px">
+      <div style="font-weight:700;margin-bottom:2px">Heart Rate Recovery (HRR₁)</div>
+      <div><strong>HRR₁ = HRpeak − HR 1 menit recovery</strong></div><div style="margin-top:2px">Hasil: <strong id="hrr_val">—</strong> bpm &nbsp;|&nbsp; Cutoff: <strong id="hrr_cutoff">—</strong></div>
+      <div id="hrr_interp" style="margin-top:2px;font-weight:700"></div>
+    </div>
+
+    <!-- Treadmill stage selector -->
+    <div id="fld_tm">
+      <div class="fg"><label class="fl">Stage yang Dicapai <span class="fu">pilih</span></label>
+        <select class="fi fsel" id="inp_stage_tm" onchange="onStageTmChange()">
+          <option value="">— Pilih Stage —</option>
+        </select>
+      </div>
+      <div id="stage_tm_info" style="display:none;background:linear-gradient(135deg,#f0fdf4,#ecfdf5);border:1.5px solid #6ee7b7;border-radius:8px;padding:8px 11px;margin-bottom:6px;font-size:9px;color:#065f46">
+        <div style="font-weight:700;margin-bottom:2px">Stage Terpilih</div>
+        <div style="display:flex;gap:12px;flex-wrap:wrap">
+          <span>Speed: <strong id="stage_tm_spd">—</strong> km/jam (<span id="stage_tm_mph">—</span> MPH)</span>
+          <span>Grade: <strong id="stage_tm_grd">—</strong>%</span>
+        </div>
+        <div style="margin-top:2px">METs: <strong id="stage_tm_mets">—</strong> &nbsp;|&nbsp; Estimated Peak VO₂: <strong id="stage_tm_vo2">—</strong> mL/kg/min</div>
+      </div>
+      <div class="fg"><label class="fl">Durasi Total Latihan <span class="fu">menit</span></label><input class="fi" id="inp_dur" type="number" step="0.5" value="9" min="0"></div>
+      <div class="fg"><label class="fl">Status Stage Terakhir</label><select class="fi fsel" id="inp_stage_completion"><option value="full">Full stage / selesai</option><option value="partial">Partial stage / belum selesai</option></select><div class="validation-note">Pilih Partial bila pasien berhenti sebelum menyelesaikan stage terakhir.</div></div>
+    </div>
+
+    <!-- Ergo stage selector -->
+    <div id="fld_er" style="display:none">
+      <div class="fg"><label class="fl">Stage / Beban yang Dicapai <span class="fu">pilih</span></label>
+        <select class="fi fsel" id="inp_stage_er" onchange="onStageErChange()">
+          <option value="">— Pilih Stage —</option>
+        </select>
+      </div>
+      <div id="stage_er_info" style="display:none;background:linear-gradient(135deg,#f5f3ff,#ede9fe);border:1.5px solid #c4b5fd;border-radius:8px;padding:8px 11px;margin-bottom:6px;font-size:9px;color:#4c1d95">
+        <div style="font-weight:700;margin-bottom:2px">Stage Terpilih</div>
+        <div>Beban: <strong id="stage_er_watt">—</strong> Watt &nbsp;|&nbsp; METs: <strong id="stage_er_mets">—</strong> &nbsp;|&nbsp; VO₂: <strong id="stage_er_vo2">—</strong> mL/kg/min</div>
+      </div>
+      <div class="fg"><label class="fl">Berat Badan (untuk VO₂) <span class="fu">kg</span></label><input class="fi" id="inp_bb_er" type="number" value="70" placeholder="BB untuk hitung VO₂ ergo"></div>
+      <div class="fg"><label class="fl">Durasi Total Latihan <span class="fu">menit</span></label><input class="fi" id="inp_dur_er" type="number" value="12" min="0"></div>
+      <div class="fg"><label class="fl">Status Beban/Stage Terakhir</label><select class="fi fsel" id="inp_stage_completion_er"><option value="full">Full stage / selesai</option><option value="partial">Partial stage / belum selesai</option></select><div class="validation-note">Pilih Partial bila beban terakhir belum dipertahankan sesuai protokol.</div></div>
+    </div>
+  </div>
+
+  <!-- COL 4: DUKE + TOMBOL -->
+  <div>
+    <div class="sh c-gold">
+      <div class="sh-ic"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#92400e" stroke-width="2.3" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 12h8M12 8v8"/></svg></div>
+      <span class="sh-tx">Duke Treadmill Score</span>
+    </div>
+    <div class="fg"><label class="fl">Deviasi ST Terbesar <span class="fu">mm</span></label><input class="fi" id="inp_st" type="number" step="0.5" value="1" min="0"></div>
+    <div class="frow"><div class="fg"><label class="fl">Arah ST</label><select class="fi fsel" id="inp_st_dir"><option value="depression">ST depression</option><option value="elevation">ST elevation</option></select></div><div class="fg"><label class="fl">Morfologi ST</label><select class="fi fsel" id="inp_st_morph"><option value="horizontal">Horizontal</option><option value="downsloping">Downsloping</option><option value="upsloping">Upsloping</option><option value="unknown">Tidak dinilai</option></select></div></div>
+    <div class="fg"><label class="fl">Alasan Terminasi Test</label><select class="fi fsel" id="inp_termination"><option value="fatigue">Kelelahan</option><option value="dyspnea">Dyspnea</option><option value="chest_pain">Nyeri dada</option><option value="ecg">Perubahan ECG</option><option value="arrhythmia">Aritmia</option><option value="bp">Respons tekanan darah abnormal</option><option value="target">Target/protokol tercapai</option><option value="patient">Permintaan pasien</option><option value="other">Lainnya</option></select></div>
+    <div class="fg"><label class="fl">Angina Index</label>
+      <select class="fi fsel" id="inp_ang">
+        <option value="0">0 – Tidak ada angina</option>
+        <option value="1">1 – Angina (tidak membatasi)</option>
+        <option value="2">2 – Angina (exercise-limiting)</option>
+      </select>
+    </div>
+
+    <div class="fg" style="margin-top:8px">
+      <label class="fl">Kesimpulan Expertise <span class="fu">opsional</span></label>
+      <textarea class="fi" id="inp_catatan" rows="6" placeholder="Tambahkan analisis klinis dokter di sini..." style="resize:vertical;line-height:1.6;padding:8px 10px;font-size:11.5px;font-weight:400;min-height:120px;width:100%"></textarea>
+    </div>
+
+    <div style="margin-top:10px;padding-top:12px;border-top:1.5px solid var(--brd)">
+      <button class="btn-calc" onclick="hitungSemua()">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        Hitung Semua
+      </button>
+      <button class="btn-reset" onclick="resetForm()">↺ Reset Formulir</button>
+      <div class="form-note">
+        ACSM GETP 12 · metabolic equations / normative dataset<br>
+        HRR₁: HRpeak − HR 1 menit recovery; cutoff harus mengikuti metode/protokol recovery yang dipilih.<br>
+        Herushima.dev © 2025
+      </div>
+    </div>
+  </div>
+
+</div><!-- /.form-grid -->
+</div><!-- /.form-panel -->
+
+<!-- RESULTS -->
+<div class="results-wrap">
+<main id="main_panel">
+  <div class="placeholder">
+    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="1.3" stroke-linecap="round">
+      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78z"/>
+    </svg>
+    <h3>Hasil Akan Muncul di Sini</h3>
+    <p>Isi semua data di atas → klik <strong>Hitung Semua</strong><br>Laporan lengkap muncul di sini</p>
+  </div>
+</main>
+</div><!-- /.results-wrap -->
+
+</div><!-- /.app-body -->
+
+
+<script>
+/* ════ ACSM TABLE 3.8 — TREADMILL ════ */
+var AT = {
+  M:{
+    95:{c:'Superior',   v:[66.3,59.8,55.6,50.7,43.0]},
+    90:{c:'Excellent',  v:[61.8,56.5,52.1,45.6,40.3]},
+    85:{c:'',           v:[59.3,54.2,49.3,43.2,38.2]},
+    80:{c:'',           v:[57.1,51.6,46.7,41.2,36.1]},
+    75:{c:'Good',       v:[55.2,49.2,45.0,39.7,34.5]},
+    70:{c:'',           v:[53.7,48.0,43.9,38.2,32.9]},
+    65:{c:'',           v:[52.1,46.6,42.1,36.3,31.6]},
+    60:{c:'',           v:[50.2,45.2,40.3,35.1,30.5]},
+    55:{c:'Fair',       v:[49.0,43.8,38.9,33.8,29.1]},
+    50:{c:'',           v:[48.0,42.4,37.8,32.6,28.2]},
+    45:{c:'',           v:[46.5,41.3,36.7,31.6,27.2]},
+    40:{c:'',           v:[44.9,39.6,35.7,30.7,26.6]},
+    35:{c:'Poor',       v:[43.5,38.5,34.6,29.5,25.7]},
+    30:{c:'',           v:[41.9,37.4,33.3,28.4,24.6]},
+    25:{c:'',           v:[40.1,35.9,31.9,27.1,23.7]},
+    20:{c:'',           v:[38.1,34.1,30.5,26.1,22.4]},
+    15:{c:'Very poor',  v:[35.4,32.7,29.0,24.4,21.2]},
+    10:{c:'',           v:[32.1,30.2,26.8,22.8,19.8]},
+     5:{c:'',           v:[29.0,27.2,24.2,20.9,17.4]}
+  },
+  P:{
+    95:{c:'Superior',   v:[56.0,45.8,41.7,35.9,29.4]},
+    90:{c:'Excellent',  v:[51.3,41.4,38.4,32.0,27.0]},
+    85:{c:'',           v:[48.3,39.3,36.0,30.2,25.6]},
+    80:{c:'',           v:[46.5,37.5,34.0,28.6,24.6]},
+    75:{c:'Good',       v:[44.7,36.1,32.4,27.6,23.8]},
+    70:{c:'',           v:[43.2,34.6,31.1,26.8,23.1]},
+    65:{c:'',           v:[41.6,33.5,30.0,26.0,22.0]},
+    60:{c:'',           v:[40.6,32.2,28.7,25.2,21.2]},
+    55:{c:'Fair',       v:[38.9,31.2,27.7,24.4,20.5]},
+    50:{c:'',           v:[37.6,30.2,26.7,23.4,20.0]},
+    45:{c:'',           v:[35.9,29.3,25.9,22.7,19.6]},
+    40:{c:'',           v:[34.6,28.2,24.9,21.8,18.9]},
+    35:{c:'Poor',       v:[33.6,27.4,24.1,21.2,18.4]},
+    30:{c:'',           v:[32.0,26.4,23.3,20.6,17.9]},
+    25:{c:'',           v:[30.5,25.3,22.1,19.9,17.2]},
+    20:{c:'',           v:[28.6,24.1,21.3,19.1,16.5]},
+    15:{c:'Very poor',  v:[26.2,22.5,20.0,18.3,15.6]},
+    10:{c:'',           v:[23.9,20.9,18.8,17.3,14.6]},
+     5:{c:'',           v:[21.7,19.0,17.0,16.0,13.4]}
+  }
+};
+
+/* ════ ACSM TABLE 3.9 — ERGOCYCLE ════ */
+var AE = {
+  M:{
+    95:{c:'Superior',   v:[58.5,44.7,41.9,37.4,32.4]},
+    90:{c:'Excellent',  v:[55.5,41.7,37.1,34.0,29.9]},
+    85:{c:'',           v:[53.9,38.1,34.9,32.1,27.8]},
+    80:{c:'',           v:[51.4,36.2,34.2,30.7,26.7]},
+    75:{c:'Good',       v:[49.5,35.0,31.8,29.3,25.5]},
+    70:{c:'',           v:[47.9,33.9,30.4,28.2,24.5]},
+    65:{c:'',           v:[46.0,31.8,29.3,27.1,24.0]},
+    60:{c:'',           v:[44.5,31.1,28.6,26.3,23.2]},
+    55:{c:'Fair',       v:[43.1,30.7,28.0,25.7,22.9]},
+    50:{c:'',           v:[41.9,30.1,27.1,24.8,22.4]},
+    45:{c:'',           v:[40.2,29.4,26.2,24.2,21.9]},
+    40:{c:'',           v:[38.3,28.1,25.4,23.6,21.4]},
+    35:{c:'Poor',       v:[37.6,27.5,24.9,23.0,21.0]},
+    30:{c:'',           v:[36.2,26.9,24.0,22.6,20.2]},
+    25:{c:'',           v:[34.7,26.2,22.9,22.1,19.7]},
+    20:{c:'',           v:[33.2,25.4,22.2,21.5,19.0]},
+    15:{c:'Very poor',  v:[31.8,23.9,21.6,20.8,18.4]},
+    10:{c:'',           v:[29.5,21.8,20.6,20.4,17.3]},
+     5:{c:'',           v:[25.5,19.3,18.9,18.1,15.3]}
+  },
+  P:{
+    95:{c:'Superior',   v:[45.2,33.2,29.3,25.0,22.0]},
+    90:{c:'Excellent',  v:[42.6,30.0,26.2,22.6,20.5]},
+    85:{c:'',           v:[40.9,27.8,24.4,21.5,19.3]},
+    80:{c:'',           v:[38.8,26.0,23.4,20.7,18.8]},
+    75:{c:'Good',       v:[37.1,25.1,22.6,20.1,18.3]},
+    70:{c:'',           v:[35.6,24.2,22.0,19.3,17.8]},
+    65:{c:'',           v:[34.6,23.3,21.4,18.9,17.3]},
+    60:{c:'',           v:[33.6,22.5,20.7,18.2,16.7]},
+    55:{c:'Fair',       v:[32.4,22.1,20.0,17.7,16.3]},
+    50:{c:'',           v:[31.0,21.6,19.4,17.3,16.0]},
+    45:{c:'',           v:[29.8,21.0,18.8,17.0,15.7]},
+    40:{c:'',           v:[28.1,20.1,18.4,16.6,15.4]},
+    35:{c:'Poor',       v:[26.6,19.5,17.9,16.2,15.1]},
+    30:{c:'',           v:[25.6,18.8,17.1,15.7,14.7]},
+    25:{c:'',           v:[23.2,17.9,16.5,15.3,14.4]},
+    20:{c:'',           v:[21.6,17.0,15.8,14.9,14.0]},
+    15:{c:'Very poor',  v:[20.4,16.3,15.4,14.4,13.5]},
+    10:{c:'',           v:[19.3,15.2,14.6,13.7,13.0]},
+     5:{c:'',           v:[17.1,14.4,13.5,12.8,12.2]}
+  }
+};
+
+/* ════ PROTOCOLS ════ */
+var PROTO = {
+  treadmill:{
+    bruce:{name:'Bruce Protocol',note:'Protokol standar. ΔMETs ~3 per stage. Start ~5 METs. Durasi ideal 8–12 menit.',
+      hdr:['Stage','MPH','Grade (%)','Dur (mnt)','~METs'],
+      rows:[[1,1.7,10,3,'~5'],[2,2.5,12,3,'~7'],[3,3.4,14,3,'~10'],[4,4.2,16,3,'~13'],[5,5.0,18,3,'~16'],[6,5.5,20,3,'~19'],[7,6.0,22,3,'~22']]},
+    modbruce:{name:'Modified Bruce Protocol',note:'2 stage tambahan di awal (grade 0% & 5%). Ideal untuk kapasitas rendah, CHF.',
+      hdr:['Stage','MPH','Grade (%)','Dur (mnt)','~METs'],
+      rows:[[1,1.7,0,3,'~2'],[2,1.7,5,3,'~3.5'],[3,1.7,10,3,'~5'],[4,2.5,12,3,'~7'],[5,3.4,14,3,'~10'],[6,4.2,16,3,'~13'],[7,5.0,18,3,'~16']]},
+    naughton:{name:'Naughton Protocol',note:'Ideal untuk kapasitas sangat rendah (CHF, post-MI). ΔMETs ~1 per stage. Durasi 2 mnt.',
+      hdr:['Stage','MPH','Grade (%)','Dur (mnt)','~METs'],
+      rows:[[1,1.0,0,2,'~1.8'],[2,2.0,0,2,'~2.5'],[3,2.0,3.5,2,'~3.5'],[4,2.0,7,2,'~4.5'],[5,2.0,10.5,2,'~5.5'],[6,2.0,14,2,'~6.5'],[7,3.0,12.5,2,'~7.5'],[8,3.0,15,2,'~8.5']]},
+    balke:{name:'Balke-Ware Protocol',note:'Speed tetap 3.3 mph. Grade naik 2% tiap menit. Cocok untuk kebugaran umum.',
+      hdr:['Stage','MPH','Grade (%)','Dur (mnt)','~METs'],
+      rows:[[1,3.3,0,1,'~3.5'],[2,3.3,2,1,'~5'],[3,3.3,4,1,'~6'],[4,3.3,6,1,'~7.5'],[5,3.3,8,1,'~8.5'],[6,3.3,10,1,'~10'],[7,3.3,12,1,'~11.5'],[8,3.3,14,1,'~13'],[9,3.3,16,1,'~14.5'],[10,3.3,18,1,'~16']]}
+  },
+  ergocycle:{
+    who25:{name:'WHO25 Protocol (Ergocycle)',note:'Start 25 W, naik 25 W tiap 3 menit. Ideal untuk kapasitas rendah–sedang.',
+      hdr:['Stage','Beban (Watt)','Durasi (mnt)'],
+      rows:[[1,25,3],[2,50,3],[3,75,3],[4,100,3],[5,125,3],[6,150,3],[7,175,3],[8,200,3]]},
+    who50:{name:'WHO50 Protocol (Ergocycle)',note:'Start 50 W, naik 50 W tiap 3 menit. Untuk kondisi sedang–baik.',
+      hdr:['Stage','Beban (Watt)','Durasi (mnt)'],
+      rows:[[1,50,3],[2,100,3],[3,150,3],[4,200,3],[5,250,3],[6,300,3]]}
+  }
+};
+
+/* ════ STATE ════ */
+var curModal = 'treadmill';
+
+/* ════ FARMAKOLOGI TOGGLE ════ */
+function farmToggle(sel, rowId){
+  var v = document.getElementById(sel).value;
+  document.getElementById(rowId).style.display = v ? 'block' : 'none';
+}
+
+/* bind on change */
+['inp_farm_bb','inp_farm_acei','inp_farm_statin'].forEach(function(id){
+  var el = document.getElementById(id);
+  if(el) el.addEventListener('change', function(){
+    var rowMap = {inp_farm_bb:'farm_bb_dose_row', inp_farm_acei:'farm_acei_dose_row', inp_farm_statin:'farm_statin_dose_row'};
+    farmToggle(id, rowMap[id]);
+  });
+});
+
+function getFarmakologi(){
+  function gv2(id){ var el=document.getElementById(id); return el?el.value:''; }
+  var list = [];
+  var bb = gv2('inp_farm_bb'); if(bb){ var d=gv2('inp_farm_bb_dose'); list.push(bb+(d?' '+d:'')); }
+  var ac = gv2('inp_farm_acei'); if(ac){ var d=gv2('inp_farm_acei_dose'); list.push(ac+(d?' '+d:'')); }
+  var st = gv2('inp_farm_statin'); if(st){ var d=gv2('inp_farm_statin_dose'); list.push(st+(d?' '+d:'')); }
+  var an = gv2('inp_farm_anti'); if(an) list.push(an);
+  var ni = gv2('inp_farm_nitrat'); if(ni) list.push(ni);
+  var di = gv2('inp_farm_diuretik'); if(di) list.push(di);
+  var la = gv2('inp_farm_lain'); if(la) list.push(la);
+  return list;
+}
+
+/* Drawer removed - layout changed */
+function openDrawer(){}
+function closeDrawer(){}
+
+/* ════ MODALITAS ════ */
+function setModal(m){
+  curModal = m;
+  document.getElementById('btn_tm').className = 'mod-btn'+(m==='treadmill'?' act-tm':'');
+  document.getElementById('btn_er').className = 'mod-btn'+(m==='ergocycle'?' act-er':'');
+  document.getElementById('fld_tm').style.display = m==='treadmill'?'block':'none';
+  document.getElementById('fld_er').style.display = m==='ergocycle'?'block':'none';
+  var ps = document.getElementById('inp_proto');
+  ps.innerHTML = '';
+  var list = m==='treadmill'
+    ? [['bruce','Bruce Protocol'],['modbruce','Modified Bruce Protocol'],['naughton','Naughton Protocol'],['balke','Balke-Ware Protocol']]
+    : [['who25','WHO25 (25 W/stage)'],['who50','WHO50 (50 W/stage)']];
+  list.forEach(function(p){
+    var o=document.createElement('option');o.value=p[0];o.textContent=p[1];ps.appendChild(o);
+  });
+  populateStages(m, list[0][0]);
+}
+
+function populateStages(modal, proto){
+  if(modal==='treadmill'){
+    var p = PROTO.treadmill[proto];
+    if(!p) return;
+    var sel = document.getElementById('inp_stage_tm');
+    sel.innerHTML = '<option value="">— Pilih Stage —</option>';
+    p.rows.forEach(function(r){
+      var stage=r[0], mph=r[1], grade=r[2], dur=r[3], metsStr=r[4];
+      var kmh = (mph*1.60934).toFixed(1);
+      // calc VO2 from mph/grade using ACSM walking/running equation
+      var spdMmin = mph*26.82;
+      var gradeD = grade/100;
+      var vo2calc = mph<5 ? (3.5+0.1*spdMmin+1.8*spdMmin*gradeD) : (3.5+0.2*spdMmin+0.9*spdMmin*gradeD);
+      var metsCalc = vo2calc/3.5;
+      var o = document.createElement('option');
+      o.value = JSON.stringify({s:stage,mph:mph,kmh:parseFloat(kmh),grade:grade,mets:parseFloat(metsCalc.toFixed(1)),vo2:parseFloat(vo2calc.toFixed(1)),metsStr:String(metsStr)});
+      o.textContent = 'Stage '+stage+' — '+kmh+' km/jam ('+mph+' MPH) / '+grade+'% / '+metsStr+' METs';
+      sel.appendChild(o);
+    });
+    // reset info
+    document.getElementById('stage_tm_info').style.display='none';
+  } else {
+    var p = PROTO.ergocycle[proto];
+    if(!p) return;
+    var sel = document.getElementById('inp_stage_er');
+    sel.innerHTML = '<option value="">— Pilih Stage —</option>';
+    p.rows.forEach(function(r){
+      var stage=r[0], watt=r[1], dur=r[2];
+      var o = document.createElement('option');
+      o.value = JSON.stringify({s:stage, watt:watt});
+      o.textContent = 'Stage '+stage+' — '+watt+' Watt ('+dur+' menit)';
+      sel.appendChild(o);
+    });
+    document.getElementById('stage_er_info').style.display='none';
+  }
+}
+
+/* Re-populate when protocol changes */
+document.addEventListener('DOMContentLoaded', function(){
+  var ps = document.getElementById('inp_proto');
+  if(ps) ps.addEventListener('change', function(){
+    populateStages(curModal, this.value);
+  });
+});
+
+/* Stage change — Treadmill */
+function onStageTmChange(){
+  var sel = document.getElementById('inp_stage_tm');
+  var info = document.getElementById('stage_tm_info');
+  if(!sel.value){ info.style.display='none'; return; }
+  var d = JSON.parse(sel.value);
+  document.getElementById('stage_tm_spd').textContent  = d.kmh;
+  document.getElementById('stage_tm_mph').textContent  = d.mph;
+  document.getElementById('stage_tm_grd').textContent  = d.grade;
+  document.getElementById('stage_tm_mets').textContent = d.mets;
+  document.getElementById('stage_tm_vo2').textContent  = d.vo2;
+  info.style.display = 'block';
+}
+
+/* Stage change — Ergocycle */
+function onStageErChange(){
+  var sel = document.getElementById('inp_stage_er');
+  var info = document.getElementById('stage_er_info');
+  if(!sel.value){ info.style.display='none'; return; }
+  var d = JSON.parse(sel.value);
+  var bw = parseFloat(document.getElementById('inp_bb_er').value)||parseFloat(document.getElementById('inp_bb_kg').value)||70;
+  var jk = document.getElementById('inp_jk').value;
+  var workRate = d.watt*6.12; // kg·m/min
+  var vo2e = 7 + (1.8*workRate/bw);
+  var metse = vo2e/3.5;
+  document.getElementById('stage_er_watt').textContent = d.watt;
+  document.getElementById('stage_er_mets').textContent = metse.toFixed(1);
+  document.getElementById('stage_er_vo2').textContent  = vo2e.toFixed(1);
+  info.style.display = 'block';
+}
+
+/* HRR live preview */
+function updateHRRPreview(){
+  var hrpost=parseFloat(document.getElementById('inp_hrpost').value);
+  var hr1rec=parseFloat(document.getElementById('inp_hr1rec').value);
+  var recType=document.getElementById('inp_recovery_type').value;
+  var box=document.getElementById('hrr_preview');
+  if(isNaN(hrpost)||isNaN(hr1rec)||hr1rec===0){box.style.display='none';return;}
+  var cutoff=recType==='active'?12:18;
+  /* DATA-QUALITY CHECK ONLY — never use a clinical HRR cutoff as an input-validity rule. */
+  var valid=hr1rec>0 && hr1rec<=250 && hr1rec<=hrpost;
+  var review=valid && hr1rec<20; /* low value is a review flag, not a clinical cutoff */
+  var hrr=hrpost-hr1rec;
+  document.getElementById('hrr_val').textContent=valid?hrr:'—';
+  document.getElementById('hrr_cutoff').textContent='> '+cutoff+' bpm ('+(recType==='active'?'upright cool-down':'supine/passive')+')';
+  var interp=document.getElementById('hrr_interp');
+  if(!valid){
+    interp.textContent='⚠ INVALID / PERIKSA DATA — Nilai HR 1 menit tidak konsisten dengan HRpeak atau berada di luar rentang input. Verifikasi rekaman asli; HRR tidak diklasifikasikan.';
+    interp.style.color='#b45309';box.style.background='#fffbeb';box.style.borderColor='#fde68a';box.style.color='#78350f';
+  }else if(review){
+    interp.textContent='⚠ REVIEW DATA — HR 1 menit sangat rendah; ini bukan cutoff klinis. Verifikasi waktu pengukuran, alat, HRpeak, dan rekaman asli sebelum menggunakan klasifikasi HRR.';
+    interp.style.color='#b45309';box.style.background='#fffbeb';box.style.borderColor='#fde68a';box.style.color='#78350f';
+  }else if(hrr>cutoff){
+    interp.textContent='✓ NORMAL — HRR berada di atas cutoff referensi untuk protokol recovery yang dipilih.';
+    interp.style.color='#059669';box.style.background='#ecfdf5';box.style.borderColor='#6ee7b7';box.style.color='#065f46';
+  }else{
+    interp.textContent='⚠ ABNORMAL — HRR berada pada/di bawah cutoff referensi. Ini adalah temuan prognostik, bukan diagnosis penyakit tunggal; korelasikan dengan keseluruhan exercise test.';
+    interp.style.color='#dc2626';box.style.background='#fef2f2';box.style.borderColor='#fca5a5';box.style.color='#7f1d1d';
+  }
+  box.style.display='block';
+}
+/* Bind HRR preview to inputs */
+document.addEventListener('DOMContentLoaded', function(){
+  ['inp_hrpost','inp_hr1rec','inp_recovery_type'].forEach(function(id){
+    var el = document.getElementById(id);
+    if(el) el.addEventListener('input', updateHRRPreview);
+    if(el) el.addEventListener('change', updateHRRPreview);
+  });
+});
+
+/* ════ HR MAX ════ */
+function autoHRMax(){
+  var u = parseInt(document.getElementById('inp_usia').value)||55;
+  var bb = document.getElementById('inp_betabl').value;
+  var man = parseFloat(document.getElementById('inp_hrmax').value);
+  var hm, fm;
+  if(!isNaN(man)&&man>0){ hm=man; fm='Manual / measured input: '+man+' bpm'; }
+  else { hm=220-u; fm='Predicted HRmax: 220 − '+u+' = '+hm.toFixed(0)+' bpm'; if(bb==='ya') fm += ' · β-blocker: interpret HR response with caution'; }
+  document.getElementById('hrmax_val').textContent=hm.toFixed(0);
+  document.getElementById('hrmax_fm').textContent=fm;
+}
+
+/* ════ HELPERS ════ */
+function gn(id){var v=parseFloat((document.getElementById(id)||{}).value);return isNaN(v)?0:v;}
+function gv(id){var el=document.getElementById(id);return el?el.value:'';}
+function ff(v,d){d=d===undefined?1:d;return (v===null||isNaN(v))?'—':parseFloat(v).toFixed(d);}
+
+function getAgeIdx(age){
+  if(age<30)return 0;if(age<40)return 1;if(age<50)return 2;if(age<60)return 3;return 4;
+}
+function getAgeGrp(age){
+  if(age<20 || age>=70)return 'Di luar dataset normatif';
+  if(age<30)return '20–29';if(age<40)return '30–39';if(age<50)return '40–49';if(age<60)return '50–59';return '60–69';
+}
+
+function classifyVO2(vo2, jk, age, modal){
+  /* Embedded normative tables cover 20–69 years only. */
+  if(age<20 || age>=70) return {pct:null, cat:'Tidak tersedia', cls:'gray'};
+  var tbl = modal==='ergocycle'?AE:AT;
+  var data = tbl[jk];
+  var ai = getAgeIdx(age);
+  var pcts = [95,90,85,80,75,70,65,60,55,50,45,40,35,30,25,20,15,10,5];
+  var pct = 5;
+  for(var i=0;i<pcts.length;i++){
+    if(vo2>=data[pcts[i]].v[ai]){pct=pcts[i];break;}
+  }
+  var cat;
+  if(pct>=95)cat='Superior';
+  else if(pct>=90)cat='Excellent';
+  else if(pct>=75)cat='Good';
+  else if(pct>=55)cat='Fair';
+  else if(pct>=35)cat='Poor';
+  else cat='Very poor';
+  return {pct:pct, cat:cat, cls:catCls(cat)};
+}
+
+function catCls(cat){
+  if(cat==='Tidak tersedia')return 'gray';
+  if(cat==='Superior'||cat==='Excellent'||cat==='Good')return 'ok';
+  if(cat==='Fair')return 'warn';
+  return 'bad';
+}
+function catBg(cls){return cls==='ok'?'var(--ok-bg)':cls==='warn'?'var(--warn-bg)':cls==='gray'?'var(--brd2)':'var(--bad-bg)';}
+function catBrd(cls){return cls==='ok'?'var(--ok-b)':cls==='warn'?'var(--warn-b)':cls==='gray'?'var(--brd)':'var(--bad-b)';}
+function catCol(cls){return cls==='ok'?'var(--ok-d)':cls==='warn'?'var(--warn-d)':cls==='gray'?'var(--t3)':'var(--bad-d)';}
+
+function buildAcsmRows(vo2, jk, age, modal){
+  if(age<20 || age>=70) return '<tr><td colspan="4" style="color:var(--t3);text-align:center">Dataset normatif tertanam tidak mencakup usia ini (20–69 tahun).</td></tr>';
+  var tbl = modal==='ergocycle'?AE:AT;
+  var data = tbl[jk];
+  var ai = getAgeIdx(age);
+  var pairs = [[95,'Superior'],[90,'Excellent'],[75,'Good'],[55,'Fair'],[35,'Poor'],[15,'Very poor']];
+  var html = '';
+  pairs.forEach(function(p){
+    var ref = data[p[0]].v[ai];
+    var isCurrent = vo2>=ref;
+    html += '<tr'+(isCurrent?' class="current-row"':'')+'>'
+      +'<td>'+p[1]+'</td>'
+      +'<td>≥ P'+p[0]+'</td>'
+      +'<td style="font-family:var(--fm);font-weight:700">≥ '+ref.toFixed(1)+'</td>'
+      +'<td>'+(isCurrent?'<span style="color:var(--ok-d);font-weight:700">✓</span>':'<span style="color:var(--t4)">—</span>')+'</td>'
+      +'</tr>';
+  });
+  return html;
+}
+
+function buildProtoTable(modal, proto){
+  var p = PROTO[modal][proto];
+  if(!p) return '';
+  var html = '<table class="proto-tbl"><tr>';
+  if(modal==='treadmill'){
+    // Custom headers with km/jam added
+    html += '<th>Stage</th><th>MPH</th><th>km/jam</th><th>Grade (%)</th><th>Dur (mnt)</th><th>≈METs</th>';
+    html += '</tr>';
+    p.rows.forEach(function(r){
+      // r = [stage, mph, grade, dur, mets_str]
+      var stage=r[0], mph=r[1], grade=r[2], dur=r[3], metsStr=r[4];
+      var kmh = (mph * 1.60934).toFixed(1);
+      // metsStr is like '~5' — show as is but replace ~ with ≈ for clarity
+      var metsDisplay = String(metsStr).replace('~','≈');
+      html += '<tr><td>'+stage+'</td><td>'+mph+'</td><td>'+kmh+'</td><td>'+grade+'%</td><td>'+dur+'\'</td><td>'+metsDisplay+'</td></tr>';
+    });
+  } else {
+    p.hdr.forEach(function(h){ html+='<th>'+h+'</th>'; });
+    html += '</tr>';
+    p.rows.forEach(function(r){
+      html += '<tr>';
+      r.forEach(function(c){ html += '<td>'+c+'</td>'; });
+      html += '</tr>';
+    });
+  }
+  html += '</table>';
+  return html;
+}
+
+/* ════ RESET ════ */
+function resetForm(){
+  document.getElementById('inp_usia').value=55;
+  document.getElementById('inp_bb_kg').value=70;
+  document.getElementById('inp_hrrest').value=68;
+  document.getElementById('inp_hrpost').value=128;
+  document.getElementById('inp_sbp').value=150;
+  document.getElementById('inp_dur').value=9;
+  document.getElementById('inp_dur_er').value=12;
+  document.getElementById('inp_st').value=1;
+  document.getElementById('inp_ang').value='0';
+  document.getElementById('inp_hrmax').value='';
+  document.getElementById('inp_betabl').value='tidak';
+  // Reset stage selectors
+  var stm=document.getElementById('inp_stage_tm'); if(stm){ stm.innerHTML='<option value="">— Pilih Stage —</option>'; }
+  var ser=document.getElementById('inp_stage_er'); if(ser){ ser.innerHTML='<option value="">— Pilih Stage —</option>'; }
+  var itm=document.getElementById('stage_tm_info'); if(itm) itm.style.display='none';
+  var ier=document.getElementById('stage_er_info'); if(ier) ier.style.display='none';
+  var ihr=document.getElementById('inp_hr1rec'); if(ihr) ihr.value='';
+  document.getElementById('inp_recovery_type').value='passive';
+  var hrrBox=document.getElementById('hrr_preview'); if(hrrBox) hrrBox.style.display='none';
+  // Reset farmakologi
+  ['inp_farm_bb','inp_farm_acei','inp_farm_statin','inp_farm_anti','inp_farm_nitrat','inp_farm_diuretik'].forEach(function(id){
+    var el=document.getElementById(id); if(el) el.value='';
+  });
+  ['inp_farm_bb_dose','inp_farm_acei_dose','inp_farm_statin_dose','inp_farm_lain'].forEach(function(id){
+    var el=document.getElementById(id); if(el) el.value='';
+  });
+  ['farm_bb_dose_row','farm_acei_dose_row','farm_statin_dose_row'].forEach(function(id){
+    var el=document.getElementById(id); if(el) el.style.display='none';
+  });
+  autoHRMax();
+  setModal('treadmill');
+  document.getElementById('main_panel').innerHTML=
+    '<div class="placeholder"><svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="1.3" stroke-linecap="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78z"/></svg>'
+    +'<h3>Hasil Akan Muncul di Sini</h3><p>Pilih <strong>Modalitas</strong> → <strong>Protokol</strong><br>Isi <strong>METs yang Dicapai</strong> → klik <strong>Hitung Semua</strong></p></div>';
+}
+
+/* ════════════════════════════════════════════════
+   HITUNG SEMUA
+════════════════════════════════════════════════ */
+function hitungSemua(){
+  /* --- IDENTITAS --- */
+  var nama     = document.getElementById('inp_nama').value||'—';
+  var usia     = gn('inp_usia');
+  var jk       = gv('inp_jk');
+  var jkLabel  = jk==='M'?'Laki-laki':'Perempuan';
+  var bwKg     = gn('inp_bb_kg');
+  var klinik   = document.getElementById('inp_klinik').value||'—';
+  var dokter   = document.getElementById('inp_dokter').value||'—';
+  var spesialis= document.getElementById('inp_spesialis').value||'—';
+  var sip      = document.getElementById('inp_sip').value||'—';
+  var catatan  = document.getElementById('inp_catatan').value||'';
+  var farmList = getFarmakologi();
+
+  /* --- INPUT & VALIDATION --- */
+  var hr1rec=parseFloat(document.getElementById('inp_hr1rec').value), recType=gv('inp_recovery_type');
+  var hrRest=gn('inp_hrrest'), hrPost=gn('inp_hrpost'), betabl=gv('inp_betabl');
+  var manHR=parseFloat(document.getElementById('inp_hrmax').value);
+  var predictedHRmax=220-usia;
+  var hrMax=(!isNaN(manHR)&&manHR>0)?manHR:predictedHRmax;
+  var hrMaxFm=(!isNaN(manHR)&&manHR>0)?('Manual / measured: '+manHR+' bpm'):('Age-predicted: 220 − '+usia+' = '+predictedHRmax.toFixed(0)+' bpm');
+
+  /* GLOBAL DATA-QUALITY VALIDATION — before clinical classification */
+  var basicErrors=[];
+  if(!isFinite(usia)||usia<10||usia>100) basicErrors.push('Usia harus 10–100 tahun.');
+  if(!isFinite(bwKg)||bwKg<=0||bwKg>300) basicErrors.push('Berat badan tidak valid.');
+  if(!isFinite(hrRest)||hrRest<30||hrRest>220) basicErrors.push('HR istirahat tidak valid.');
+  if(!isFinite(hrPost)||hrPost<30||hrPost>260) basicErrors.push('HR peak exercise tidak valid.');
+  if(!isFinite(hrMax)||hrMax<=hrRest) basicErrors.push('HRmax harus lebih tinggi daripada HR istirahat.');
+  if(!isNaN(manHR) && manHR>0 && hrPost>manHR) basicErrors.push('HR peak exercise melebihi HRmax manual yang dimasukkan — verifikasi HRmax/HRpeak.');
+  if(bwKg<=0) basicErrors.push('Berat badan harus diisi sebelum estimasi VO₂.');
+  var sbpRest0=gn('inp_sbp_rest'),dbpRest0=gn('inp_dbp_rest'),sbpPeak0=gn('inp_sbp'),dbpPeak0=gn('inp_dbp');
+  if(!isFinite(sbpRest0)||sbpRest0<50||sbpRest0>300||!isFinite(sbpPeak0)||sbpPeak0<50||sbpPeak0>350||!isFinite(dbpRest0)||dbpRest0<20||dbpRest0>200||!isFinite(dbpPeak0)||dbpPeak0<20||dbpPeak0>250) basicErrors.push('Nilai tekanan darah berada di luar rentang input yang diizinkan.');
+  if(sbpRest0<=dbpRest0 || sbpPeak0<=dbpPeak0) basicErrors.push('SBP harus lebih tinggi daripada DBP.');
+  if(basicErrors.length){ alert('PERIKSA DATA\n\n'+basicErrors.join('\n')); return; }
+
+  /* --- MODALITAS & PROTO --- */
+  var modal=curModal, proto=gv('inp_proto'), pObj=PROTO[modal][proto], protoName=pObj?pObj.name:proto;
+  var stageCompletion=modal==='treadmill'?gv('inp_stage_completion'):gv('inp_stage_completion_er');
+  var stageCompletionLabel=stageCompletion==='partial'?'Partial stage':'Full stage';
+
+  /* --- ESTIMATED PEAK VO₂ --- */
+  var spd=0,grd=0,watt=0,dur=0,vo2,vo2fm,metsInput=0,stageLabel='';
+  if(modal==='treadmill'){
+    dur=gn('inp_dur');
+    var stageSel=document.getElementById('inp_stage_tm');
+    if(!stageSel||!stageSel.value){alert('Pilih stage yang dicapai pada protokol treadmill!');return;}
+    var sd=JSON.parse(stageSel.value); spd=sd.kmh; grd=sd.grade; vo2=sd.vo2; metsInput=vo2/3.5;
+    stageLabel='Stage '+sd.s+' ('+sd.kmh+' km/jam / '+sd.mph+' MPH / '+sd.grade+'% grade / '+ff(metsInput,1)+' METs)';
+    vo2fm='Estimated peak VO₂ dari workload: '+ff(vo2,1)+' mL/kg/min | '+ff(metsInput,1)+' METs';
+  } else {
+    dur=gn('inp_dur_er'); var stageErSel=document.getElementById('inp_stage_er');
+    if(!stageErSel||!stageErSel.value){alert('Pilih stage / beban yang dicapai pada protokol ergocycle!');return;}
+    var se=JSON.parse(stageErSel.value); watt=se.watt; var bwEr=gn('inp_bb_er')||bwKg;
+    if(bwEr<=0){alert('Berat badan harus lebih dari 0 kg untuk estimasi VO₂ ergocycle.');return;}
+    var workRate=watt*6.12; vo2=7+(1.8*workRate/bwEr); metsInput=vo2/3.5;
+    stageLabel='Stage '+se.s+' ('+watt+' Watt / '+ff(metsInput,1)+' METs)';
+    vo2fm='VO₂ = 7 + (1,8 × '+ff(workRate,1)+' / '+ff(bwEr,1)+') = '+ff(vo2,1)+' mL/kg/min';
+  }
+  var mets=vo2/3.5;
+
+  /* --- ACSM NORMATIVE CLASSIFICATION --- */
+  var cls=classifyVO2(vo2,jk,usia,modal),vo2Pct=cls.pct,vo2Cat=cls.cat;
+  var vo2Cls=catCls(vo2Cat),vo2Bg=catBg(vo2Cls),vo2Brd=catBrd(vo2Cls),vo2Col=catCol(vo2Cls),acsmRows=buildAcsmRows(vo2,jk,usia,modal);
+
+  /* --- HEMODYNAMICS --- */
+  var sbpRest=gn('inp_sbp_rest'),dbpRest=gn('inp_dbp_rest'),sbp=gn('inp_sbp'),dbp=gn('inp_dbp');
+  var pct=hrMax>0?(hrPost/hrMax)*100:null, tgt85=Math.round(.85*hrMax), rpp=hrPost*sbp;
+  var pC=pct===null?'gray':pct>=85?'ok':pct>=70?'warn':'bad', pL=pct===null?'Tidak dapat dinilai':pct>=85?'≥85% predicted HRmax':pct>=70?'70–84% predicted HRmax':'<70% predicted HRmax';
+  var rC=rpp>=20000?'ok':rpp>=15000?'warn':'bad';
+
+  /* --- HR RESERVE / CHRONOTROPIC RESPONSE --- */
+  var hrRes=hrMax-hrRest, hrReserveAch=hrRes>0?(hrPost-hrRest)/hrRes:null, ci=hrReserveAch, ciPct=ci!==null?ci*100:null;
+  var cC=ci===null?'bad':ci>=.80?'ok':'warn', cL=ci===null?'Tidak dapat dinilai':ci>=.80?'≥80% HR reserve':'<80% HR reserve';
+  var thr40=hrRest+.40*hrRes,thr60=hrRest+.60*hrRes,needle=ci!==null?Math.min(Math.max(ciPct,0),100):0;
+  var cBg=catBg(cC),cBrd=catBrd(cC),cCol=catCol(cC);
+
+  /* --- HR RECOVERY --- */
+  /* HRR classification: data-quality validity is separate from clinical cutoff classification. */
+  /* HRR: formula/cutoff are separate from software plausibility validation. */
+  var hrrInputPresent=!isNaN(hr1rec);
+  var hrrInputValid=hrrInputPresent&&hr1rec>0&&hr1rec<=250&&hr1rec<=hrPost;
+  var hrrVal=hrrInputValid?(hrPost-hr1rec):null;
+  var hrrCutoff=recType==='active'?12:18;
+  var hrrNormal=hrrVal!==null?hrrVal>hrrCutoff:null;
+  var hrrLowReview=hrrInputValid&&hr1rec<30; /* software QC flag only; not a clinical HRR cutoff */
+  var hrrNeedsVerify=hrrInputPresent&&!hrrInputValid;
+  var hrrStatus=hrrNeedsVerify?'INVALID':(hrrVal===null?'NOT_ASSESSED':(hrrLowReview?'REVIEW':(hrrNormal?'NORMAL':'ABNORMAL')));
+  var hrrCls=hrrStatus==='INVALID'||hrrStatus==='REVIEW'?'warn':(hrrStatus==='NOT_ASSESSED'?'gray':hrrStatus==='NORMAL'?'ok':'bad');
+  var hrrLabel=hrrStatus==='INVALID'
+    ?'INVALID / PERIKSA DATA — HR 1 menit tidak konsisten dengan input HRpeak/rentang data. Verifikasi rekaman asli. Tidak diklasifikasikan Normal/Abnormal.'
+    :(hrrStatus==='REVIEW'
+      ?'REVIEW DATA — HR 1 menit sangat rendah. Ini bukan cutoff klinis; verifikasi waktu pengukuran, alat, HRpeak, dan rekaman asli sebelum klasifikasi.'
+      :(hrrStatus==='NOT_ASSESSED'?'Tidak diisi'
+        :(hrrStatus==='NORMAL'
+          ?'NORMAL — HRR berada di atas cutoff referensi untuk protokol recovery yang dipilih.'
+          :'ABNORMAL — HRR berada pada/di bawah cutoff referensi. Temuan prognostik; bukan diagnosis penyakit tunggal. Interpretasikan bersama keseluruhan exercise test.')));
+
+  /* --- DUKE TREADMILL SCORE: TREADMILL ONLY --- */
+  var stDev=gn('inp_st'),stDir=gv('inp_st_dir'),stMorph=gv('inp_st_morph'),ang=parseFloat(gv('inp_ang'));
+  var dts=(modal==='treadmill' && proto==='bruce')?(dur-5*stDev-4*ang):null;
+  var dC=dts===null?'gray':dts>=5?'ok':dts>=-10?'warn':'bad',dShort=dts===null?(modal==='ergocycle'?'Not applicable — ergocycle':'Not calculated — DTS requires standard Bruce duration'):(dts>=5?'Low Risk Category':dts>=-10?'Intermediate Risk Category':'High Risk Category');
+
+  /* --- BP RESPONSE --- */
+  var sbpDelta=(sbpRest>0&&sbp>0)?sbp-sbpRest:null;
+  var dbpDelta=(dbpRest>0&&dbp>0)?dbp-dbpRest:null;
+  var bpResponse=sbpDelta===null?'Tidak dapat dinilai':sbpDelta>0?'SBP meningkat dari baseline':sbpDelta===0?'SBP tidak berubah dari baseline':'SBP menurun dari baseline — perlu review klinis';
+  var bpReview=sbpDelta!==null&&sbpDelta<0;
+  var bpDataValid=sbpRest>0&&sbp>0&&dbpRest>0&&dbp>0&&sbpRest>=dbpRest&&sbp>=dbp;
+  if(!bpDataValid) basicErrors.push('Data tekanan darah tidak konsisten (pastikan SBP > DBP dan semua nilai terisi).');
+  if(basicErrors.length){ alert('PERIKSA DATA\n\n'+basicErrors.join('\n')); return; }
+  var termination=gv('inp_termination');
+
+  /* --- DATE --- */
+  var now=new Date(),tgl=now.toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'}),jam=now.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'});
+  var rand=String(Math.floor(Math.random()*99)+1).padStart(2,'0'),lapId='EXM-'+String(now.getFullYear()).slice(2)+String(now.getMonth()+1).padStart(2,'0')+String(now.getDate()).padStart(2,'0')+'-'+rand;
+
+  /* --- ALERTS --- */
+  var alertTxt='<strong>% Predicted HRmax: '+ff(pct,1)+'%</strong> → '+pL+' &nbsp;|&nbsp; <strong>RPP '+ff(rpp,0)+'</strong> → parameter beban miokard, bukan penentu tunggal adequacy test.';
+  var ciAlert=ci===null?'<strong>Respons kronotropik tidak dapat dinilai.</strong>':ci<.80?'<strong>⚠ Respons HR reserve <80%.</strong> Temuan dapat dipengaruhi usia, obat (termasuk beta-blocker), protokol, dan kondisi klinis.':'<strong>✅ Respons HR reserve ≥80%.</strong> Tidak memenuhi threshold <80% yang digunakan modul ini.';
+
+  var conclTxt='Pasien ['+jkLabel+', '+usia+' thn] menjalani uji latihan '+(modal==='treadmill'?'treadmill':'ergocycle')+' dengan '+protoName+', mencapai '+stageLabel+'. Estimated Peak VO₂ '+ff(vo2,1)+' mL/kg/min ('+ff(mets,1)+' METs), klasifikasi kapasitas '+vo2Cat+' berdasarkan dataset normatif aplikasi.'
+    +(modal==='treadmill'?' Duke Treadmill Score = '+ff(dts,0)+' ('+dShort+').':' Duke Treadmill Score tidak dihitung karena modalitas ergocycle.')
+    +' % predicted HRmax = '+ff(pct,1)+'%; HR reserve response = '+(ci!==null?ff(ciPct,1)+'%':'tidak dapat dinilai')+'.'
+    +(hrrStatus==='INVALID'?' HRR₁ = tidak diklasifikasikan; '+hrrLabel:(hrrVal!==null?' HRR₁ = '+hrrVal+' bpm; '+hrrLabel:' HRR₁ tidak dinilai karena data recovery tidak lengkap.'))
+    +' Status stage terakhir: '+stageCompletionLabel+(stageCompletion==='partial'?' — workload selected represents the stage workload; exact peak VO₂ should be interpreted cautiously because the stage was not completed.':'')+'. BP rest '+sbpRest+'/'+dbpRest+' mmHg, peak '+sbp+'/'+dbp+' mmHg; '+bpResponse+'.'+(bpReview?' BP peak lebih rendah dari baseline; perlu review terhadap workload, gejala, ECG, dan alasan terminasi.':'')+' Alasan terminasi: '+termination+'.'
+    +' Klasifikasi kapasitas menggunakan dataset normatif yang tertanam dalam aplikasi; sumber/populasi harus dicocokkan dengan protokol institusi. Hasil merupakan ringkasan parameter exercise test dan harus ditinjau serta disahkan oleh dokter penanggung jawab.'
+    +(farmList.length>0?' Farmakologi aktif: '+farmList.join(', ')+'.':'');
+
+  /* --- PROTOCOL TABLE --- */
+  var protoTableHTML = buildProtoTable(modal, proto);
+
+  /* --- BAR SEGMENTS --- */
+  var cats6 = ['Very poor','Poor','Fair','Good','Excellent','Superior'];
+  var segCols = {'Very poor':'#dc2626','Poor':'#ef4444','Fair':'#f59e0b','Good':'#10b981','Excellent':'#059669','Superior':'#065f46'};
+  var barHTML = '';
+  cats6.forEach(function(c){
+    var active = c===vo2Cat;
+    barHTML += '<div class="pct-seg'+(active?' active':' dim')+'" style="background:'+segCols[c]+'">'+c+'</div>';
+  });
+
+  /* ══════════════════════════════════════
+     RENDER REPORT — 2-PAGE PDF DESIGN
+  ══════════════════════════════════════ */
+  var html = '';
+
+  /* ── PAGE 1 WRAPPER ── */
+  html += '<div class="pdf-page">';
+
+  /* ── HEADER COMPACT ── */
+  html += '<div class="rcard" style="margin-bottom:8px"><div style="padding:12px 16px">'
+    /* Top row */
+    +'<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:10px">'
+      +'<div>'
+        +'<div style="font-size:8.5px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--t3);margin-bottom:3px">CardioInsight V3.3 &nbsp;·&nbsp; Stress & Exercise Evaluation Suite</div>'
+        +'<div class="rh-title">LAPORAN EVALUASI STRESS & EXERCISE</div>'
+        +'<div style="font-size:10px;color:var(--t2);margin-top:2px">'
+          +'Modalitas: <strong>'+(modal==='treadmill'?'Treadmill':'Ergocycle')+'</strong>'
+          +' &nbsp;·&nbsp; Protokol: <strong>'+protoName+'</strong>'
+        +'</div>'
+      +'</div>'
+      +'<div class="rh-badge" style="flex-shrink:0">Laporan Hasil Uji Beban Jantung</div>'
+    +'</div>'
+    /* Meta row + patient + doctor all in one row */
+    +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;align-items:start">'
+      /* Meta */
+      +'<div style="display:flex;flex-direction:column;gap:5px">'
+        +'<div class="rh-mc"><div class="rh-mc-ic"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2.3" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div><div><div class="rh-mc-lbl">Tanggal</div><div class="rh-mc-val" style="font-size:12px">'+tgl+'</div></div></div>'
+        +'<div class="rh-mc"><div class="rh-mc-ic"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2.3" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg></div><div><div class="rh-mc-lbl">Waktu</div><div class="rh-mc-val" style="font-size:12px">'+jam+' WIB</div></div></div>'
+        +'<div class="rh-mc"><div class="rh-mc-ic"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2.3" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div><div><div class="rh-mc-lbl">ID Laporan</div><div class="rh-mc-val" style="font-size:10px;font-family:var(--fm)">'+lapId+'</div></div></div>'
+      +'</div>'
+      /* Patient */
+      +'<div style="background:var(--brd2);border-radius:9px;padding:10px 12px;border:1px solid var(--brd)">'
+        +'<div style="display:flex;align-items:center;gap:8px">'
+          +'<div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#dbeafe,#ede9fe);flex-shrink:0;display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--pur)" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></div>'
+          +'<div>'
+            +'<div style="font-size:13px;font-weight:800;color:var(--t1)">'+nama+'</div>'
+            +'<div style="font-size:9.5px;color:var(--t2);margin-top:1px">'+jkLabel+', '+usia+' thn &nbsp;|&nbsp; '+bwKg+' kg</div>'
+            +'<div style="font-size:9px;color:var(--t3)">'+klinik+'</div>'
+          +'</div>'
+        +'</div>'
+        /* Farmakologi mini pills */
+        +(farmList.length>0
+          ?'<div style="margin-top:7px;padding-top:7px;border-top:1px solid var(--brd)">'
+            +'<div style="font-size:7.5px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--t3);margin-bottom:4px">💊 Farmakologi</div>'
+            +'<div style="display:flex;flex-wrap:wrap;gap:3px">'
+              +farmList.map(function(f){return '<span style="display:inline-block;padding:2px 7px;background:#fff;border:1px solid var(--brd);border-radius:99px;font-size:8px;font-weight:600;color:var(--t2)">'+f+'</span>';}).join('')
+            +'</div>'
+          +'</div>'
+          :'')
+      +'</div>'
+      /* Doctor */
+      +'<div style="background:var(--brd2);border-radius:9px;padding:10px 12px;border:1px solid var(--brd)">'
+        +'<div style="font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--t3);margin-bottom:4px">Dokter Penanggung Jawab</div>'
+        +'<div style="font-size:12px;font-weight:800;color:var(--t1);line-height:1.3">'+dokter+'</div>'
+        +'<div style="font-size:9px;color:var(--t2);margin-top:2px">'+spesialis+'</div>'
+        +'<div style="font-size:8.5px;color:var(--t3);font-family:var(--fm);margin-top:2px">SIP. '+sip+'</div>'
+      +'</div>'
+    +'</div>'
+  +'</div></div>';
+
+  /* ── SUMMARY 4 + PROTOCOL side by side ── */
+  html += '<div class="summary-layout">';
+
+  /* Left: 4 summary tiles 2x2 */
+  html += '<div>';
+  html += '<div class="stb" style="margin-bottom:6px">RINGKASAN HASIL</div>'
+    +'<div class="summary-tiles">'
+    /* VO2 */
+    +'<div class="sum-tile '+vo2Cls+'">'
+      +'<div class="sum-ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="'+vo2Col+'" stroke-width="2.3" stroke-linecap="round"><path d="M18 20V10M12 20V4M6 20v-6"/></svg></div>'
+      +'<div class="sum-lbl">Estimated Peak VO₂</div>'
+      +'<div class="sum-val" style="font-size:22px">'+ff(vo2,1)+'</div>'
+      +'<div class="sum-tag">mL/kg/min</div>'
+      +'<div class="sum-unit">'+vo2Cat+'</div>'
+    +'</div>'
+    /* METs */
+    +'<div class="sum-tile '+vo2Cls+'">'
+      +'<div class="sum-ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="'+vo2Col+'" stroke-width="2.3" stroke-linecap="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>'
+      +'<div class="sum-lbl">METs Kapasitas</div>'
+      +'<div class="sum-val" style="font-size:22px">'+ff(mets,1)+'</div>'
+      +'<div class="sum-tag">MET</div>'
+      +'<div class="sum-unit">'+(vo2Pct===null?'Normatif tidak tersedia':('P'+vo2Pct+' · '+vo2Cat))+'</div>'
+    +'</div>'
+    /* Duke */
+    +'<div class="sum-tile '+dC+'">'
+      +'<div class="sum-ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="'+catCol(dC)+'" stroke-width="2.3" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15.5 13.5"/></svg></div>'
+      +'<div class="sum-lbl">Duke Score</div>'
+      +'<div class="sum-val" style="font-size:22px">'+ff(dts,0)+'</div>'
+      +'<div class="sum-tag">&nbsp;</div>'
+      +'<div class="sum-unit">'+dShort+'</div>'
+    +'</div>'
+    /* CI */
+    +'<div class="sum-tile '+cC+'">'
+      +'<div class="sum-ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="'+catCol(cC)+'" stroke-width="2.3" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg></div>'
+      +'<div class="sum-lbl">HR Reserve Response</div>'
+      +'<div class="sum-val" style="font-size:22px">'+(ci!==null?ff(ciPct,1):'—')+'</div>'
+      +'<div class="sum-tag">%</div>'
+      +'<div class="sum-unit">'+cL+'</div>'
+    +'</div>'
+    /* HRR */
+    +(hrrNeedsVerify
+      ?'<div class="sum-tile warn">'
+        +'<div class="sum-ico"><span style="font-size:18px">⚠</span></div>'
+        +'<div class="sum-lbl">HRR Menit ke-1</div>'
+        +'<div class="sum-val" style="font-size:18px">Periksa</div>'
+        +'<div class="sum-tag">input '+hr1rec+' bpm</div>'
+        +'<div class="sum-unit">Verifikasi data</div>'
+      +'</div>'
+      :hrrVal!==null
+      ?'<div class="sum-tile '+(hrrNormal?'ok':'bad')+'">'
+        +'<div class="sum-ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="'+(hrrNormal?'var(--ok-d)':'var(--bad-d)')+'" stroke-width="2.3" stroke-linecap="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>'
+        +'<div class="sum-lbl">HRR Menit ke-1</div>'
+        +'<div class="sum-val" style="font-size:22px">'+hrrVal+'</div>'
+        +'<div class="sum-tag">bpm</div>'
+        +'<div class="sum-unit">'+(hrrNormal?'Normal berdasarkan cutoff':'Abnormal berdasarkan cutoff')+'</div>'
+      +'</div>'
+      :'<div class="sum-tile" style="background:var(--brd2);border-color:var(--brd);border:2px solid var(--brd)">'
+        +'<div class="sum-ico" style="background:var(--brd)"><span style="font-size:18px;color:var(--t4)">—</span></div>'
+        +'<div class="sum-lbl" style="color:var(--t3)">HRR Menit ke-1</div>'
+        +'<div class="sum-val" style="font-size:22px;color:var(--t4)">—</div>'
+        +'<div class="sum-tag" style="color:var(--t4)">bpm</div>'
+        +'<div class="sum-unit" style="color:var(--t3)">Tidak diisi</div>'
+      +'</div>')
+    +'</div>';
+  html += '</div>'; /* end left */
+
+  /* Right: protocol table compact */
+  if(pObj){
+    html += '<div style="min-width:220px">'
+      +'<div class="stb" style="margin-bottom:6px">'+(modal==='treadmill'?'🏃':'🚴')+' PROTOKOL</div>'
+      +'<div style="background:linear-gradient(135deg,#f0f9ff,#fdf4ff);border:1px solid #c7d2fe;border-radius:10px;padding:10px 12px;">'
+        +'<div style="font-size:9px;font-weight:700;color:#3730a3;margin-bottom:4px">'+protoName+'</div>'
+        +'<div style="font-size:8.5px;color:#4338ca;line-height:1.6;margin-bottom:7px">'+pObj.note+'</div>'
+        +protoTableHTML
+        +(modal==='treadmill'
+          ?'<div style="font-size:8px;color:#6366f1;margin-top:5px">≈ = perkiraan METs &nbsp;|&nbsp; 1 MPH = 1.609 km/jam &nbsp;|&nbsp; METs diisi manual sesuai hasil uji</div>'
+          :'<div style="font-size:8px;color:#6366f1;margin-top:5px">METs diisi manual sesuai hasil uji ergocycle</div>')
+      +'</div>'
+    +'</div>';
+  }
+  html += '</div>'; /* end summary+protocol grid */
+
+  /* ── ACSM + KLINIS side by side ── */
+  html += '<div class="acsm-clinical-layout">';
+
+  /* ACSM Left */
+  html += '<div class="acsm-card" style="margin-bottom:0">'
+    +'<div class="acsm-head">'
+      +'<div class="acsm-title">📊 ACSM GETP 12 · Table '+(modal==='treadmill'?'3.8':'3.9')+' · '+jkLabel+' · '+getAgeGrp(usia)+' thn</div>'
+    +'</div>'
+    +'<div class="acsm-body">'
+      +'<div class="acsm-result-big" style="background:'+vo2Bg+';border-color:'+vo2Brd+';padding:9px">'
+        +'<div class="acsm-big-val" style="color:'+vo2Col+';font-size:26px">'+ff(vo2,1)+' <span style="font-size:12px;font-weight:600">mL/kg/min</span></div>'
+        +'<div class="acsm-big-cat" style="color:'+vo2Col+';font-size:12px">'+vo2Cat+' &nbsp;·&nbsp; '+(vo2Pct===null?'Normatif tidak tersedia':('Persentil '+vo2Pct))+' &nbsp;·&nbsp; '+ff(metsInput,1)+' METs</div>'
+      +'</div>'
+      +'<div class="pct-bar" style="height:22px">'+barHTML+'</div>'
+      +'<div class="pct-labels"><span>Very poor</span><span>Poor</span><span>Fair</span><span>Good</span><span>Excellent</span><span>Superior</span></div>'
+      +'<table class="acsm-ref-table">'
+        +'<tr><th>Kategori</th><th>P</th><th>VO₂ Ref.</th><th>Status</th></tr>'
+        +acsmRows
+      +'</table>'
+      +'<div style="font-size:7.5px;color:var(--t3);margin-top:5px">Referensi: ACSM GETP 12th ed. · Appendix C/D; dataset normatif aplikasi memerlukan verifikasi populasi/protokol</div>'
+    +'</div></div>';
+
+  /* Klinis Right */
+  html += '<div>'
+    +'<div class="stb" style="margin-bottom:6px">RINGKASAN KLINIS</div>'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:5px">'
+      +'<div class="kc"><div class="kc-lbl">Age-predicted HRmax</div><div class="kc-val blue" style="font-size:16px">'+predictedHRmax+'</div><div class="kc-unit">bpm · formula 220−age</div></div>'
+      +'<div class="kc"><div class="kc-lbl">Target 85%</div><div class="kc-val blue" style="font-size:16px">'+tgt85+'</div><div class="kc-unit">bpm</div></div>'
+      +'<div class="kc"><div class="kc-lbl">% Achieved HR</div><div class="kc-val '+pC+'" style="font-size:16px">'+ff(pct,1)+'%</div><div class="kc-unit">'+pL+'</div></div>'
+      +'<div class="kc"><div class="kc-lbl">HR Post</div><div class="kc-val" style="font-size:16px">'+hrPost+'</div><div class="kc-unit">bpm</div></div>'
+      +'<div class="kc"><div class="kc-lbl">Estimated Peak VO₂</div><div class="kc-val '+vo2Cls+'" style="font-size:16px">'+ff(vo2,1)+'</div><div class="kc-unit">mL/kg/min</div></div>'
+      +'<div class="kc"><div class="kc-lbl">METs</div><div class="kc-val '+vo2Cls+'" style="font-size:16px">'+ff(mets,1)+'</div><div class="kc-unit">MET ('+vo2Cat+')</div></div>'
+      +'<div class="kc"><div class="kc-lbl">RPP</div><div class="kc-val '+rC+'" style="font-size:18px">'+ff(rpp,0)+'</div><div class="kc-unit">Parameter myocardial workload</div></div>'
+      +'<div class="kc"><div class="kc-lbl">Duke Score</div><div class="kc-val '+dC+'" style="font-size:18px">'+ff(dts,0)+'</div><div class="kc-unit">'+dShort+'</div></div>'
+      +(hrrNeedsVerify
+        ?'<div class="kc warn" style="grid-column:span 2"><div class="kc-lbl">HRR Menit ke-1</div><div class="kc-val warn" style="font-size:16px">Periksa Data</div><div class="kc-unit">Input '+hr1rec+' bpm tidak digunakan untuk klasifikasi HRR.</div></div>'
+        :hrrVal!==null
+        ?'<div class="kc" style="grid-column:span 2"><div class="kc-lbl">HRR Menit ke-1</div><div class="kc-val '+(hrrNormal?'ok':'bad')+'" style="font-size:18px">'+hrrVal+'</div><div class="kc-unit">bpm &nbsp;'+(hrrNormal?'Normal berdasarkan cutoff':'Abnormal berdasarkan cutoff')+'</div></div>'
+        :'<div class="kc" style="grid-column:span 2"><div class="kc-lbl">HRR Menit ke-1</div><div class="kc-val" style="font-size:18px;color:var(--t4)">—</div><div class="kc-unit">Tidak diisi</div></div>')
+    +'</div>'
+    /* Alert compact */
+    +'<div class="alert '+pC+'" style="margin-top:6px;margin-bottom:0;padding:8px 10px;font-size:9.5px">'
+      +'<div style="flex-shrink:0">'+(pC==='ok'?'✅':pC==='warn'?'ℹ️':'⚠️')+'</div>'
+      +'<div>'+alertTxt+'</div>'
+    +'</div>'
+  +'</div>';
+
+  html += '</div>'; /* end ACSM+klinis grid */
+
+  /* ── END PAGE 1 ── */
+  html += '</div>';
+
+  /* ══════════════════════════════════════
+     PAGE 2
+  ══════════════════════════════════════ */
+  html += '<div class="pdf-page" style="page-break-before:always">';
+
+  /* PAGE 2 HEADER MINI */
+  html += '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:linear-gradient(135deg,#0a1628,#1e1060);border-radius:9px;margin-bottom:10px">'
+    +'<div style="font-size:11px;font-weight:800;color:#fff">CardioInsight &nbsp;·&nbsp; '+nama+' &nbsp;·&nbsp; '+tgl+'</div>'
+    +'<div style="font-size:9px;font-family:var(--fm);color:rgba(255,255,255,.6)">'+lapId+'</div>'
+  +'</div>';
+
+  /* TWO COL: PARAM+HEMO (left) + CI (right) */
+  html += '<div class="two-col" style="margin-bottom:8px">';
+
+  /* LEFT col */
+  html += '<div class="col-stack">';
+
+  /* Param table */
+  html += '<div class="ptbl-wrap"><div class="ptbl-head">Parameter Exercise Test</div><table class="ptbl">'
+    +'<tr><td>Modalitas</td><td>'+(modal==='treadmill'?'🏃 Treadmill':'🚴 Ergocycle')+'</td><td></td><td>'+protoName+'</td></tr>'
+    +'<tr><td>Stage Dicapai</td><td>'+stageLabel.split('(')[0].trim()+'</td><td><span class="dot '+(stageCompletion==='partial'?'warn':'ok')+'"></span></td><td>'+stageCompletionLabel+'</td></tr>'
+    +'<tr><td>Durasi Latihan</td><td>'+ff(dur,1)+' menit</td><td><span class="dot ok"></span></td><td>—</td></tr>'
+    +(modal==='treadmill'
+      ?'<tr><td>Speed Treadmill</td><td>'+ff(spd,1)+' km/jam</td><td><span class="dot gray"></span></td><td>'+ff(spd/1.60934,2)+' MPH</td></tr>'
+       +'<tr><td>Grade</td><td>'+ff(grd,0)+' %</td><td><span class="dot gray"></span></td><td>—</td></tr>'
+      :'<tr><td>Beban Akhir</td><td>'+watt+' Watt</td><td><span class="dot gray"></span></td><td>—</td></tr>'
+       +'<tr><td>Berat Badan</td><td>'+bwKg+' kg</td><td><span class="dot gray"></span></td><td>—</td></tr>')
+    +'<tr><td>Estimated Peak VO₂</td><td>'+ff(vo2,1)+' mL/kg/min</td><td><span class="dot '+vo2Cls+'"></span></td><td>'+vo2Cat+' · P'+vo2Pct+'</td></tr>'
+    +'<tr><td>METs Kapasitas</td><td>'+ff(mets,1)+' MET</td><td><span class="dot '+vo2Cls+'"></span></td><td>'+vo2Cat+'</td></tr>'
+    +'<tr><td>Duke Treadmill Score</td><td>'+(dts===null?'—':ff(dts,0))+'</td><td><span class="dot '+dC+'"></span></td><td>'+dShort+'</td></tr>'
+    +'<tr><td>Deviasi ST</td><td>'+ff(stDev,1)+' mm</td><td><span class="dot warn"></span></td><td>'+stDir+' · '+stMorph+' — tidak otomatis normal/abnormal</td></tr>'
+    +'<tr><td>Angina Index</td><td>'+ang+'</td><td><span class="dot ok"></span></td><td>'+(ang==0?'Tidak ada':ang==1?'Non-limiting':'Limiting')+'</td></tr>'
+    +'<tr><td>HR Reserve Response</td><td>'+(ci!==null?ff(ciPct,1):'—')+'%</td><td><span class="dot '+cC+'"></span></td><td>'+cL+'</td></tr>'
+    +'</table></div>';
+
+  /* Hemo */
+  html += '<div class="hemo-wrap"><div class="ptbl-head">Data '+(modal==='treadmill'?'Treadmill':'Ergocycle')+' & Hemodinamik</div>'
+    +'<div class="hemo-row"><span class="hemo-lbl">HR Peak Exercise</span><span class="hemo-val">'+hrPost+' bpm</span></div>'
+    +'<div class="hemo-row"><span class="hemo-lbl">Stage Dicapai</span><span class="hemo-val" style="font-size:9px">'+stageLabel+'</span></div>'
+    +(modal==='treadmill'
+      ?'<div class="hemo-row"><span class="hemo-lbl">Speed Treadmill</span><span class="hemo-val">'+ff(spd,1)+' km/jam &nbsp;('+ff(spd/1.60934,2)+' MPH)</span></div>'
+       +'<div class="hemo-row"><span class="hemo-lbl">Grade</span><span class="hemo-val">'+ff(grd,0)+' %</span></div>'
+      :'<div class="hemo-row"><span class="hemo-lbl">Beban Akhir</span><span class="hemo-val">'+watt+' Watt</span></div>'
+       +'<div class="hemo-row"><span class="hemo-lbl">Berat Badan</span><span class="hemo-val">'+bwKg+' kg</span></div>')
+    +'<div class="hemo-row"><span class="hemo-lbl">BP Rest</span><span class="hemo-val">'+sbpRest+'/'+dbpRest+' mmHg</span></div>'
+    +'<div class="hemo-row"><span class="hemo-lbl">BP Peak</span><span class="hemo-val">'+sbp+'/'+dbp+' mmHg</span></div>'
+    +'<div class="hemo-row"><span class="hemo-lbl">BP Response</span><span class="hemo-val">'+bpResponse+'</span></div>'
+    +'<div class="hemo-row"><span class="hemo-lbl">HR Istirahat</span><span class="hemo-val">'+hrRest+' bpm</span></div>'
+    +'<div class="hemo-row"><span class="hemo-lbl">HR Recovery Menit 1</span><span class="hemo-val" style="color:'+((hrrStatus==='INVALID'||hrrStatus==='REVIEW')?'var(--warn-d)':hrrStatus==='NOT_ASSESSED'?'var(--t3)':hrrNormal?'var(--ok-d)':'var(--bad-d)')+'">'+(hrrStatus==='INVALID'?'Periksa Data':hrrStatus==='REVIEW'?'Review Data':hrrVal!==null?hrrVal+' bpm':'—')+'</span></div>'
+    +'<div class="hemo-row"><span class="hemo-lbl">HRR₁ Status</span><span class="hemo-val" style="font-size:9px;color:'+((hrrStatus==='INVALID'||hrrStatus==='REVIEW')?'var(--warn-d)':hrrStatus==='NOT_ASSESSED'?'var(--t3)':hrrNormal?'var(--ok-d)':'var(--bad-d)')+'">'+hrrLabel+'</span></div>'
+    +'<div class="hemo-row"><span class="hemo-lbl">Beta-blocker</span><span class="hemo-val" style="font-size:8.5px">'+(betabl==='ya'?'Ya':'Tidak')+'</span></div>'
+    +'<div class="hemo-row"><span class="hemo-lbl">HR Max Basis</span><span class="hemo-val blue">'+hrMax.toFixed(0)+' bpm</span></div>'
+    /* Farmakologi in hemo card */
+    +(farmList.length>0
+      ?'<div style="padding:7px 12px;border-top:1px solid var(--brd2);background:var(--brd2)">'
+        +'<div style="font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--t3);margin-bottom:4px">💊 Farmakologi Aktif</div>'
+        +'<div style="font-size:9px;color:var(--t1);line-height:1.7">'+farmList.join('<span style="color:var(--t4)"> · </span>')+'</div>'
+      +'</div>'
+      :'')
+    +'</div>';
+
+  html += '</div>'; /* end col-stack */
+
+  /* RIGHT: CI CARD */
+  html += '<div class="ci-wrap">'
+    +'<div class="ci-top" style="background:linear-gradient(135deg,'+cBg+',#fff)">'
+      +'<div class="ci-head-lbl">HR Reserve Response (% HR Reserve)</div>'
+      +'<div class="ci-big-row"><div class="ci-big-num" style="color:'+cCol+'">'+(ci!==null?ff(ciPct,1):'—')+'</div><div class="ci-big-pct" style="color:'+cCol+'">%</div></div>'
+      +'<div class="ci-pill" style="background:'+cBg+';color:'+cCol+';border-color:'+cBrd+'">'+cL+'</div>'
+      +'<div class="ci-sublbl">% HR Reserve Achieved</div>'
+      +'<div class="ci-formula">'
+        +'= (HR post − HR rest) ÷ (HR max − HR rest)<br>'
+        +'= ('+hrPost+' − '+hrRest+') ÷ ('+hrMax.toFixed(0)+' − '+hrRest+')<br>'
+        +'= '+(hrPost-hrRest)+' ÷ '+(hrMax-hrRest).toFixed(0)+' = '+(ci!==null?ff(ci,3):'—')
+      +'</div>'
+    +'</div>'
+    +'<div class="ci-gauge-wrap">'
+      +'<div class="ci-gauge-lbl">HR Reserve Response Scale &nbsp;<strong>'+ff(ciPct,1)+'%</strong></div>'
+      +'<div class="ci-track">'
+        +'<div class="ci-cut" style="left:70%;background:#b45309"></div>'
+        +'<div class="ci-cut" style="left:80%;background:#059669"></div>'
+        +(ci!==null?'<div class="ci-needle" style="left:'+needle+'%"></div>':'')
+      +'</div>'
+      +'<div class="ci-tlabels"><span>0%</span><span>Incompetent</span><span style="color:#b45309">70%</span><span style="color:#059669">80%</span><span>100%</span></div>'
+    +'</div>'
+    +'<div class="ci-mets-grid">'
+      +'<div class="ci-met"><div class="ci-met-lbl">HR Rest</div><div class="ci-met-val">'+hrRest+'</div><div class="ci-met-unit">bpm</div></div>'
+      +'<div class="ci-met"><div class="ci-met-lbl">HR Post</div><div class="ci-met-val">'+hrPost+'</div><div class="ci-met-unit">bpm</div></div>'
+      +'<div class="ci-met"><div class="ci-met-lbl">HR Max</div><div class="ci-met-val pur">'+hrMax.toFixed(0)+'</div><div class="ci-met-unit">bpm</div></div>'
+      +'<div class="ci-met"><div class="ci-met-lbl">HR Reserve</div><div class="ci-met-val">'+ff(hrMax-hrRest,0)+'</div><div class="ci-met-unit">bpm</div></div>'
+    +'</div>'
+    +'<div class="ci-karv-grid">'
+      +'<div class="ci-kv"><div class="ci-kv-lbl">Target 40% Reserve</div><div class="ci-kv-val">'+ff(thr40,0)+'</div><div class="ci-kv-unit">bpm (Karvonen)</div></div>'
+      +'<div class="ci-kv"><div class="ci-kv-lbl">Target 60% Reserve</div><div class="ci-kv-val">'+ff(thr60,0)+'</div><div class="ci-kv-unit">bpm (Karvonen)</div></div>'
+    +'</div>'
+    +'<div class="ci-alert '+cC+'">'+ciAlert+'</div>'
+    +'<div class="ci-fn">HR basis: '+hrMaxFm+'. &nbsp;&lt;80% HR reserve = reduced response; interpretasikan bersama obat, protokol, dan konteks klinis.</div>'
+    +'</div>';
+
+  html += '</div>'; /* end two-col */
+
+  /* KESIMPULAN + TTD */
+  html += '<div class="two-col" style="margin-bottom:8px">'
+    +'<div class="concl-wrap">'
+      +'<div class="concl-head"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg> Kesimpulan</div>'
+      +'<div class="concl-body">'+conclTxt+'<div class="validation-banner" style="margin-top:10px"><strong>Catatan referensi:</strong> persamaan metabolik mengacu pada ACSM GETP 12. Klasifikasi normatif VO₂ yang tertanam di aplikasi harus diverifikasi kesesuaiannya dengan populasi, jenis kelamin, usia, modalitas, dan protokol institusi sebelum digunakan untuk keputusan klinis.</div></div>'
+    +(catatan?'<div class="expertise-box"><div class="expertise-lbl">🩺 Kesimpulan Expertise Dokter</div><div class="expertise-txt">'+catatan+'</div></div>':'')
+    +'</div>'
+    +'<div class="sign-wrap" id="sign_wrap_el">'
+      +'<div class="sign-lbl">Tanda Tangan Dokter</div>'
+      +'<div style="display:flex;flex-direction:column;align-items:center;margin-bottom:6px">'
+        +'<canvas id="qr_canvas" width="88" height="88" style="border-radius:8px;border:1.5px solid var(--brd);display:block"></canvas>'
+        +'<div style="font-size:7.5px;color:var(--t3);margin-top:3px;text-align:center">QR Verifikasi Data Laporan — bukan tanda tangan digital tersertifikasi</div>'
+      +'</div>'
+      +'<div class="sign-line" style="margin:4px auto 8px;width:160px"></div>'
+      +'<div class="sign-name">'+dokter+'</div>'
+      +'<div class="sign-spec">'+spesialis+'</div>'
+      +'<div class="sign-sip">SIP. '+sip+'</div>'
+    +'</div>'
+    +'</div>';
+
+  /* Generate real QR code with dokter + SIP data */
+  (function(){
+    var qrData = 'Dokter: '+dokter+'\nSIP: '+sip+'\nSpesialis: '+spesialis+'\nID Laporan: '+lapId+'\nTanggal: '+tgl;
+    setTimeout(function(){
+      generateQR('qr_canvas', qrData, 88);
+    }, 100);
+  })();
+
+  /* FOOTER */
+  html += '<div class="rep-footer">'
+    +'<span>🛡 Laporan ini dihasilkan oleh sistem CardioInsight dan bukan pengganti penilaian klinis dokter.</span>'
+    +'<span style="font-family:var(--fm);white-space:nowrap">CardioInsight · '+tgl+' '+jam+' WIB</span>'
+    +'<span>ℹ Referensi: ACSM GETP 12th ed. · Appendix C/D; dataset normatif aplikasi memerlukan verifikasi populasi/protokol</span>'
+    +'</div>';
+
+  html += '</div>'; /* end page 2 */
+
+  document.getElementById('main_panel').innerHTML = html;
+
+  if(window.innerWidth<=860){
+    // scroll to results
+    setTimeout(function(){document.getElementById('main_panel').scrollIntoView({behavior:'smooth',block:'start'});},200);
+  }
+}
+
+/* ════ INIT ════ */
+autoHRMax();
+setModal('treadmill');
+
+/* ════════════════════════════════════════════════
+   QR CODE — menggunakan QR Server API
+   Isi QR: Nama Dokter + SIP + ID Laporan
+════════════════════════════════════════════════ */
+function generateQR(canvasId, text, size){
+  var canvas = typeof canvasId==='string' ? document.getElementById(canvasId) : canvasId;
+  if(!canvas) return;
+  var ctx = canvas.getContext('2d');
+  var url = 'https://api.qrserver.com/v1/create-qr-code/?size='+size+'x'+size
+    +'&data='+encodeURIComponent(text)+'&format=png&ecc=M&color=0f172a&bgcolor=ffffff';
+  var img = new Image();
+  img.crossOrigin = 'anonymous';
+  img.onload = function(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    ctx.drawImage(img,0,0,canvas.width,canvas.height);
+  };
+  img.onerror = function(){
+    /* Offline fallback — draw finder-pattern placeholder */
+    ctx.fillStyle='#fff'; ctx.fillRect(0,0,size,size);
+    ctx.fillStyle='#0f172a';
+    var m=3, cs=Math.floor((size-m*2)/10);
+    function sq(x,y,w,h,c){ ctx.fillStyle=c; ctx.fillRect(x,y,w,h); }
+    function finder(ox,oy){
+      sq(ox,oy,cs*7,cs*7,'#0f172a');
+      sq(ox+cs,oy+cs,cs*5,cs*5,'#fff');
+      sq(ox+cs*2,oy+cs*2,cs*3,cs*3,'#0f172a');
+    }
+    finder(m,m); finder(size-m-cs*7,m); finder(m,size-m-cs*7);
+    ctx.fillStyle='#64748b'; ctx.font='bold '+(cs+1)+'px monospace';
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText('QR',size/2,size/2);
+  };
+  img.src = url;
+}
+
+/* ════════════════════════════════════════════════
+   EXPORT PDF — via print window
+════════════════════════════════════════════════ */
+function exportPDF(){
+  var panel = document.getElementById('main_panel');
+
+  // Guard: no report yet
+  if(!panel || panel.querySelector('.placeholder')){
+    alert('Hasilkan laporan terlebih dahulu dengan klik "Hitung Semua".');
+    return;
+  }
+
+  var nama = (document.getElementById('inp_nama').value||'Pasien').replace(/\s+/g,'_');
+  var tgl  = new Date().toLocaleDateString('id-ID',{day:'2-digit',month:'2-digit',year:'numeric'}).replace(/\//g,'-');
+
+  // Collect all inline CSS from the page
+  var css = '';
+  for(var i=0;i<document.styleSheets.length;i++){
+    try{
+      var rules=document.styleSheets[i].cssRules||[];
+      for(var j=0;j<rules.length;j++) css += rules[j].cssText+'\n';
+    }catch(e){}
+  }
+
+  // Build full standalone HTML for the print window
+  var printHTML = '<!DOCTYPE html><html lang="id"><head>'
+    +'<meta charset="UTF-8">'
+    +'<meta name="viewport" content="width=device-width,initial-scale=1">'
+    +'<title>CardioInsight_'+nama+'_'+tgl+'</title>'
+    +'<link rel="preconnect" href="https://fonts.googleapis.com">'
+    +'<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">'
+    +'<style>'
+    /* CSS variables re-declared for print window */
+    +':root{'
+    +'--blue:#2563eb;--blue-d:#1d4ed8;--blue-bg:#eff6ff;--blue-b:#bfdbfe;'
+    +'--ok:#10b981;--ok-bg:#ecfdf5;--ok-b:#6ee7b7;--ok-d:#059669;--ok-t:#065f46;'
+    +'--warn:#f59e0b;--warn-bg:#fffbeb;--warn-b:#fde68a;--warn-d:#b45309;--warn-t:#78350f;'
+    +'--bad:#ef4444;--bad-bg:#fef2f2;--bad-b:#fca5a5;--bad-d:#dc2626;--bad-t:#7f1d1d;'
+    +'--pur:#7c3aed;--pur-bg:#f5f3ff;--pur-b:#c4b5fd;--pur-d:#6d28d9;'
+    +'--page:#eef2f7;--card:#fff;--brd:#e2e8f0;--brd2:#f1f5f9;'
+    +'--t1:#0f172a;--t2:#475569;--t3:#94a3b8;--t4:#cbd5e1;'
+    +"--ff:'Plus Jakarta Sans',sans-serif;--fm:'JetBrains Mono',monospace;"
+    +'}'
+    /* Page setup */
+    +'*{margin:0;padding:0;box-sizing:border-box}'
+    +'html,body{background:#fff;font-family:var(--ff);color:var(--t1);font-size:10px}'
+    +'@page{size:A4 portrait;margin:10mm 12mm}'
+    +'body{padding:0}'
+    +'.print-body{width:100%;}'
+    /* All component styles copied from main */
+    +css
+    /* Print-specific overrides */
+    +'.rcard,.acsm-card,.ptbl-wrap,.hemo-wrap,.ci-wrap,.concl-wrap,.sign-wrap,.rep-footer{page-break-inside:avoid;break-inside:avoid}'
+    +'.two-col{display:grid!important;grid-template-columns:1fr 1fr!important;gap:10px!important;margin-bottom:10px!important}'
+    +'.pat-doc-row{display:grid!important;grid-template-columns:1fr 1fr!important;gap:8px!important;margin-bottom:8px!important}'
+    +'.col-stack{display:flex!important;flex-direction:column!important;gap:7px!important}'
+    +'.ci-mets-grid{display:grid!important;grid-template-columns:repeat(4,1fr)!important}'
+    +'.ci-karv-grid{display:grid!important;grid-template-columns:1fr 1fr!important}'
+    +'.rep-footer{display:flex!important;flex-direction:row!important;gap:8px!important;font-size:8px!important;flex-wrap:wrap}'
+    +'.rcard,.acsm-card,.proto-box,.alert{margin-bottom:7px!important}'
+    +'.two-col{margin-bottom:7px!important}'
+    +'.rh{padding:10px 14px!important}'
+    +'.rh-title{font-size:16px!important}'
+    +'.acsm-body{padding:10px 14px!important}'
+    +'.acsm-result-big{padding:8px!important;margin-bottom:8px!important}'
+    +'.concl-body{padding:10px 14px!important}'
+    +'.ci-top{padding:10px 14px!important}'
+    +'.ci-gauge-wrap{padding:8px 12px!important}'
+    +'.ci-fn{font-size:8px!important;padding:6px 12px!important}'
+    +'.ci-met{padding:7px 6px!important}'
+    +'.ci-kv{padding:7px 10px!important}'
+    +'.stb{margin-bottom:6px!important}'
+    +'.sum-tile{padding:10px 7px!important}'
+    +'.sum-val{font-size:19px!important}'
+    +'.ci-big-num{font-size:32px!important}'
+    +'.acsm-big-val{font-size:22px!important}'
+    +'.ci-kv-val{font-size:15px!important}'
+    +'.kc-val{font-size:14px!important}'
+    +'.ci-met-val{font-size:13px!important}'
+    +'table.ptbl td{padding:4px 8px!important;font-size:9px!important}'
+    +'.hemo-row{padding:5px 10px!important}'
+    +'.hemo-lbl,.hemo-val{font-size:9px!important}'
+    +'.proto-box-note{font-size:9px!important;margin-bottom:4px!important}'
+    /* Hide formulas in PDF */
+    +'</style>'
+    +'</head><body>'
+    +'<div class="print-body">';
+
+  // Replace canvas QR with img data URL for print
+  var contentDiv = document.createElement('div');
+  contentDiv.innerHTML = panel.innerHTML;
+  var qrCanvas = document.getElementById('qr_canvas');
+  var qrImgEl = contentDiv.querySelector('#qr_canvas');
+  if(qrCanvas && qrImgEl){
+    try{
+      var dataURL = qrCanvas.toDataURL('image/png');
+      var img = document.createElement('img');
+      img.src = dataURL;
+      img.width = 88; img.height = 88;
+      img.style.cssText = 'border-radius:8px;border:1.5px solid #e2e8f0;display:block';
+      qrImgEl.parentNode.replaceChild(img, qrImgEl);
+    }catch(e){ qrImgEl.style.display='none'; }
+  }
+
+  printHTML += contentDiv.innerHTML
+    +'</div>'
+    +'</body></html>';
+
+  // Open print window
+  var pw = window.open('','_blank','width=900,height=700');
+  if(!pw){ alert('Popup diblokir browser. Izinkan popup untuk situs ini.'); return; }
+
+  pw.document.open();
+  pw.document.write(printHTML);
+  pw.document.close();
+
+  // Wait for fonts/images to load then print
+  pw.onload = function(){
+    setTimeout(function(){
+      pw.focus();
+      pw.print();
+      // Close after print dialog dismissed (small delay)
+      setTimeout(function(){ pw.close(); }, 1000);
+    }, 800);
+  };
+
+  // Fallback if onload doesn't fire
+  setTimeout(function(){
+    if(pw && !pw.closed){
+      pw.focus();
+      pw.print();
+    }
+  }, 2000);
+}
+</script>
+</body>
+</html>
