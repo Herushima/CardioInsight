@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CardioInsight V3.3 – Stress & Exercise Evaluation Suite</title>
+<title>CardioInsight V3.4 – Stress & Exercise Evaluation Suite</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -25,7 +25,7 @@ body{display:flex;flex-direction:column;min-height:100vh}
 ::-webkit-scrollbar-thumb{background:var(--t4);border-radius:99px}
 
 
-/* V3.0 clinical calculation + validation hardening */
+/* V3.4 clinical narrative output + validation hardening */
 .validation-note{font-size:8.5px;line-height:1.45;margin-top:3px;color:var(--t3)}
 @media(max-width:600px){
   .hint-bar{flex-wrap:wrap;overflow-wrap:anywhere}
@@ -35,6 +35,8 @@ body{display:flex;flex-direction:column;min-height:100vh}
   .pdf-page{min-width:0;overflow:hidden}
   .pdf-page .two-col{grid-template-columns:1fr!important}
   .pdf-page .rh-title{font-size:17px}
+  .concl-body{font-size:11.8px;line-height:1.82;padding:14px 15px}
+  .concl-body p{margin-bottom:10px}
   .proto-box,.ptbl-wrap{max-width:100%;overflow-x:auto}
 }
 
@@ -112,6 +114,11 @@ body{display:flex;flex-direction:column;min-height:100vh}
 .btn-reset{width:100%;padding:7px;background:transparent;border:1.5px solid var(--brd);border-radius:8px;font-size:11px;font-weight:600;font-family:var(--ff);cursor:pointer;color:var(--t2);transition:.12s;margin-bottom:8px}
 .btn-reset:hover{border-color:var(--bad);color:var(--bad)}
 .form-note{font-size:8.5px;color:var(--t3);line-height:1.7}
+.app-footer{padding:20px 20px 26px;text-align:center;border-top:1px solid var(--brd);background:#fff;margin-top:6px}
+.app-footer-inner{font-size:11px;color:var(--t3);line-height:1.8}
+.app-footer-inner strong{color:var(--t2)}
+.app-footer-inner a{color:var(--blue);text-decoration:none;font-weight:700}
+.app-footer-inner a:hover{text-decoration:underline}
 
 /* ── PDF OVERLAY ── */
 #pdf-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;align-items:center;justify-content:center}
@@ -243,7 +250,7 @@ table.ptbl td:last-child{font-size:9px;color:var(--t3);text-align:right}
 .ci-fn{padding:9px 14px;font-size:9px;font-family:var(--fm);color:var(--t3);line-height:1.8}
 .concl-wrap{background:var(--card);border-radius:12px;border:1.5px solid var(--brd);overflow:hidden}
 .concl-head{padding:10px 15px;background:linear-gradient(135deg,var(--brd2),#fff);border-bottom:1px solid var(--brd);display:flex;align-items:center;gap:8px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:var(--t1)}
-.concl-body{padding:13px 16px;font-size:10.5px;color:var(--t2);line-height:1.8}
+.concl-body{padding:15px 17px;font-size:12px;color:var(--t2);line-height:1.85;letter-spacing:.02px;overflow-wrap:anywhere;word-break:normal}.concl-body p{margin:0 0 11px}.concl-body p:last-of-type{margin-bottom:0}.concl-lead{color:var(--t1);font-weight:500}.concl-key{font-weight:700;color:var(--t1)}.concl-status{font-weight:800}.concl-status.ok{color:var(--ok-d)}.concl-status.warn{color:var(--warn-d)}.concl-status.bad{color:var(--bad-d)}.concl-status.gray{color:var(--t2)}
 /* Kesimpulan Expertise box */
 .expertise-box{background:linear-gradient(135deg,#fffbeb,#fff7ed);border:1.5px solid var(--warn-b);border-radius:10px;padding:12px 16px;margin-top:10px}
 .expertise-lbl{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:var(--warn-d);margin-bottom:5px}
@@ -399,6 +406,488 @@ table.ptbl td:last-child{width:30%;}
   #main_panel table.ptbl .dot{width:7px;height:7px;}
 }
 </style>
+
+<style id="pdf-one-page-v3-11">
+@media print {
+  @page { size: A4 portrait; margin: 9mm 10mm 8mm 10mm; }
+  html, body { width: 100%; height: auto; }
+  body { font-size: 9.2pt !important; line-height: 1.28 !important; }
+  .pdf-page {
+    width: 100% !important;
+    min-height: 0 !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    page-break-after: auto !important;
+    break-after: auto !important;
+    overflow: visible !important;
+  }
+  .pdf-page + .pdf-page { margin-top: 4mm !important; }
+  .pdf-only { display: block !important; }
+  .no-pdf, .screen-only { display: none !important; }
+
+  /* Compact report header */
+  .pdf-header, .report-header, .header-card {
+    padding: 7px 10px !important;
+    margin-bottom: 7px !important;
+    min-height: 0 !important;
+  }
+  .pdf-header h1, .report-header h1, .header-card h1 {
+    font-size: 15pt !important;
+    margin: 0 0 2px !important;
+  }
+  .pdf-header h2, .report-header h2, .header-card h2 {
+    font-size: 9pt !important;
+    margin: 0 !important;
+  }
+
+  /* Patient identity */
+  .patient-card, .patient-info, .identity-card {
+    padding: 6px 8px !important;
+    margin-bottom: 7px !important;
+  }
+  .patient-card *, .patient-info *, .identity-card * {
+    font-size: 8.7pt !important;
+  }
+
+  /* Compact result grid */
+  .result-grid, .summary-grid, .metrics-grid, .kpi-grid {
+    display: grid !important;
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+    gap: 5px !important;
+    margin: 5px 0 7px !important;
+  }
+  .result-card, .metric-card, .summary-card, .kpi-card {
+    padding: 6px 5px !important;
+    min-height: 0 !important;
+    height: auto !important;
+    border-radius: 7px !important;
+  }
+  .result-card .value, .metric-card .value, .summary-card .value,
+  .kpi-card .value, .result-value {
+    font-size: 13pt !important;
+    line-height: 1.05 !important;
+  }
+  .result-card .label, .metric-card .label, .summary-card .label,
+  .kpi-card .label, .result-label {
+    font-size: 7.3pt !important;
+    line-height: 1.15 !important;
+  }
+  .result-card .sub, .metric-card .sub, .summary-card .sub,
+  .kpi-card .sub {
+    font-size: 7pt !important;
+    line-height: 1.15 !important;
+  }
+
+  /* Two-column compact clinical details */
+  .detail-grid, .clinical-grid, .hemo-grid, .info-grid {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 5px 12px !important;
+    margin: 4px 0 7px !important;
+  }
+  .detail-grid > *, .clinical-grid > *, .hemo-grid > *, .info-grid > * {
+    margin: 0 !important;
+    padding: 4px 0 !important;
+  }
+
+  /* Tables */
+  table { width: 100% !important; border-collapse: collapse !important; table-layout: fixed !important; }
+  th, td {
+    padding: 3px 4px !important;
+    font-size: 7.8pt !important;
+    line-height: 1.18 !important;
+    word-break: break-word !important;
+  }
+
+  /* Narrative */
+  .conclusion, .conclusion-box, .interpretation, .report-conclusion {
+    padding: 7px 9px !important;
+    margin-top: 6px !important;
+    font-size: 8.8pt !important;
+    line-height: 1.34 !important;
+  }
+  .conclusion p, .interpretation p, .report-conclusion p {
+    margin: 0 0 5px !important;
+  }
+
+  /* Hide excessive technical blocks in patient PDF */
+  .technical-only, .formula-section, .normative-table, .karvonen-section,
+  .stage-detail-table, .protocol-detail, .full-parameter-table,
+  .reference-section { display: none !important; }
+
+  /* Footer */
+  .pdf-footer, .report-footer {
+    margin-top: 6px !important;
+    padding-top: 5px !important;
+    font-size: 7pt !important;
+    line-height: 1.15 !important;
+  }
+
+  /* Force single page */
+  .pdf-page-break, .page-break { display: none !important; }
+}
+</style>
+
+
+<style id="pdf-one-page-v3-12">
+@media print {
+  @page { size: A4 portrait; margin: 6mm 7mm 5mm 7mm; }
+
+  html, body {
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    background: #fff !important;
+  }
+
+  body {
+    font-size: 7.8pt !important;
+    line-height: 1.18 !important;
+  }
+
+  /* Hide any screen-only / duplicated print sections that can create blank pages. */
+  .screen-only, .no-pdf, .technical-only, .formula-section,
+  .normative-table, .karvonen-section, .stage-detail-table,
+  .protocol-detail, .full-parameter-table, .reference-section {
+    display: none !important;
+  }
+
+  /* Convert the two existing report pages into one continuous compact report. */
+  .pdf-page {
+    display: block !important;
+    width: 100% !important;
+    min-height: 0 !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    border: 0 !important;
+    page-break-after: auto !important;
+    break-after: auto !important;
+    page-break-before: auto !important;
+    break-before: auto !important;
+    overflow: visible !important;
+  }
+
+  .pdf-page + .pdf-page {
+    margin-top: 2.5mm !important;
+    padding-top: 2.5mm !important;
+    border-top: 1px solid #d8e0e8 !important;
+  }
+
+  /* Small, low-height header. */
+  .pdf-header, .report-header, .header-card {
+    padding: 4px 7px !important;
+    margin: 0 0 4px !important;
+    min-height: 0 !important;
+    border-radius: 5px !important;
+  }
+  .pdf-header h1, .report-header h1, .header-card h1 {
+    font-size: 11.5pt !important;
+    line-height: 1.05 !important;
+    margin: 0 0 1px !important;
+  }
+  .pdf-header h2, .report-header h2, .header-card h2 {
+    font-size: 7pt !important;
+    line-height: 1.05 !important;
+    margin: 0 !important;
+  }
+
+  /* Identity row. */
+  .patient-card, .patient-info, .identity-card {
+    padding: 4px 6px !important;
+    margin: 0 0 4px !important;
+    border-radius: 5px !important;
+  }
+  .patient-card *, .patient-info *, .identity-card * {
+    font-size: 7.2pt !important;
+    line-height: 1.12 !important;
+  }
+
+  /* Five compact result boxes, all on one row. */
+  .result-grid, .summary-grid, .metrics-grid, .kpi-grid {
+    display: grid !important;
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+    gap: 3px !important;
+    margin: 3px 0 4px !important;
+  }
+  .result-card, .metric-card, .summary-card, .kpi-card {
+    min-width: 0 !important;
+    min-height: 0 !important;
+    height: auto !important;
+    padding: 4px 3px !important;
+    border-radius: 5px !important;
+  }
+  .result-card .value, .metric-card .value, .summary-card .value,
+  .kpi-card .value, .result-value {
+    font-size: 9.5pt !important;
+    line-height: 1 !important;
+    margin: 0 !important;
+  }
+  .result-card .label, .metric-card .label, .summary-card .label,
+  .kpi-card .label, .result-label {
+    font-size: 5.9pt !important;
+    line-height: 1.05 !important;
+    margin: 0 !important;
+  }
+  .result-card .sub, .metric-card .sub, .summary-card .sub,
+  .kpi-card .sub {
+    font-size: 5.7pt !important;
+    line-height: 1.05 !important;
+    margin: 1px 0 0 !important;
+  }
+
+  /* Compact clinical details. */
+  .detail-grid, .clinical-grid, .hemo-grid, .info-grid {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 2px 9px !important;
+    margin: 2px 0 4px !important;
+  }
+  .detail-grid > *, .clinical-grid > *, .hemo-grid > *, .info-grid > * {
+    padding: 2px 0 !important;
+    margin: 0 !important;
+    min-height: 0 !important;
+  }
+
+  /* Tables: compact, fixed, no overflow. */
+  table {
+    width: 100% !important;
+    max-width: 100% !important;
+    border-collapse: collapse !important;
+    table-layout: fixed !important;
+    margin: 2px 0 4px !important;
+  }
+  th, td {
+    padding: 2px 3px !important;
+    font-size: 6.7pt !important;
+    line-height: 1.08 !important;
+    word-break: break-word !important;
+    overflow-wrap: anywhere !important;
+  }
+
+  /* Section headings. */
+  h2, h3, .section-title, .report-section-title {
+    font-size: 8.2pt !important;
+    line-height: 1.05 !important;
+    margin: 3px 0 2px !important;
+  }
+
+  /* Conclusion: complete but compact. */
+  .conclusion, .conclusion-box, .interpretation, .report-conclusion {
+    padding: 5px 7px !important;
+    margin: 3px 0 4px !important;
+    font-size: 7.5pt !important;
+    line-height: 1.22 !important;
+    border-radius: 5px !important;
+  }
+  .conclusion p, .interpretation p, .report-conclusion p {
+    margin: 0 0 3px !important;
+  }
+
+  .pdf-footer, .report-footer {
+    margin-top: 3px !important;
+    padding-top: 3px !important;
+    font-size: 5.8pt !important;
+    line-height: 1.05 !important;
+  }
+
+  /* Never force an extra blank page. */
+  .page-break, .pdf-page-break { display: none !important; }
+  [style*="page-break-after: always"],
+  [style*="break-after: page"],
+  [style*="page-break-before: always"],
+  [style*="break-before: page"] {
+    page-break-after: auto !important;
+    break-after: auto !important;
+    page-break-before: auto !important;
+    break-before: auto !important;
+  }
+}
+</style>
+
+
+<style id="pdf-one-page-v3-13">
+@media print {
+  @page { size: A4 portrait; margin: 4.5mm 5.5mm 4mm 5.5mm; }
+
+  html, body {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    height: auto !important;
+    overflow: visible !important;
+    background: #fff !important;
+  }
+
+  body {
+    font-size: 7pt !important;
+    line-height: 1.08 !important;
+  }
+
+  /* One continuous A4 report */
+  .pdf-page {
+    display: block !important;
+    width: 100% !important;
+    min-height: 0 !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    page-break-after: auto !important;
+    break-after: auto !important;
+    page-break-before: auto !important;
+    break-before: auto !important;
+    overflow: visible !important;
+  }
+  .pdf-page + .pdf-page {
+    margin: 1.5mm 0 0 !important;
+    padding: 1.5mm 0 0 !important;
+    border-top: 0.5px solid #d9e1e8 !important;
+  }
+
+  /* Very compact top bar */
+  .pdf-header, .report-header, .header-card {
+    padding: 2.5px 5px !important;
+    margin: 0 0 2.5px !important;
+    min-height: 0 !important;
+    height: auto !important;
+    border-radius: 4px !important;
+  }
+  .pdf-header h1, .report-header h1, .header-card h1 {
+    font-size: 9.5pt !important;
+    line-height: 1 !important;
+    margin: 0 !important;
+  }
+  .pdf-header h2, .report-header h2, .header-card h2 {
+    font-size: 5.8pt !important;
+    line-height: 1 !important;
+    margin: 1px 0 0 !important;
+  }
+
+  /* Patient strip */
+  .patient-card, .patient-info, .identity-card {
+    padding: 2.5px 5px !important;
+    margin: 0 0 2.5px !important;
+    border-radius: 4px !important;
+  }
+  .patient-card *, .patient-info *, .identity-card * {
+    font-size: 6.5pt !important;
+    line-height: 1.05 !important;
+  }
+
+  /* Tiny result cards */
+  .result-grid, .summary-grid, .metrics-grid, .kpi-grid {
+    display: grid !important;
+    grid-template-columns: repeat(5, minmax(0,1fr)) !important;
+    gap: 2px !important;
+    margin: 2px 0 3px !important;
+  }
+  .result-card, .metric-card, .summary-card, .kpi-card {
+    min-width: 0 !important;
+    min-height: 0 !important;
+    height: auto !important;
+    padding: 2.5px 2px !important;
+    border-radius: 4px !important;
+  }
+  .result-card .value, .metric-card .value, .summary-card .value,
+  .kpi-card .value, .result-value {
+    font-size: 8pt !important;
+    line-height: .95 !important;
+    margin: 0 !important;
+  }
+  .result-card .label, .metric-card .label, .summary-card .label,
+  .kpi-card .label, .result-label {
+    font-size: 5.1pt !important;
+    line-height: 1 !important;
+    margin: 0 !important;
+  }
+  .result-card .sub, .metric-card .sub, .summary-card .sub,
+  .kpi-card .sub {
+    font-size: 4.9pt !important;
+    line-height: 1 !important;
+    margin: 0 !important;
+  }
+
+  /* Section spacing */
+  h2, h3, .section-title, .report-section-title {
+    font-size: 7.2pt !important;
+    line-height: 1 !important;
+    margin: 2px 0 1.5px !important;
+  }
+
+  /* Two-column details */
+  .detail-grid, .clinical-grid, .hemo-grid, .info-grid {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 1px 7px !important;
+    margin: 1.5px 0 2.5px !important;
+  }
+  .detail-grid > *, .clinical-grid > *, .hemo-grid > *, .info-grid > * {
+    padding: 1.5px 0 !important;
+    margin: 0 !important;
+    min-height: 0 !important;
+  }
+
+  /* Tables */
+  table {
+    width: 100% !important;
+    max-width: 100% !important;
+    table-layout: fixed !important;
+    border-collapse: collapse !important;
+    margin: 1.5px 0 2.5px !important;
+  }
+  th, td {
+    padding: 1.5px 2.5px !important;
+    font-size: 5.9pt !important;
+    line-height: 1.02 !important;
+    overflow-wrap: anywhere !important;
+    word-break: break-word !important;
+  }
+
+  /* Conclusion stays complete, but compact */
+  .conclusion, .conclusion-box, .interpretation, .report-conclusion {
+    padding: 3.5px 5px !important;
+    margin: 2px 0 2.5px !important;
+    font-size: 6.7pt !important;
+    line-height: 1.12 !important;
+    border-radius: 4px !important;
+  }
+  .conclusion p, .interpretation p, .report-conclusion p {
+    margin: 0 0 1.8px !important;
+  }
+
+  .pdf-footer, .report-footer {
+    margin-top: 2px !important;
+    padding-top: 2px !important;
+    font-size: 5.2pt !important;
+    line-height: 1 !important;
+  }
+
+  .screen-only, .no-pdf, .technical-only, .formula-section,
+  .normative-table, .karvonen-section, .stage-detail-table,
+  .protocol-detail, .full-parameter-table, .reference-section,
+  .page-break, .pdf-page-break {
+    display: none !important;
+  }
+
+  /* Neutralize inline print page breaks */
+  [style*="page-break-after"],
+  [style*="break-after"],
+  [style*="page-break-before"],
+  [style*="break-before"] {
+    page-break-after: auto !important;
+    break-after: auto !important;
+    page-break-before: auto !important;
+    break-before: auto !important;
+  }
+}
+</style>
+
 </head>
 <body>
 
@@ -471,6 +960,7 @@ table.ptbl td:last-child{width:30%;}
     </div>
     <div class="frow">
       <div class="fg"><label class="fl">BB <span class="fu">kg</span></label><input class="fi" id="inp_bb_kg" type="number" value="70"></div>
+      <div class="fg"><label class="fl">TB <span class="fu">cm</span></label><input class="fi" id="inp_tb_cm" type="number" value="165" placeholder="Tinggi badan"></div>
       <div class="fg"><label class="fl">Institusi / Klinik</label><input class="fi" id="inp_klinik" type="text" value="Klinik Jantung Sehat"></div>
     </div>
 
@@ -697,6 +1187,15 @@ table.ptbl td:last-child{width:30%;}
 </main>
 </div><!-- /.results-wrap -->
 
+<!-- APP FOOTER — CREDIT -->
+<footer class="app-footer">
+  <div class="app-footer-inner">
+    <strong>CardioInsight</strong> dirancang &amp; dikembangkan oleh <strong>Herushima.Dev</strong><br>
+    Designer &amp; Programmer Aplikasi Kesehatan Digital<br>
+    <a href="mailto:herushima06@gmail.com">herushima06@gmail.com</a>
+  </div>
+</footer>
+
 </div><!-- /.app-body -->
 
 
@@ -805,9 +1304,9 @@ var PROTO = {
     naughton:{name:'Naughton Protocol',note:'Ideal untuk kapasitas sangat rendah (CHF, post-MI). ΔMETs ~1 per stage. Durasi 2 mnt.',
       hdr:['Stage','MPH','Grade (%)','Dur (mnt)','~METs'],
       rows:[[1,1.0,0,2,'~1.8'],[2,2.0,0,2,'~2.5'],[3,2.0,3.5,2,'~3.5'],[4,2.0,7,2,'~4.5'],[5,2.0,10.5,2,'~5.5'],[6,2.0,14,2,'~6.5'],[7,3.0,12.5,2,'~7.5'],[8,3.0,15,2,'~8.5']]},
-    balke:{name:'Balke-Ware Protocol',note:'Speed tetap 3.3 mph. Grade naik 2% tiap menit. Cocok untuk kebugaran umum.',
+    balke:{name:'Balke-Ware Protocol',note:'Speed tetap 3.3 mph. Grade 0% pada menit ke-1, naik ke 2% di awal menit ke-2, lalu +1%/menit setelahnya (protokol Balke-Ware klasik). Cocok untuk kebugaran umum.',
       hdr:['Stage','MPH','Grade (%)','Dur (mnt)','~METs'],
-      rows:[[1,3.3,0,1,'~3.5'],[2,3.3,2,1,'~5'],[3,3.3,4,1,'~6'],[4,3.3,6,1,'~7.5'],[5,3.3,8,1,'~8.5'],[6,3.3,10,1,'~10'],[7,3.3,12,1,'~11.5'],[8,3.3,14,1,'~13'],[9,3.3,16,1,'~14.5'],[10,3.3,18,1,'~16']]}
+      rows:[[1,3.3,0,1,'~3.5'],[2,3.3,2,1,'~4.4'],[3,3.3,3,1,'~4.9'],[4,3.3,4,1,'~5.3'],[5,3.3,5,1,'~5.8'],[6,3.3,6,1,'~6.3'],[7,3.3,7,1,'~6.7'],[8,3.3,8,1,'~7.2'],[9,3.3,9,1,'~7.6'],[10,3.3,10,1,'~8.1'],[11,3.3,11,1,'~8.5'],[12,3.3,12,1,'~9.0'],[13,3.3,13,1,'~9.4'],[14,3.3,14,1,'~9.9'],[15,3.3,15,1,'~10.4']]}
   },
   ergocycle:{
     who25:{name:'WHO25 Protocol (Ergocycle)',note:'Start 25 W, naik 25 W tiap 3 menit. Ideal untuk kapasitas rendah–sedang.',
@@ -1096,6 +1595,7 @@ function buildProtoTable(modal, proto){
 function resetForm(){
   document.getElementById('inp_usia').value=55;
   document.getElementById('inp_bb_kg').value=70;
+  document.getElementById('inp_tb_cm').value=165;
   document.getElementById('inp_hrrest').value=68;
   document.getElementById('inp_hrpost').value=128;
   document.getElementById('inp_sbp').value=150;
@@ -1140,6 +1640,7 @@ function hitungSemua(){
   var jk       = gv('inp_jk');
   var jkLabel  = jk==='M'?'Laki-laki':'Perempuan';
   var bwKg     = gn('inp_bb_kg');
+  var tbCm     = gn('inp_tb_cm');
   var klinik   = document.getElementById('inp_klinik').value||'—';
   var dokter   = document.getElementById('inp_dokter').value||'—';
   var spesialis= document.getElementById('inp_spesialis').value||'—';
@@ -1198,6 +1699,11 @@ function hitungSemua(){
   var cls=classifyVO2(vo2,jk,usia,modal),vo2Pct=cls.pct,vo2Cat=cls.cat;
   var vo2Cls=catCls(vo2Cat),vo2Bg=catBg(vo2Cls),vo2Brd=catBrd(vo2Cls),vo2Col=catCol(vo2Cls),acsmRows=buildAcsmRows(vo2,jk,usia,modal);
 
+  /* --- IMT / BODY MASS INDEX (Asia-Pacific / WHO Asia classification) --- */
+  var imt=(tbCm>0)?(bwKg/((tbCm/100)*(tbCm/100))):null;
+  var imtCat=imt===null?'Tidak dinilai':imt<18.5?'Underweight':imt<23?'Normal':imt<25?'Overweight (Berisiko)':imt<30?'Obese I':'Obese II';
+  var imtCls=imt===null?'gray':(imt>=18.5&&imt<23)?'ok':(imt<18.5||(imt>=23&&imt<25))?'warn':'bad';
+
   /* --- HEMODYNAMICS --- */
   var sbpRest=gn('inp_sbp_rest'),dbpRest=gn('inp_dbp_rest'),sbp=gn('inp_sbp'),dbp=gn('inp_dbp');
   var pct=hrMax>0?(hrPost/hrMax)*100:null, tgt85=Math.round(.85*hrMax), rpp=hrPost*sbp;
@@ -1254,13 +1760,46 @@ function hitungSemua(){
   var alertTxt='<strong>% Predicted HRmax: '+ff(pct,1)+'%</strong> → '+pL+' &nbsp;|&nbsp; <strong>RPP '+ff(rpp,0)+'</strong> → parameter beban miokard, bukan penentu tunggal adequacy test.';
   var ciAlert=ci===null?'<strong>Respons kronotropik tidak dapat dinilai.</strong>':ci<.80?'<strong>⚠ Respons HR reserve <80%.</strong> Temuan dapat dipengaruhi usia, obat (termasuk beta-blocker), protokol, dan kondisi klinis.':'<strong>✅ Respons HR reserve ≥80%.</strong> Tidak memenuhi threshold <80% yang digunakan modul ini.';
 
-  var conclTxt='Pasien ['+jkLabel+', '+usia+' thn] menjalani uji latihan '+(modal==='treadmill'?'treadmill':'ergocycle')+' dengan '+protoName+', mencapai '+stageLabel+'. Estimated Peak VO₂ '+ff(vo2,1)+' mL/kg/min ('+ff(mets,1)+' METs), klasifikasi kapasitas '+vo2Cat+' berdasarkan dataset normatif aplikasi.'
-    +(modal==='treadmill'?' Duke Treadmill Score = '+ff(dts,0)+' ('+dShort+').':' Duke Treadmill Score tidak dihitung karena modalitas ergocycle.')
-    +' % predicted HRmax = '+ff(pct,1)+'%; HR reserve response = '+(ci!==null?ff(ciPct,1)+'%':'tidak dapat dinilai')+'.'
-    +(hrrStatus==='INVALID'?' HRR₁ = tidak diklasifikasikan; '+hrrLabel:(hrrVal!==null?' HRR₁ = '+hrrVal+' bpm; '+hrrLabel:' HRR₁ tidak dinilai karena data recovery tidak lengkap.'))
-    +' Status stage terakhir: '+stageCompletionLabel+(stageCompletion==='partial'?' — workload selected represents the stage workload; exact peak VO₂ should be interpreted cautiously because the stage was not completed.':'')+'. BP rest '+sbpRest+'/'+dbpRest+' mmHg, peak '+sbp+'/'+dbp+' mmHg; '+bpResponse+'.'+(bpReview?' BP peak lebih rendah dari baseline; perlu review terhadap workload, gejala, ECG, dan alasan terminasi.':'')+' Alasan terminasi: '+termination+'.'
-    +' Klasifikasi kapasitas menggunakan dataset normatif yang tertanam dalam aplikasi; sumber/populasi harus dicocokkan dengan protokol institusi. Hasil merupakan ringkasan parameter exercise test dan harus ditinjau serta disahkan oleh dokter penanggung jawab.'
-    +(farmList.length>0?' Farmakologi aktif: '+farmList.join(', ')+'.':'');
+  /* --- CLINICAL NARRATIVE CONCLUSION --- */
+  var modalityLabel=modal==='treadmill'?'treadmill':'ergocycle';
+  var recoveryLabel=recType==='active'?'active recovery (upright cool-down)':'passive recovery (abrupt stop/supine)';
+  var terminationLabel={
+    fatigue:'kelelahan fisik (fatigue)',dyspnea:'dyspnea',chest_pain:'nyeri dada',ecg:'perubahan ECG',
+    arrhythmia:'aritmia',bp:'respons tekanan darah abnormal',target:'target/protokol tercapai',
+    patient:'permintaan pasien',other:'alasan lain sesuai input operator'
+  }[termination]||termination;
+  var stageSentence=stageCompletion==='partial'
+    ? 'mencapai '+stageLabel+' secara parsial'
+    : 'mencapai '+stageLabel+' secara penuh';
+  var bpSentence=bpReview
+    ? 'dengan SBP menurun dari baseline dan memerlukan review terhadap workload, gejala, ECG, serta alasan terminasi'
+    : bpResponse.toLowerCase();
+  var hrrNarrative='';
+  if(hrrStatus==='NORMAL'){
+    hrrNarrative='HRR₁ pada menit pertama sebesar '+hrrVal+' bpm, yang berada di atas cutoff '+hrrCutoff+' bpm untuk '+recoveryLabel+' sehingga diklasifikasikan <span class="concl-status ok">NORMAL</span>.';
+  } else if(hrrStatus==='ABNORMAL'){
+    hrrNarrative='HRR₁ pada menit pertama sebesar '+hrrVal+' bpm, yang berada pada atau di bawah cutoff '+hrrCutoff+' bpm untuk '+recoveryLabel+' sehingga diklasifikasikan <span class="concl-status bad">ABNORMAL</span>.';
+  } else if(hrrStatus==='REVIEW'){
+    hrrNarrative='HRR₁ pada menit pertama sebesar '+hrrVal+' bpm terdeteksi sangat rendah oleh pemeriksaan kualitas data aplikasi dan memerlukan verifikasi sebelum diklasifikasikan.';
+  } else if(hrrStatus==='INVALID'){
+    hrrNarrative='Data HRR₁ tidak konsisten dengan HRpeak atau rentang input, sehingga <span class="concl-status warn">INVALID / PERIKSA DATA</span> dan tidak diklasifikasikan sebagai normal atau abnormal.';
+  } else {
+    hrrNarrative='HRR₁ tidak dapat dinilai karena data recovery tidak lengkap.';
+  }
+  var dukeSentence=modal==='treadmill' && dts!==null
+    ? 'Duke Treadmill Score (DTS) sebesar <span class="concl-key">'+ff(dts,0)+'</span>, termasuk <span class="concl-key">'+dShort+'</span>.'
+    : 'Duke Treadmill Score tidak dihitung karena modalitas yang digunakan adalah ergocycle.';
+  var ecgSentence='';
+  if(modal==='treadmill'){
+    var stDirLabel=stDir==='depression'?'depresi ST':stDir==='elevation'?'elevasi ST':'tidak ada perubahan ST';
+    var morphLabel=stMorph==='horizontal'?'horizontal':stMorph==='downsloping'?'downsloping':stMorph==='upsloping'?'upsloping':stMorph;
+    ecgSentence='ST Depresi '+ff(stDev,1)+' mm dengan morfologi '+morphLabel+', sedangkan Angina Index sebesar '+ff(ang,0)+'.';
+  }
+  var conclTxt='<p class="concl-lead">Pasien <span class="concl-key">'+jkLabel.toLowerCase()+' berusia '+usia+' tahun</span> telah menjalani uji latih beban jantung menggunakan <span class="concl-key">'+protoName+'</span> pada modalitas '+modalityLabel+' dan '+stageSentence+', sebelum pemeriksaan dihentikan akibat '+terminationLabel+'. Respons hemodinamik menunjukkan tekanan darah berubah dari <span class="concl-key">'+sbpRest+'/'+dbpRest+' mmHg</span> saat istirahat menjadi <span class="concl-key">'+sbp+'/'+dbp+' mmHg</span> pada puncak latihan, dengan '+bpSentence+'. Capaian denyut jantung sebesar <span class="concl-key">'+ff(pct,1)+'% predicted HRmax</span> dan HR reserve response sebesar <span class="concl-key">'+(ci!==null?ff(ciPct,1)+'%':'tidak dapat dinilai')+'</span>.</p>'
+    +'<p>Estimasi kapasitas aerobik puncak tercatat sebesar <span class="concl-key">('+ff(mets,1)+' METs)</span>, yang diklasifikasikan sebagai kapasitas fungsional <span class="concl-key">'+vo2Cat+'</span>. '+dukeSentence+'</p>'
+    +'<p>'+hrrNarrative+(ecgSentence?' '+ecgSentence:'')+'</p>'
+    +'<p class="validation-note" style="font-size:10.5px;margin-top:10px;padding-top:9px;border-top:1px solid var(--brd2);color:var(--t3)"><strong>Catatan interpretasi:</strong> Klasifikasi kapasitas menggunakan dataset normatif yang tertanam dalam aplikasi dan harus diverifikasi kesesuaiannya dengan populasi, jenis kelamin, usia, modalitas, dan protokol institusi. Hasil ini merupakan ringkasan perhitungan dan klasifikasi parameter exercise test, bukan diagnosis tunggal, dan harus ditinjau serta disahkan oleh dokter penanggung jawab.</p>';
+
 
   /* --- PROTOCOL TABLE --- */
   var protoTableHTML = buildProtoTable(modal, proto);
@@ -1287,7 +1826,7 @@ function hitungSemua(){
     /* Top row */
     +'<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:10px">'
       +'<div>'
-        +'<div style="font-size:8.5px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--t3);margin-bottom:3px">CardioInsight V3.3 &nbsp;·&nbsp; Stress & Exercise Evaluation Suite</div>'
+        +'<div style="font-size:8.5px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--t3);margin-bottom:3px">CardioInsight V3.10 &nbsp;·&nbsp; Stress & Exercise Evaluation Suite</div>'
         +'<div class="rh-title">LAPORAN EVALUASI STRESS & EXERCISE</div>'
         +'<div style="font-size:10px;color:var(--t2);margin-top:2px">'
           +'Modalitas: <strong>'+(modal==='treadmill'?'Treadmill':'Ergocycle')+'</strong>'
@@ -1573,7 +2112,7 @@ function hitungSemua(){
   html += '<div class="two-col" style="margin-bottom:8px">'
     +'<div class="concl-wrap">'
       +'<div class="concl-head"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg> Kesimpulan</div>'
-      +'<div class="concl-body">'+conclTxt+'<div class="validation-banner" style="margin-top:10px"><strong>Catatan referensi:</strong> persamaan metabolik mengacu pada ACSM GETP 12. Klasifikasi normatif VO₂ yang tertanam di aplikasi harus diverifikasi kesesuaiannya dengan populasi, jenis kelamin, usia, modalitas, dan protokol institusi sebelum digunakan untuk keputusan klinis.</div></div>'
+      +'<div class="concl-body">'+conclTxt+'</div>'
     +(catatan?'<div class="expertise-box"><div class="expertise-lbl">🩺 Kesimpulan Expertise Dokter</div><div class="expertise-txt">'+catatan+'</div></div>':'')
     +'</div>'
     +'<div class="sign-wrap" id="sign_wrap_el">'
@@ -1607,6 +2146,26 @@ function hitungSemua(){
   html += '</div>'; /* end page 2 */
 
   document.getElementById('main_panel').innerHTML = html;
+
+  /* ── Store computed data for the redesigned single-page A4 PDF export ── */
+  window.__ciReportData = {
+    nama:nama, jkLabel:jkLabel, usia:usia, bwKg:bwKg, klinik:klinik, dokter:dokter, spesialis:spesialis, sip:sip,
+    lapId:lapId, tgl:tgl, jam:jam,
+    modal:modal, protoName:protoName, modalityLabel:modalityLabel,
+    predictedHRmax:predictedHRmax, hrMax:hrMax, tgt85:tgt85, pct:pct, pC:pC,
+    hrPost:hrPost, hrRest:hrRest,
+    vo2:vo2, mets:mets, vo2Cat:vo2Cat, vo2Cls:vo2Cls, vo2Pct:vo2Pct,
+    imt:imt, imtCat:imtCat, tbCm:tbCm,
+    rpp:rpp,
+    dts:dts, dC:dC, dShort:dShort,
+    ci:ci, ciPct:ciPct, cC:cC, cL:cL,
+    hrrVal:hrrVal, hrrCutoff:hrrCutoff, hrrStatus:hrrStatus, hrrNormal:hrrNormal,
+    sbpRest:sbpRest, dbpRest:dbpRest, sbp:sbp, dbp:dbp, bpResponse:bpResponse, betabl:betabl,
+    grd:grd, spd:spd, watt:watt,
+    stageSentence:stageSentence, terminationLabel:terminationLabel, bpSentence:bpSentence,
+    dukeSentence:dukeSentence, hrrNarrative:hrrNarrative, ecgSentence:ecgSentence,
+    catatan:catatan
+  };
 
   if(window.innerWidth<=860){
     // scroll to results
@@ -1653,115 +2212,289 @@ function generateQR(canvasId, text, size){
   img.src = url;
 }
 
+
 /* ════════════════════════════════════════════════
-   EXPORT PDF — via print window
+   PDF REPORT RENDERER — single-page A4 redesign
+════════════════════════════════════════════════ */
+function pdfBadge(status){
+  switch(status){
+    case 'NORMAL': return {cls:'ok', text:'NORMAL'};
+    case 'ABNORMAL': return {cls:'bad', text:'ABNORMAL'};
+    case 'REVIEW': return {cls:'warn', text:'REVIEW DATA'};
+    case 'INVALID': return {cls:'warn', text:'PERIKSA DATA'};
+    default: return {cls:'gray', text:'TIDAK DINILAI'};
+  }
+}
+function pdfHrrDesc(status){
+  switch(status){
+    case 'NORMAL': return 'HRR berada di atas cutoff referensi untuk protokol recovery yang dipilih.';
+    case 'ABNORMAL': return 'HRR berada pada atau di bawah cutoff referensi untuk protokol recovery yang dipilih.';
+    case 'REVIEW': return 'HR pemulihan menit pertama sangat rendah — perlu verifikasi data sebelum diklasifikasikan.';
+    case 'INVALID': return 'Data tidak konsisten dengan HRpeak / rentang input — periksa kembali rekaman asli.';
+    default: return 'Data HRR belum diisi / tidak dapat dinilai.';
+  }
+}
+function pdfHrrShort(status){
+  switch(status){
+    case 'NORMAL': return 'Normal berdasarkan cutoff';
+    case 'ABNORMAL': return 'Abnormal berdasarkan cutoff';
+    case 'REVIEW': return 'Perlu review data';
+    case 'INVALID': return 'Data tidak valid';
+    default: return 'Tidak diisi';
+  }
+}
+
+function buildPdfReportHTML(d, qrImgTag){
+  var modalityText = d.modal==='treadmill' ? 'Treadmill' : 'Ergocycle';
+  var pctVal = (d.pct===null||isNaN(d.pct)) ? 0 : d.pct;
+  var arcVal = Math.max(0, Math.min(100, pctVal)).toFixed(1);
+  var pctLabel = d.pct===null ? 'Tidak dapat dinilai' : (d.pct>=85?'≥85% predicted HRmax':d.pct>=70?'70–84% predicted HRmax':'<70% predicted HRmax');
+  var vo2PctLabel = d.vo2Pct===null ? 'N/A' : ('P'+d.vo2Pct);
+  var duke = (d.dts===null) ? '—' : ff(d.dts,0);
+  var ciDisp = (d.ci===null) ? '—' : ff(d.ciPct,1);
+  var hrrDisp = (d.hrrVal===null) ? '—' : d.hrrVal;
+  var imtDisp = (d.imt===null||isNaN(d.imt)) ? '—' : ff(d.imt,1);
+  var badge = pdfBadge(d.hrrStatus);
+  var hrrDesc = pdfHrrDesc(d.hrrStatus);
+  var hrrShort = pdfHrrShort(d.hrrStatus);
+  var gradeRow = d.modal==='treadmill'
+    ? '<td class="label">Grade</td><td class="value">'+ff(d.grd,0)+'%</td>'
+    : '<td class="label">Beban</td><td class="value">'+d.watt+' Watt</td>';
+
+  var k1 = 'Pasien '+d.jkLabel.toLowerCase()+' berusia '+d.usia+' tahun telah menjalani uji latih beban jantung menggunakan <span class="concl-key">'+d.protoName+'</span> pada modalitas '+d.modalityLabel+' dan '+d.stageSentence+', sebelum pemeriksaan dihentikan akibat '+d.terminationLabel+'.';
+  var k2 = 'Respons hemodinamik menunjukkan tekanan darah berubah dari <span class="concl-key">'+d.sbpRest+'/'+d.dbpRest+' mmHg</span> saat istirahat menjadi <span class="concl-key">'+d.sbp+'/'+d.dbp+' mmHg</span> pada puncak latihan, dengan '+d.bpSentence+'.';
+  var k3 = 'Capaian denyut jantung sebesar <span class="concl-key">'+ff(d.pct,1)+'% predicted HRmax</span> dan HR reserve response sebesar <span class="concl-key">'+(d.ci!==null?ff(d.ciPct,1)+'%':'tidak dapat dinilai')+'</span>.';
+  var k4 = 'Estimasi kapasitas aerobik puncak tercatat sebesar <span class="concl-key">'+ff(d.vo2,1)+' mL/kg/min ('+ff(d.mets,1)+' METs)</span>, yang diklasifikasikan sebagai kapasitas fungsional <span class="concl-key">'+d.vo2Cat+'</span>.';
+  var k5 = d.dukeSentence;
+  var k6 = d.hrrNarrative + (d.ecgSentence ? ' '+d.ecgSentence : '');
+
+  var catatanBlock = d.catatan
+    ? '<p style="margin-top:6px;padding-top:6px;border-top:1px dashed var(--blue-border)"><b>Kesimpulan Expertise Dokter:</b> '+d.catatan+'</p>'
+    : '';
+
+  var css = ''
+    +':root{--navy:#173a63;--navy-dark:#0f2947;--red:#d81f26;--blue-light:#eef3fb;--blue-border:#d7e2f0;--gray-text:#5b6779;--green:#2e9e4f;--amber:#e08a1e;--bad:#c0392b;}'
+    +'*{box-sizing:border-box;}html,body{margin:0;padding:0;}'
+    +'body{font-family:Arial,Helvetica,sans-serif;color:#16233a;-webkit-font-smoothing:antialiased;}'
+    +'@page{size:A4 portrait;margin:0;}'
+    +'.page{width:210mm;height:297mm;position:relative;padding:7mm 8mm 6mm 8mm;overflow:hidden;display:flex;flex-direction:column;}'
+    +'.header-row{display:flex;justify-content:space-between;align-items:flex-start;position:relative;}'
+    +'.top-section{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-top:6px;}'
+    +'.top-section .title-block{flex:1;margin-top:6px;}'
+    +'.top-section .top-right{flex:0 0 70mm;width:70mm;}'
+    +'.brand{display:flex;align-items:center;gap:8px;}'
+    +'.brand svg{width:44px;height:44px;flex-shrink:0;}'
+    +'.brand-text .name{font-size:26px;font-weight:800;letter-spacing:.3px;line-height:1;}'
+    +'.brand-text .name .cardio{color:var(--navy);}.brand-text .name .insight{color:var(--red);}'
+    +'.brand-text .tagline{font-size:7.3px;letter-spacing:2px;color:var(--navy);font-weight:700;margin-top:3px;}'
+    +'.patient-report-tab{background:var(--navy-dark);color:#fff;font-weight:700;font-size:12px;letter-spacing:1px;padding:6px 18px 6px 24px;position:absolute;top:-7mm;right:-8mm;clip-path:polygon(14px 0,100% 0,100% 100%,0 100%);}'
+    +'.title-block h1{font-size:18px;color:var(--navy);margin:0 0 8px 0;font-weight:800;letter-spacing:.2px;white-space:nowrap;}'
+    +'.badges{display:flex;gap:10px;}'
+    +'.badge{border:1px solid var(--blue-border);background:#fff;border-radius:7px;padding:5px 12px;font-size:10px;font-weight:700;color:#22314a;display:flex;align-items:center;gap:6px;}'
+    +'.badge svg{width:13px;height:13px;}'
+    +'.info-card{border:1px solid var(--blue-border);background:#fbfcfe;border-radius:9px;padding:8px 10px;font-size:9px;}'
+    +'.patient-card{display:flex;gap:8px;}'
+    +'.patient-card .avatar{width:30px;height:30px;border-radius:50%;background:var(--navy);display:flex;align-items:center;justify-content:center;flex-shrink:0;}'
+    +'.patient-card .avatar svg{width:16px;height:16px;fill:#fff;}'
+    +'.patient-card .pname{font-size:12.5px;font-weight:800;color:var(--navy);margin-bottom:2px;}'
+    +'.patient-card .prow{display:flex;align-items:center;gap:5px;margin-top:3px;color:#33415c;font-size:9px;}'
+    +'.patient-card .prow svg{width:10px;height:10px;flex-shrink:0;fill:var(--navy);}'
+    +'.doctor-card{margin-top:6px;}'
+    +'.doctor-tab{background:var(--navy);color:#fff;font-size:8px;font-weight:700;letter-spacing:.5px;padding:4px 9px;border-radius:5px 5px 0 0;display:inline-block;}'
+    +'.doctor-body{border:1px solid var(--blue-border);border-top:none;border-radius:0 8px 8px 8px;padding:7px 9px;display:flex;gap:7px;align-items:flex-start;background:#fbfcfe;}'
+    +'.doctor-body svg{width:20px;height:20px;flex-shrink:0;margin-top:1px;}'
+    +'.doctor-body .dname{font-weight:800;font-size:10px;color:var(--navy);}'
+    +'.doctor-body .dsub{font-size:8.3px;color:var(--gray-text);margin-top:1px;line-height:1.35;}'
+    +'.section-banner{background:var(--navy);color:#fff;font-weight:800;font-size:11px;letter-spacing:.6px;padding:6px 14px;display:inline-flex;align-items:center;clip-path:polygon(0 0,calc(100% - 10px) 0,100% 100%,0 100%);margin:10px 0 6px 0;min-width:260px;}'
+    +'.stat-row{display:flex;gap:6px;margin-bottom:8px;}'
+    +'.stat-card{flex:1;min-width:0;border:1px solid var(--blue-border);background:var(--blue-light);border-radius:9px;padding:7px 8px;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;}'
+    +'.stat-card .lbl{font-size:6.6px;font-weight:800;letter-spacing:.4px;color:#4a5877;display:flex;align-items:center;gap:3px;margin-bottom:3px;text-transform:uppercase;}'
+    +'.stat-card .lbl svg{width:9px;height:9px;}'
+    +'.stat-card .val{font-size:19px;font-weight:800;color:var(--navy);line-height:1.05;}'
+    +'.stat-card .unit{font-size:8px;color:#4a5877;font-weight:600;margin-top:1px;}'
+    +'.stat-card .sub{font-size:7.3px;color:#6a7690;margin-top:3px;}'
+    +'.stat-card .sub.strong{font-weight:800;color:#2b3750;}'
+    +'.donut-wrap{width:52px;height:52px;position:relative;margin:2px 0 3px 0;}'
+    +'.donut-wrap svg{width:52px;height:52px;transform:rotate(-90deg);}'
+    +'.donut-center{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:var(--navy);}'
+    +'.stat-card.wide{flex:1.9;display:flex;flex-direction:row;padding:7px 4px;gap:2px;}'
+    +'.stat-card.wide .sub-stat{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;border-right:1px solid var(--blue-border);padding:0 4px;}'
+    +'.stat-card.wide .sub-stat:last-child{border-right:none;}'
+    +'.stat-card.wide .val{font-size:16px;}'
+    +'.stat-card.note{text-align:left;align-items:flex-start;}'
+    +'.stat-card.note .lbl{color:var(--navy);}'
+    +'.stat-card.note p{font-size:7.3px;line-height:1.4;margin:2px 0 0 0;color:#3a4867;}'
+    +'.flex-row{display:flex;gap:6px;align-items:stretch;}'
+    +'.data-table-wrap{flex:1.65;border:1px solid var(--blue-border);border-radius:9px;overflow:hidden;}'
+    +'table.dt{width:100%;border-collapse:collapse;font-size:9px;}'
+    +'table.dt td{padding:6px 9px;border-bottom:1px solid var(--blue-border);vertical-align:middle;}'
+    +'table.dt tr:last-child td{border-bottom:none;}'
+    +'table.dt td.icon-cell{width:14px;padding-right:4px;}'
+    +'table.dt td.icon-cell svg{width:12px;height:12px;fill:var(--navy);}'
+    +'table.dt td.label{color:#3a4867;font-weight:700;width:38%;}'
+    +'table.dt td.value{font-weight:800;color:#16233a;}'
+    +'.hrr-box{flex:1;border:1px solid var(--blue-border);border-radius:9px;background:#fbfcfe;padding:9px 10px;display:flex;flex-direction:column;position:relative;}'
+    +'.hrr-box .htitle{font-size:9px;font-weight:800;color:var(--navy);letter-spacing:.3px;}'
+    +'.hrr-box .hval{font-size:26px;font-weight:800;color:#16233a;margin-top:2px;}'
+    +'.hrr-box .hval span{font-size:11px;font-weight:700;color:#4a5877;}'
+    +'.badge-pill{font-size:8.5px;font-weight:800;letter-spacing:.5px;padding:3px 10px;border-radius:5px;display:inline-block;margin-top:5px;width:fit-content;color:#fff;}'
+    +'.badge-pill.ok{background:var(--green);}.badge-pill.bad{background:var(--bad);}.badge-pill.warn{background:var(--amber);}.badge-pill.gray{background:#8a94a6;}'
+    +'.hrr-box p{font-size:7.6px;color:#4a5877;line-height:1.35;margin:6px 0 0 0;}'
+    +'.hrr-box .heart-icon{position:absolute;right:10px;bottom:9px;width:34px;height:34px;opacity:.9;}'
+    +'.kesimpulan-box{border:1px solid var(--blue-border);border-radius:9px;padding:9px 12px;margin-top:2px;}'
+    +'.kes-grid{display:flex;gap:14px;}.kes-col{flex:1;}'
+    +'.kes-item{display:flex;gap:7px;margin-bottom:7px;align-items:flex-start;}.kes-item:last-child{margin-bottom:0;}'
+    +'.kes-item svg{width:13px;height:13px;flex-shrink:0;fill:var(--navy);margin-top:1px;}'
+    +'.kes-item p{font-size:8.3px;line-height:1.42;margin:0;color:#26324a;}'
+    +'.concl-key{font-weight:800;color:#16233a;}'
+    +'.concl-status.ok{color:var(--green);font-weight:800;}.concl-status.bad{color:var(--bad);font-weight:800;}.concl-status.warn{color:var(--amber);font-weight:800;}'
+    +'.bottom-row{display:flex;gap:6px;margin-top:12px;}'
+    +'.bottom-card{border:1px solid var(--blue-border);border-radius:9px;padding:9px 11px;background:#fff;}'
+    +'.bottom-card h4{font-size:8.3px;letter-spacing:.6px;color:var(--navy);margin:0 0 6px 0;font-weight:800;text-transform:uppercase;}'
+    +'.catatan{flex:1.5;}.catatan p{font-size:7.6px;line-height:1.45;color:#3a4867;margin:0;}'
+    +'.ttd{flex:1;text-align:center;}'
+    +'.ttd .sig{font-family:"Brush Script MT",cursive;font-size:22px;color:#22314a;margin:6px 0 2px 0;}'
+    +'.ttd .line{border-top:1px solid #33415c;width:80%;margin:0 auto 5px auto;}'
+    +'.ttd .dname{font-size:8.6px;font-weight:800;color:#16233a;}'
+    +'.ttd .dsub{font-size:7.3px;color:var(--gray-text);margin-top:1px;}'
+    +'.qr{flex:.9;text-align:center;}.qr .qrimg{width:56px;height:56px;margin:2px auto 4px auto;display:block;}'
+    +'.qr p{font-size:6.8px;color:var(--gray-text);margin:0;line-height:1.3;}'
+    +'.footer{margin-top:auto;padding-top:10px;}'
+    +'.footer-top{border-top:2px solid var(--navy);padding-top:5px;display:flex;align-items:center;gap:8px;font-size:7.6px;color:#3a4867;}'
+    +'.footer-top .fshield{width:14px;height:14px;flex-shrink:0;fill:var(--navy);}'
+    +'.footer-top .fright{margin-left:auto;font-weight:700;color:#22314a;white-space:nowrap;}'
+    +'.footer-ref{font-size:7.2px;color:var(--gray-text);margin-top:3px;}.footer-ref b{color:#3a4867;}'
+    +'.footer-credit{font-size:7px;color:#8a94a6;margin-top:5px;text-align:center;padding-top:5px;border-top:1px dotted var(--blue-border);}'
+    +'.footer-credit b{color:#3a4867;}.footer-credit a{color:var(--navy);text-decoration:none;font-weight:700;}'
+    +'@media print{ html,body{width:210mm;height:297mm;} }';
+
+  var body = ''
+    +'<div class="page">'
+    +'<div class="header-row"><div class="brand">'
+      +'<svg viewBox="0 0 64 64"><path d="M32 54s-20-12.5-26-25C1.5 18.5 5 8 15 7c7-.6 12.5 4 17 10 4.5-6 10-10.6 17-10 10 1 13.5 11.5 9 22-6 12.5-26 25-26 25z" fill="none" stroke="#173a63" stroke-width="4"/><path d="M8 32h9l4-9 6 16 5-11 3 6h13" fill="none" stroke="#d81f26" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+      +'<div class="brand-text"><div class="name"><span class="cardio">CARDIO</span><span class="insight">INSIGHT</span></div>'
+      +'<div class="tagline">V3.10 &nbsp;•&nbsp; STRESS &amp; EXERCISE EVALUATION SUITE</div></div>'
+    +'</div></div>'
+    +'<div class="patient-report-tab">PATIENT REPORT</div>'
+    +'<div class="top-section">'
+      +'<div class="title-block"><h1>LAPORAN EVALUASI STRESS &amp; EXERCISE</h1>'
+        +'<div class="badges">'
+          +'<div class="badge"><svg viewBox="0 0 24 24" fill="none" stroke="#173a63" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="17" cy="5" r="2"/><path d="M9 22l2-8-3-3 1-6 5 4 4-1M13 11l4 2 3 5"/><path d="M4 22l4-5 3-2"/></svg>Modalitas: '+modalityText+'</div>'
+          +'<div class="badge"><svg viewBox="0 0 24 24" fill="none" stroke="#173a63" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M8 2v4M16 2v4M3 10h18"/><path d="M9 15l2 2 4-4"/></svg>Protokol: '+d.protoName+'</div>'
+        +'</div></div>'
+      +'<div class="top-right">'
+        +'<div class="info-card patient-card"><div class="avatar"><svg viewBox="0 0 24 24"><path d="M12 12a5 5 0 100-10 5 5 0 000 10zM4 22c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg></div>'
+          +'<div><div class="pname">'+d.nama+'</div>'
+          +'<div class="prow"><svg viewBox="0 0 24 24"><path d="M12 12a5 5 0 100-10 5 5 0 000 10z"/></svg>'+d.jkLabel+', '+d.usia+' tahun | '+d.bwKg+' kg</div>'
+          +'<div class="prow"><svg viewBox="0 0 24 24"><path d="M7 2v3M17 2v3M3 9h18M4 5h16a1 1 0 011 1v13a1 1 0 01-1 1H4a1 1 0 01-1-1V6a1 1 0 011-1z"/></svg>'+d.tgl+'</div>'
+          +'<div class="prow"><svg viewBox="0 0 24 24"><path d="M12 22s7-6.5 7-12a7 7 0 10-14 0c0 5.5 7 12 7 12z"/></svg>'+d.klinik+'</div>'
+          +'<div class="prow"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>ID Laporan: '+d.lapId+'</div>'
+        +'</div></div>'
+        +'<div class="doctor-card"><div class="doctor-tab">DOKTER PENANGGUNG JAWAB</div>'
+          +'<div class="doctor-body"><svg viewBox="0 0 24 24" fill="none" stroke="#173a63" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/><path d="M9 3.5c-1 1-1 3 0 4M15 3.5c1 1 1 3 0 4"/></svg>'
+          +'<div><div class="dname">'+d.dokter+'</div><div class="dsub">'+d.spesialis+'<br>SIP. '+d.sip+'</div></div></div>'
+        +'</div>'
+      +'</div>'
+    +'</div>'
+
+    +'<div class="section-banner">RINGKASAN KLINIS</div>'
+    +'<div class="stat-row">'
+      +'<div class="stat-card"><div class="lbl"><svg viewBox="0 0 24 24" fill="#d81f26"><path d="M12 21s-7.5-4.7-10-9.3C.5 8.5 2.5 4 7 4c2.5 0 4 1.3 5 3 1-1.7 2.5-3 5-3 4.5 0 6.5 4.5 5 7.7C19.5 16.3 12 21 12 21z"/></svg>AGE-PREDICTED HRMAX</div><div class="val">'+ff(d.predictedHRmax,0)+'</div><div class="unit">bpm</div><div class="sub">Formula 220-age</div></div>'
+      +'<div class="stat-card"><div class="lbl"><svg viewBox="0 0 24 24" fill="none" stroke="#173a63" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>TARGET 85%</div><div class="val">'+ff(d.tgt85,0)+'</div><div class="unit">bpm</div></div>'
+      +'<div class="stat-card"><div class="lbl">% ACHIEVED HR</div><div class="donut-wrap"><svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="16" fill="none" stroke="#d7e2f0" stroke-width="5"/><circle cx="20" cy="20" r="16" fill="none" stroke="#173a63" stroke-width="5" stroke-dasharray="'+arcVal+' 100.5" stroke-linecap="round"/></svg><div class="donut-center">'+ff(d.pct,1)+'%</div></div><div class="sub">'+pctLabel+'</div></div>'
+      +'<div class="stat-card"><div class="lbl"><svg viewBox="0 0 24 24" fill="#d81f26"><path d="M12 21s-7.5-4.7-10-9.3C.5 8.5 2.5 4 7 4c2.5 0 4 1.3 5 3 1-1.7 2.5-3 5-3 4.5 0 6.5 4.5 5 7.7C19.5 16.3 12 21 12 21z"/></svg>HR POST</div><div class="val">'+d.hrPost+'</div><div class="unit">bpm</div></div>'
+      +'<div class="stat-card wide">'
+        +'<div class="sub-stat"><div class="lbl"><svg viewBox="0 0 24 24" fill="none" stroke="#173a63" stroke-width="2"><path d="M6 20c-2 0-3-1.5-3-3.5S4 13 6 13c.3-2.5 2-4 4-4M18 20c2 0 3-1.5 3-3.5S20 13 18 13c-.3-2.5-2-4-4-4"/><path d="M10 9c0-2 1-4 2-4s2 2 2 4-1 8-2 8-2-6-2-8z"/></svg>PEAK VO2</div><div class="val">'+ff(d.vo2,1)+'</div><div class="unit">mL/kg/min</div><div class="sub strong">METS '+ff(d.mets,1)+'<br>('+d.vo2Cat+')</div></div>'
+        +'<div class="sub-stat"><div class="lbl"><svg viewBox="0 0 24 24" fill="none" stroke="#e08a1e" stroke-width="2"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zM12 12L18 9"/></svg>RPP</div><div class="val" style="font-size:14px;">'+ff(d.rpp,0)+'</div><div class="sub">Myocardial workload</div></div>'
+        +'<div class="sub-stat"><div class="lbl"><svg viewBox="0 0 24 24" fill="none" stroke="#173a63" stroke-width="2"><path d="M12 2l7 3v6c0 5-3 8.5-7 11-4-2.5-7-6-7-11V5l7-3z"/></svg>DUKE SCORE</div><div class="val">'+duke+'</div><div class="sub strong">'+d.dShort+'</div></div>'
+      +'</div>'
+    +'</div>'
+    +'<div class="stat-row">'
+      +'<div class="stat-card"><div class="lbl"><svg viewBox="0 0 24 24" fill="none" stroke="#173a63" stroke-width="2"><path d="M6 20c-2 0-3-1.5-3-3.5S4 13 6 13c.3-2.5 2-4 4-4M18 20c2 0 3-1.5 3-3.5S20 13 18 13c-.3-2.5-2-4-4-4"/><path d="M10 9c0-2 1-4 2-4s2 2 2 4-1 8-2 8-2-6-2-8z"/></svg>ESTIMATED PEAK VO2</div><div class="val">'+ff(d.vo2,1)+'</div><div class="unit">mL/kg/min</div><div class="sub strong">'+d.vo2Cat+'</div></div>'
+      +'<div class="stat-card"><div class="lbl"><svg viewBox="0 0 24 24" fill="#173a63"><path d="M13 3L4 14h6l-1 7 9-11h-6l1-7z"/></svg>METS KAPASITAS</div><div class="val">'+ff(d.mets,1)+'</div><div class="unit">MET</div><div class="sub strong">'+vo2PctLabel+' • '+d.vo2Cat+'</div></div>'
+      +'<div class="stat-card"><div class="lbl"><svg viewBox="0 0 24 24" fill="none" stroke="#173a63" stroke-width="2"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>IMT</div><div class="val">'+imtDisp+'</div><div class="unit">kg/m²</div><div class="sub strong">'+d.imtCat+'</div></div>'
+      +'<div class="stat-card"><div class="lbl"><svg viewBox="0 0 24 24" fill="#d81f26"><path d="M12 21s-7.5-4.7-10-9.3C.5 8.5 2.5 4 7 4c2.5 0 4 1.3 5 3 1-1.7 2.5-3 5-3 4.5 0 6.5 4.5 5 7.7C19.5 16.3 12 21 12 21z"/></svg>HR RESERVE RESPONSE</div><div class="val">'+ciDisp+'%</div><div class="sub">'+d.cL+'</div></div>'
+      +'<div class="stat-card"><div class="lbl"><svg viewBox="0 0 24 24" fill="none" stroke="#d81f26" stroke-width="2.2"><path d="M2 12h4l2-6 4 12 3-9 2 3h5"/></svg>HRR MENIT KE-1</div><div class="val">'+hrrDisp+'</div><div class="unit">bpm</div><div class="sub">'+hrrShort+'</div></div>'
+      +'<div class="stat-card note"><div class="lbl"><svg viewBox="0 0 24 24" fill="none" stroke="#173a63" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v5h1"/></svg>INFO</div>'
+        +'<p>% Predicted HRmax: '+ff(d.pct,1)+'% → '+pctLabel+'</p>'
+        +'<p>RPP '+ff(d.rpp,0)+' → parameter beban miokard, bukan penentu tunggal adequacy test.</p>'
+      +'</div>'
+    +'</div>'
+
+    +'<div class="section-banner">DATA '+(d.modal==='treadmill'?'TREADMILL':'ERGOCYCLE')+' &amp; HEMODINAMIK</div>'
+    +'<div class="flex-row">'
+      +'<div class="data-table-wrap"><table class="dt">'
+        +'<tr><td class="icon-cell"><svg viewBox="0 0 24 24"><path d="M12 21s-7.5-4.7-10-9.3C.5 8.5 2.5 4 7 4c2.5 0 4 1.3 5 3 1-1.7 2.5-3 5-3 4.5 0 6.5 4.5 5 7.7C19.5 16.3 12 21 12 21z"/></svg></td><td class="label">HR Peak Exercise</td><td class="value">'+d.hrPost+' bpm</td>'+gradeRow+'</tr>'
+        +'<tr><td class="icon-cell"><svg viewBox="0 0 24 24"><path d="M6 2l10 10-3 3L3 5l3-3zM13 12l3-3 6 6a3 3 0 11-4 4l-5-7z"/></svg></td><td class="label">BP Rest</td><td class="value">'+d.sbpRest+'/'+d.dbpRest+' mmHg</td><td class="label">BP Peak</td><td class="value">'+d.sbp+'/'+d.dbp+' mmHg</td></tr>'
+        +'<tr><td class="icon-cell"><svg viewBox="0 0 24 24"><path d="M3 17l5-5 4 4 8-9"/></svg></td><td class="label">BP Response</td><td class="value" colspan="3">'+d.bpResponse+'</td></tr>'
+        +'<tr><td class="icon-cell"><svg viewBox="0 0 24 24"><path d="M12 21s-7.5-4.7-10-9.3C.5 8.5 2.5 4 7 4c2.5 0 4 1.3 5 3 1-1.7 2.5-3 5-3 4.5 0 6.5 4.5 5 7.7C19.5 16.3 12 21 12 21z"/></svg></td><td class="label">HR Istirahat</td><td class="value">'+d.hrRest+' bpm</td><td class="label">Beta-blocker</td><td class="value">'+(d.betabl==='ya'?'Ya':'Tidak')+'</td></tr>'
+        +'<tr><td class="icon-cell"><svg viewBox="0 0 24 24" fill="none" stroke="#173a63" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></td><td class="label">HR Recovery Menit 1 (HRR1)</td><td class="value">'+hrrDisp+' bpm</td><td class="label">HR Max Basis</td><td class="value">'+ff(d.hrMax,0)+' bpm</td></tr>'
+        +'<tr><td class="icon-cell"><svg viewBox="0 0 24 24" fill="none" stroke="#173a63" stroke-width="2"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg></td><td class="label">BB / TB</td><td class="value">'+d.bwKg+' kg / '+d.tbCm+' cm</td><td class="label">IMT</td><td class="value">'+imtDisp+' ('+d.imtCat+')</td></tr>'
+      +'</table></div>'
+      +'<div class="hrr-box"><div class="htitle">HRR MENIT KE-1 (HRR1)</div><div class="hval">'+hrrDisp+' <span>bpm</span></div>'
+        +'<div class="badge-pill '+badge.cls+'">'+badge.text+'</div>'
+        +'<p>'+hrrDesc+'</p>'
+        +'<svg class="heart-icon" viewBox="0 0 24 24" fill="none" stroke="#2e9e4f" stroke-width="1.6"><path d="M12 21s-7.5-4.7-10-9.3C.5 8.5 2.5 4 7 4c2.5 0 4 1.3 5 3 1-1.7 2.5-3 5-3 4.5 0 6.5 4.5 5 7.7C19.5 16.3 12 21 12 21z"/><path d="M3 12h4l1.5-3 2 5 1.5-3h9" stroke="#2e9e4f"/></svg>'
+      +'</div>'
+    +'</div>'
+
+    +'<div class="section-banner">KESIMPULAN</div>'
+    +'<div class="kesimpulan-box"><div class="kes-grid">'
+      +'<div class="kes-col">'
+        +'<div class="kes-item"><svg viewBox="0 0 24 24"><path d="M13 3L4 14h6l-1 7 9-11h-6l1-7z"/></svg><p>'+k1+'</p></div>'
+        +'<div class="kes-item"><svg viewBox="0 0 24 24"><path d="M6 2l10 10-3 3L3 5l3-3zM13 12l3-3 6 6a3 3 0 11-4 4l-5-7z"/></svg><p>'+k2+'</p></div>'
+        +'<div class="kes-item"><svg viewBox="0 0 24 24"><path d="M12 21s-7.5-4.7-10-9.3C.5 8.5 2.5 4 7 4c2.5 0 4 1.3 5 3 1-1.7 2.5-3 5-3 4.5 0 6.5 4.5 5 7.7C19.5 16.3 12 21 12 21z"/></svg><p>'+k3+'</p></div>'
+      +'</div>'
+      +'<div class="kes-col">'
+        +'<div class="kes-item"><svg viewBox="0 0 24 24"><path d="M6 20c-2 0-3-1.5-3-3.5S4 13 6 13c.3-2.5 2-4 4-4M18 20c2 0 3-1.5 3-3.5S20 13 18 13c-.3-2.5-2-4-4-4"/><path d="M10 9c0-2 1-4 2-4s2 2 2 4-1 8-2 8-2-6-2-8z"/></svg><p>'+k4+'</p></div>'
+        +'<div class="kes-item"><svg viewBox="0 0 24 24"><path d="M12 2l7 3v6c0 5-3 8.5-7 11-4-2.5-7-6-7-11V5l7-3z"/></svg><p>'+k5+'</p></div>'
+        +'<div class="kes-item"><svg viewBox="0 0 24 24" fill="none" stroke="#173a63" stroke-width="2"><path d="M2 12h4l2-6 4 12 3-9 2 3h5"/></svg><p>'+k6+'</p></div>'
+      +'</div>'
+    +'</div></div>'
+
+    +'<div class="bottom-row">'
+      +'<div class="bottom-card catatan"><h4>Catatan Interpretasi</h4><p>Klasifikasi kapasitas menggunakan dataset normatif yang tertanam dalam aplikasi dan harus diverifikasi kesesuaiannya dengan populasi, jenis kelamin, usia, modalitas, dan protokol institusi. Hasil ini merupakan ringkasan perhitungan dan klasifikasi parameter exercise test, bukan diagnosis tunggal, dan harus ditinjau serta disahkan oleh dokter penanggung jawab.'+catatanBlock+'</p></div>'
+      +'<div class="bottom-card ttd"><h4>Tanda Tangan Dokter</h4><div class="sig">&nbsp;</div><div class="line"></div><div class="dname">'+d.dokter+'</div><div class="dsub">'+d.spesialis+'<br>SIP. '+d.sip+'</div></div>'
+      +'<div class="bottom-card qr"><h4>QR Verifikasi</h4>'+qrImgTag+'<p>bukan tanda tangan digital tersertifikasi</p></div>'
+    +'</div>'
+
+    +'<div class="footer"><div class="footer-top">'
+      +'<svg class="fshield" viewBox="0 0 24 24"><path d="M12 2l7 3v6c0 5-3 8.5-7 11-4-2.5-7-6-7-11V5l7-3z"/></svg>'
+      +'<span>Laporan ini dihasilkan oleh sistem CardioInsight dan bukan pengganti penilaian klinis dokter.</span>'
+      +'<span class="fright">CardioInsight &nbsp;•&nbsp; '+d.tgl+' &nbsp;•&nbsp; '+d.jam+' WIB</span>'
+    +'</div>'
+    +'<div class="footer-ref"><b>Referensi:</b> ACSM GETP 12th ed. • Appendix C/D; dataset normatif aplikasi memerlukan verifikasi populasi/protokol.</div>'
+    +'<div class="footer-credit">CardioInsight dirancang &amp; dikembangkan oleh <b>Herushima.Dev</b> — Designer &amp; Programmer Aplikasi Kesehatan Digital &nbsp;|&nbsp; <a href="mailto:herushima06@gmail.com">herushima06@gmail.com</a></div>'
+    +'</div>'
+    +'</div>';
+
+  return '<!DOCTYPE html><html lang="id"><head><meta charset="UTF-8">'
+    +'<title>CardioInsight_'+d.nama.replace(/\s+/g,'_')+'_'+d.tgl.replace(/\s+/g,'-')+'</title>'
+    +'<style>'+css+'</style></head><body>'+body+'</body></html>';
+}
+
+/* ════════════════════════════════════════════════
+   EXPORT PDF — via print window (single-page A4 report)
 ════════════════════════════════════════════════ */
 function exportPDF(){
   var panel = document.getElementById('main_panel');
-
-  // Guard: no report yet
-  if(!panel || panel.querySelector('.placeholder')){
+  if(!panel || panel.querySelector('.placeholder') || !window.__ciReportData){
     alert('Hasilkan laporan terlebih dahulu dengan klik "Hitung Semua".');
     return;
   }
+  var d = window.__ciReportData;
 
-  var nama = (document.getElementById('inp_nama').value||'Pasien').replace(/\s+/g,'_');
-  var tgl  = new Date().toLocaleDateString('id-ID',{day:'2-digit',month:'2-digit',year:'numeric'}).replace(/\//g,'-');
-
-  // Collect all inline CSS from the page
-  var css = '';
-  for(var i=0;i<document.styleSheets.length;i++){
-    try{
-      var rules=document.styleSheets[i].cssRules||[];
-      for(var j=0;j<rules.length;j++) css += rules[j].cssText+'\n';
-    }catch(e){}
-  }
-
-  // Build full standalone HTML for the print window
-  var printHTML = '<!DOCTYPE html><html lang="id"><head>'
-    +'<meta charset="UTF-8">'
-    +'<meta name="viewport" content="width=device-width,initial-scale=1">'
-    +'<title>CardioInsight_'+nama+'_'+tgl+'</title>'
-    +'<link rel="preconnect" href="https://fonts.googleapis.com">'
-    +'<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">'
-    +'<style>'
-    /* CSS variables re-declared for print window */
-    +':root{'
-    +'--blue:#2563eb;--blue-d:#1d4ed8;--blue-bg:#eff6ff;--blue-b:#bfdbfe;'
-    +'--ok:#10b981;--ok-bg:#ecfdf5;--ok-b:#6ee7b7;--ok-d:#059669;--ok-t:#065f46;'
-    +'--warn:#f59e0b;--warn-bg:#fffbeb;--warn-b:#fde68a;--warn-d:#b45309;--warn-t:#78350f;'
-    +'--bad:#ef4444;--bad-bg:#fef2f2;--bad-b:#fca5a5;--bad-d:#dc2626;--bad-t:#7f1d1d;'
-    +'--pur:#7c3aed;--pur-bg:#f5f3ff;--pur-b:#c4b5fd;--pur-d:#6d28d9;'
-    +'--page:#eef2f7;--card:#fff;--brd:#e2e8f0;--brd2:#f1f5f9;'
-    +'--t1:#0f172a;--t2:#475569;--t3:#94a3b8;--t4:#cbd5e1;'
-    +"--ff:'Plus Jakarta Sans',sans-serif;--fm:'JetBrains Mono',monospace;"
-    +'}'
-    /* Page setup */
-    +'*{margin:0;padding:0;box-sizing:border-box}'
-    +'html,body{background:#fff;font-family:var(--ff);color:var(--t1);font-size:10px}'
-    +'@page{size:A4 portrait;margin:10mm 12mm}'
-    +'body{padding:0}'
-    +'.print-body{width:100%;}'
-    /* All component styles copied from main */
-    +css
-    /* Print-specific overrides */
-    +'.rcard,.acsm-card,.ptbl-wrap,.hemo-wrap,.ci-wrap,.concl-wrap,.sign-wrap,.rep-footer{page-break-inside:avoid;break-inside:avoid}'
-    +'.two-col{display:grid!important;grid-template-columns:1fr 1fr!important;gap:10px!important;margin-bottom:10px!important}'
-    +'.pat-doc-row{display:grid!important;grid-template-columns:1fr 1fr!important;gap:8px!important;margin-bottom:8px!important}'
-    +'.col-stack{display:flex!important;flex-direction:column!important;gap:7px!important}'
-    +'.ci-mets-grid{display:grid!important;grid-template-columns:repeat(4,1fr)!important}'
-    +'.ci-karv-grid{display:grid!important;grid-template-columns:1fr 1fr!important}'
-    +'.rep-footer{display:flex!important;flex-direction:row!important;gap:8px!important;font-size:8px!important;flex-wrap:wrap}'
-    +'.rcard,.acsm-card,.proto-box,.alert{margin-bottom:7px!important}'
-    +'.two-col{margin-bottom:7px!important}'
-    +'.rh{padding:10px 14px!important}'
-    +'.rh-title{font-size:16px!important}'
-    +'.acsm-body{padding:10px 14px!important}'
-    +'.acsm-result-big{padding:8px!important;margin-bottom:8px!important}'
-    +'.concl-body{padding:10px 14px!important}'
-    +'.ci-top{padding:10px 14px!important}'
-    +'.ci-gauge-wrap{padding:8px 12px!important}'
-    +'.ci-fn{font-size:8px!important;padding:6px 12px!important}'
-    +'.ci-met{padding:7px 6px!important}'
-    +'.ci-kv{padding:7px 10px!important}'
-    +'.stb{margin-bottom:6px!important}'
-    +'.sum-tile{padding:10px 7px!important}'
-    +'.sum-val{font-size:19px!important}'
-    +'.ci-big-num{font-size:32px!important}'
-    +'.acsm-big-val{font-size:22px!important}'
-    +'.ci-kv-val{font-size:15px!important}'
-    +'.kc-val{font-size:14px!important}'
-    +'.ci-met-val{font-size:13px!important}'
-    +'table.ptbl td{padding:4px 8px!important;font-size:9px!important}'
-    +'.hemo-row{padding:5px 10px!important}'
-    +'.hemo-lbl,.hemo-val{font-size:9px!important}'
-    +'.proto-box-note{font-size:9px!important;margin-bottom:4px!important}'
-    /* Hide formulas in PDF */
-    +'</style>'
-    +'</head><body>'
-    +'<div class="print-body">';
-
-  // Replace canvas QR with img data URL for print
-  var contentDiv = document.createElement('div');
-  contentDiv.innerHTML = panel.innerHTML;
   var qrCanvas = document.getElementById('qr_canvas');
-  var qrImgEl = contentDiv.querySelector('#qr_canvas');
-  if(qrCanvas && qrImgEl){
-    try{
+  var qrImgTag = '<svg class="qrimg" viewBox="0 0 88 88"><rect width="88" height="88" fill="#fff"/><text x="44" y="46" text-anchor="middle" font-size="8" fill="#8a94a6">QR N/A</text></svg>';
+  try{
+    if(qrCanvas){
       var dataURL = qrCanvas.toDataURL('image/png');
-      var img = document.createElement('img');
-      img.src = dataURL;
-      img.width = 88; img.height = 88;
-      img.style.cssText = 'border-radius:8px;border:1.5px solid #e2e8f0;display:block';
-      qrImgEl.parentNode.replaceChild(img, qrImgEl);
-    }catch(e){ qrImgEl.style.display='none'; }
-  }
+      qrImgTag = '<img class="qrimg" src="'+dataURL+'" width="56" height="56">';
+    }
+  }catch(e){}
 
-  printHTML += contentDiv.innerHTML
-    +'</div>'
-    +'</body></html>';
+  var printHTML = buildPdfReportHTML(d, qrImgTag);
 
-  // Open print window
   var pw = window.open('','_blank','width=900,height=700');
   if(!pw){ alert('Popup diblokir browser. Izinkan popup untuk situs ini.'); return; }
 
@@ -1769,23 +2502,16 @@ function exportPDF(){
   pw.document.write(printHTML);
   pw.document.close();
 
-  // Wait for fonts/images to load then print
   pw.onload = function(){
     setTimeout(function(){
       pw.focus();
       pw.print();
-      // Close after print dialog dismissed (small delay)
       setTimeout(function(){ pw.close(); }, 1000);
-    }, 800);
+    }, 500);
   };
-
-  // Fallback if onload doesn't fire
   setTimeout(function(){
-    if(pw && !pw.closed){
-      pw.focus();
-      pw.print();
-    }
-  }, 2000);
+    if(pw && !pw.closed){ pw.focus(); pw.print(); }
+  }, 1800);
 }
 </script>
 </body>
