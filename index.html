@@ -60,6 +60,12 @@ body{display:flex;flex-direction:column;min-height:100vh}
   font-size:11.5px;font-weight:700;color:#fff;
   box-shadow:0 2px 8px rgba(16,185,129,.45);transition:.15s;flex-shrink:0}
 .tb-pdf-btn:hover{opacity:.88;transform:translateY(-1px)}
+.btn-pdf-bottom{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:13px 18px;margin-bottom:12px;
+  background:linear-gradient(135deg,#10b981,#059669);
+  border:none;border-radius:11px;cursor:pointer;font-family:var(--ff);
+  font-size:13.5px;font-weight:700;color:#fff;
+  box-shadow:0 3px 10px rgba(16,185,129,.4);transition:.15s}
+.btn-pdf-bottom:hover{opacity:.9;transform:translateY(-1px)}
 
 /* ── LAYOUT ── */
 .app-body{flex:1}
@@ -92,6 +98,9 @@ body{display:flex;flex-direction:column;min-height:100vh}
 .sh.c-gold{border-color:#fef3c7}.sh.c-gold .sh-ic{background:#fef3c7}.sh.c-gold .sh-tx{color:#92400e}
 .sh.c-teal{border-color:#ccfbf1}.sh.c-teal .sh-ic{background:#ccfbf1}.sh.c-teal .sh-tx{color:#0f766e}
 .sh.c-red{border-color:#fee2e2}.sh.c-red .sh-ic{background:#fee2e2}.sh.c-red .sh-tx{color:#991b1b}
+.chk-row{display:flex;align-items:flex-start;gap:6px;font-size:9.5px;color:var(--t2);line-height:1.4;padding:4px 0;border-bottom:1px dashed var(--brd);cursor:pointer}
+.chk-row input{margin-top:2px;flex-shrink:0;cursor:pointer}
+.chk-row:last-child{border-bottom:none}
 .fg{margin-bottom:6px}
 .fl{font-size:10px;font-weight:600;color:var(--t2);margin-bottom:2px;display:flex;align-items:center;justify-content:space-between}
 .fu{font-size:8px;color:var(--t3);font-family:var(--fm);background:var(--brd2);padding:1px 5px;border-radius:3px}
@@ -108,7 +117,8 @@ body{display:flex;flex-direction:column;min-height:100vh}
 .mod-btn{padding:8px 5px;border:2px solid var(--brd);border-radius:8px;background:#fff;cursor:pointer;text-align:center;font-size:11px;font-weight:700;color:var(--t2);transition:.15s;font-family:var(--ff)}
 .mod-btn.act-tm{border-color:var(--blue);background:var(--blue-bg);color:var(--blue-d)}
 .mod-btn.act-er{border-color:var(--pur);background:var(--pur-bg);color:var(--pur-d)}
-.mod-btn:hover:not(.act-tm):not(.act-er){border-color:var(--t3);background:var(--brd2)}
+.mod-btn.act-6m{border-color:var(--ok-d);background:var(--ok-bg);color:var(--ok-t)}
+.mod-btn:hover:not(.act-tm):not(.act-er):not(.act-6m){border-color:var(--t3);background:var(--brd2)}
 .btn-calc{padding:9px 20px;background:linear-gradient(135deg,#ec4899,#8b5cf6);color:#fff;border:none;border-radius:9px;font-size:13px;font-weight:800;font-family:var(--ff);cursor:pointer;box-shadow:0 4px 16px rgba(139,92,246,.4);display:inline-flex;align-items:center;gap:7px;transition:.15s;white-space:nowrap;width:100%;justify-content:center;margin-bottom:7px}
 .btn-calc:hover{transform:translateY(-1px);opacity:.93}
 .btn-reset{width:100%;padding:7px;background:transparent;border:1.5px solid var(--brd);border-radius:8px;font-size:11px;font-weight:600;font-family:var(--ff);cursor:pointer;color:var(--t2);transition:.12s;margin-bottom:8px}
@@ -904,22 +914,12 @@ table.ptbl td:last-child{width:30%;}
       <div class="tb-appsub">Stress &amp; Exercise Evaluation Suite</div>
     </div>
   </div>
-  <div style="display:flex;align-items:center;gap:6px">
-    <div class="tb-pills">
+  <div class="tb-pills">
       <div class="tb-pill">🏃 Treadmill</div>
-      <div class="tb-pill">🚴 Ergocycle</div>
+      <div class="tb-pill">🚶 6MWT</div>
       <div class="tb-pill">📊 ACSM GETP 12</div>
       <div class="tb-pill">💓 Duke Score · HRR</div>
     </div>
-    <button class="tb-pdf-btn" id="btn_pdf" onclick="exportPDF()">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round">
-        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-        <polyline points="14 2 14 8 20 8"/>
-        <line x1="12" y1="18" x2="12" y2="12"/><polyline points="9 15 12 18 15 15"/>
-      </svg>
-      <span>PDF</span>
-    </button>
-  </div>
 </header>
 
 <!-- PDF OVERLAY -->
@@ -963,6 +963,8 @@ table.ptbl td:last-child{width:30%;}
       <div class="fg"><label class="fl">TB <span class="fu">cm</span></label><input class="fi" id="inp_tb_cm" type="number" value="165" placeholder="Tinggi badan"></div>
       <div class="fg"><label class="fl">Institusi / Klinik</label><input class="fi" id="inp_klinik" type="text" value="Klinik Jantung Sehat"></div>
     </div>
+    <div class="fg"><label class="fl">Diagnosis Pasien</label><input class="fi" id="inp_diagnosis" type="text" placeholder="mis. CAD, Post-PCI, Hipertensi"></div>
+    <div class="fg"><label class="fl">Indikasi / Alasan Dilakukan EST</label><input class="fi" id="inp_indikasi" type="text" placeholder="mis. Evaluasi kapasitas fungsional pasca IMA"></div>
 
     <div class="sh c-green" style="margin-top:8px">
       <div class="sh-ic"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#065f46" stroke-width="2.3" stroke-linecap="round"><circle cx="12" cy="7" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/><line x1="18" y1="10" x2="18" y2="16"/><line x1="15" y1="13" x2="21" y2="13"/></svg></div>
@@ -997,65 +999,42 @@ table.ptbl td:last-child{width:30%;}
       <div class="sh-ic"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#991b1b" stroke-width="2.3" stroke-linecap="round"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2v-4M9 21H5a2 2 0 0 1-2-2v-4m0 0h18"/></svg></div>
       <span class="sh-tx">Data Farmakologi</span>
     </div>
-    <div class="frow">
-      <div class="fg"><label class="fl">Beta-blocker</label>
-        <select class="fi fsel" id="inp_farm_bb">
-          <option value="">— Tidak ada —</option>
-          <option value="Bisoprolol">Bisoprolol</option><option value="Metoprolol">Metoprolol</option>
-          <option value="Carvedilol">Carvedilol</option><option value="Atenolol">Atenolol</option>
-          <option value="Propranolol">Propranolol</option><option value="Nebivolol">Nebivolol</option>
-        </select>
-      </div>
-      <div class="fg" id="farm_bb_dose_row" style="display:none"><label class="fl">Dosis BB</label><input class="fi" id="inp_farm_bb_dose" type="text" placeholder="mis. 5 mg/hr"></div>
+    <div class="fg"><label class="fl">Obat-obatan <span class="fu">bebas tulis</span></label>
+      <textarea class="fi" id="inp_obat" rows="4" placeholder="mis. Bisoprolol 5 mg/hr, Ramipril 5 mg/hr, Atorvastatin 20 mg/hr, Aspirin 80 mg" style="resize:vertical;line-height:1.5;padding:6px 10px;font-size:11px;font-weight:400;min-height:70px;width:100%"></textarea>
+      <div class="validation-note">Tulis seluruh obat &amp; dosis dalam satu kolom, dipisahkan koma atau baris baru.</div>
     </div>
-    <div class="frow">
-      <div class="fg"><label class="fl">ACE-i / ARB</label>
-        <select class="fi fsel" id="inp_farm_acei">
-          <option value="">— Tidak ada —</option>
-          <option value="Ramipril">Ramipril</option><option value="Perindopril">Perindopril</option>
-          <option value="Lisinopril">Lisinopril</option><option value="Captopril">Captopril</option>
-          <option value="Valsartan">Valsartan (ARB)</option><option value="Candesartan">Candesartan (ARB)</option>
-          <option value="Losartan">Losartan (ARB)</option><option value="Sacubitril/Valsartan">Sacubitril/Valsartan</option>
-        </select>
-      </div>
-      <div class="fg" id="farm_acei_dose_row" style="display:none"><label class="fl">Dosis ACE-i</label><input class="fi" id="inp_farm_acei_dose" type="text" placeholder="mis. 5 mg/hr"></div>
+  </div>
+
+  <!-- SKRINING PRA-LATIHAN — STRATIFIKASI RISIKO KARDIOVASKULAR (AACVPR Box 2.2) -->
+  <div style="grid-column:1/-1">
+    <div class="sh c-red">
+      <div class="sh-ic"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#b91c1c" stroke-width="2.3" stroke-linecap="round"><path d="M12 9v4M12 17h.01M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/></svg></div>
+      <span class="sh-tx">Skrining Pra-Latihan — Stratifikasi Risiko Kardiovaskular pada IHD (AACVPR Box 2.2)</span>
     </div>
-    <div class="frow">
-      <div class="fg"><label class="fl">Statin</label>
-        <select class="fi fsel" id="inp_farm_statin">
-          <option value="">— Tidak ada —</option>
-          <option value="Atorvastatin">Atorvastatin</option><option value="Rosuvastatin">Rosuvastatin</option>
-          <option value="Simvastatin">Simvastatin</option><option value="Pravastatin">Pravastatin</option>
-        </select>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:6px">
+      <div>
+        <div style="font-size:10px;font-weight:800;color:#b91c1c;margin-bottom:5px">RISIKO TINGGI — centang bila ada (≥1 → HIGH RISK)</div>
+        <label class="chk-row"><input type="checkbox" id="risk_h1"> LVEF &lt;40%</label>
+        <label class="chk-row"><input type="checkbox" id="risk_h2"> Riwayat henti jantung / kematian mendadak</label>
+        <label class="chk-row"><input type="checkbox" id="risk_h3"> Aritmia ventrikel kompleks (VT/PVC multifokal &gt;6/menit) saat istirahat/latihan</label>
+        <label class="chk-row"><input type="checkbox" id="risk_h4"> MI/operasi jantung dgn komplikasi berat (cardiogenic shock, CHF, gejala/tanda iskemia setelah tindakan)</label>
+        <label class="chk-row"><input type="checkbox" id="risk_h5"> Respons hemodinamik abnormal saat latihan (TD tidak naik/turun, atau chronotropic incompetence)</label>
+        <label class="chk-row"><input type="checkbox" id="risk_h6"> Silent ischemia signifikan (ST depression ≥2 mm tanpa gejala)</label>
+        <label class="chk-row"><input type="checkbox" id="risk_h7"> Gejala pada beban latihan rendah (&lt;5 METs) atau saat recovery</label>
+        <label class="chk-row"><input type="checkbox" id="risk_h8"> Kapasitas fungsional maksimal &lt;5,0 METs</label>
+        <label class="chk-row"><input type="checkbox" id="risk_h9"> Depresi klinis / gejala depresi signifikan</label>
       </div>
-      <div class="fg" id="farm_statin_dose_row" style="display:none"><label class="fl">Dosis Statin</label><input class="fi" id="inp_farm_statin_dose" type="text" placeholder="mis. 20 mg/hr"></div>
-    </div>
-    <div class="frow">
-      <div class="fg"><label class="fl">Antiplatelet / Antikoagulan</label>
-        <select class="fi fsel" id="inp_farm_anti">
-          <option value="">— Tidak ada —</option>
-          <option value="Aspirin">Aspirin</option><option value="Clopidogrel">Clopidogrel</option>
-          <option value="Aspirin + Clopidogrel">Aspirin + Clopidogrel (DAPT)</option>
-          <option value="Ticagrelor">Ticagrelor</option><option value="Warfarin">Warfarin</option>
-          <option value="Rivaroxaban">Rivaroxaban</option><option value="Apixaban">Apixaban</option>
-        </select>
+      <div>
+        <div style="font-size:10px;font-weight:800;color:#15803d;margin-bottom:5px">RISIKO RENDAH — centang bila terpenuhi (SEMUA → LOW RISK)</div>
+        <label class="chk-row"><input type="checkbox" id="risk_l1"> LVEF &gt;50%</label>
+        <label class="chk-row"><input type="checkbox" id="risk_l2"> Tidak ada aritmia kompleks (istirahat/latihan)</label>
+        <label class="chk-row"><input type="checkbox" id="risk_l3"> MI/CABG/angioplasty/atherectomy/stent tanpa komplikasi, tidak ada CHF, tidak ada tanda/gejala iskemia setelah tindakan</label>
+        <label class="chk-row"><input type="checkbox" id="risk_l4"> Respons hemodinamik &amp; ECG normal saat latihan/recovery</label>
+        <label class="chk-row"><input type="checkbox" id="risk_l5"> Tidak bergejala saat latihan/recovery (termasuk tidak ada angina)</label>
+        <label class="chk-row"><input type="checkbox" id="risk_l6"> Kapasitas fungsional maksimal ≥7,0 METs</label>
+        <label class="chk-row"><input type="checkbox" id="risk_l7"> Tidak ada depresi klinis / gejala depresi</label>
+        <div style="font-size:8.5px;color:var(--t3);margin-top:8px;line-height:1.5">Bila tidak memenuhi kriteria High Risk maupun seluruh kriteria Low Risk → pasien termasuk <strong>Moderate Risk</strong>.</div>
       </div>
-      <div class="fg"><label class="fl">Nitrat</label>
-        <select class="fi fsel" id="inp_farm_nitrat">
-          <option value="">— Tidak ada —</option>
-          <option value="ISDN">ISDN</option><option value="ISMN">ISMN</option><option value="NTG patch">NTG Patch</option>
-        </select>
-      </div>
-    </div>
-    <div class="frow">
-      <div class="fg"><label class="fl">Diuretik</label>
-        <select class="fi fsel" id="inp_farm_diuretik">
-          <option value="">— Tidak ada —</option>
-          <option value="Furosemid">Furosemid</option><option value="HCT">HCT</option>
-          <option value="Spironolakton">Spironolakton</option><option value="Torasemid">Torasemid</option>
-        </select>
-      </div>
-      <div class="fg"><label class="fl">Obat Lain</label><input class="fi" id="inp_farm_lain" type="text" placeholder="mis. Digoxin 0.25 mg"></div>
     </div>
   </div>
 
@@ -1065,11 +1044,12 @@ table.ptbl td:last-child{width:30%;}
       <div class="sh-ic"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#0f766e" stroke-width="2.3" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg></div>
       <span class="sh-tx">Modalitas &amp; Protokol</span>
     </div>
-    <div class="mod-toggle">
+    <div class="mod-toggle" style="grid-template-columns:1fr 1fr 1fr">
       <button class="mod-btn act-tm" id="btn_tm" onclick="setModal('treadmill')">🏃 Treadmill</button>
       <button class="mod-btn" id="btn_er" onclick="setModal('ergocycle')">🚴 Ergocycle</button>
+      <button class="mod-btn" id="btn_6m" onclick="setModal('6mwt')">🚶 6MWT</button>
     </div>
-    <div class="fg"><label class="fl">Protokol</label>
+    <div class="fg" id="fld_proto_wrap"><label class="fl">Protokol</label>
       <select class="fi fsel" id="inp_proto">
         <option value="bruce">Bruce Protocol</option>
         <option value="modbruce">Modified Bruce Protocol</option>
@@ -1133,6 +1113,12 @@ table.ptbl td:last-child{width:30%;}
       <div class="fg"><label class="fl">Durasi Total Latihan <span class="fu">menit</span></label><input class="fi" id="inp_dur_er" type="number" value="12" min="0"></div>
       <div class="fg"><label class="fl">Status Beban/Stage Terakhir</label><select class="fi fsel" id="inp_stage_completion_er"><option value="full">Full stage / selesai</option><option value="partial">Partial stage / belum selesai</option></select><div class="validation-note">Pilih Partial bila beban terakhir belum dipertahankan sesuai protokol.</div></div>
     </div>
+
+    <!-- 6MWT distance field -->
+    <div id="fld_6mwt" style="display:none">
+      <div class="fg"><label class="fl">Jarak Tempuh 6MWT <span class="fu">meter</span></label><input class="fi" id="inp_jarak_6mwt" type="number" step="1" placeholder="mis. 420" min="0"></div>
+      <div class="validation-note" style="margin-bottom:6px">METs = ((jarak × 0,03) + 3,38) / 3,5 — estimasi submaksimal, bukan uji beban puncak bertingkat.</div>
+    </div>
   </div>
 
   <!-- COL 4: DUKE + TOMBOL -->
@@ -1143,6 +1129,14 @@ table.ptbl td:last-child{width:30%;}
     </div>
     <div class="fg"><label class="fl">Deviasi ST Terbesar <span class="fu">mm</span></label><input class="fi" id="inp_st" type="number" step="0.5" value="1" min="0"></div>
     <div class="frow"><div class="fg"><label class="fl">Arah ST</label><select class="fi fsel" id="inp_st_dir"><option value="depression">ST depression</option><option value="elevation">ST elevation</option></select></div><div class="fg"><label class="fl">Morfologi ST</label><select class="fi fsel" id="inp_st_morph"><option value="horizontal">Horizontal</option><option value="downsloping">Downsloping</option><option value="upsloping">Upsloping</option><option value="unknown">Tidak dinilai</option></select></div></div>
+    <div class="fg"><label class="fl">Interpretasi Respon Iskemia</label><select class="fi fsel" id="inp_iskemia">
+      <option value="negatif">Negatif (non-iskemik)</option>
+      <option value="positif">Positif (iskemik)</option>
+      <option value="sugestif">Sugestif / Equivocal (NCSNF)</option>
+      <option value="nondiagnostik">Non-diagnostik</option>
+    </select>
+    <div class="validation-note">Bila Sugestif/Equivocal atau Non-diagnostik, Duke Treadmill Score tidak dihitung karena respon iskemia tidak konklusif.</div>
+    </div>
     <div class="fg"><label class="fl">Alasan Terminasi Test</label><select class="fi fsel" id="inp_termination"><option value="fatigue">Kelelahan</option><option value="dyspnea">Dyspnea</option><option value="chest_pain">Nyeri dada</option><option value="ecg">Perubahan ECG</option><option value="arrhythmia">Aritmia</option><option value="bp">Respons tekanan darah abnormal</option><option value="target">Target/protokol tercapai</option><option value="patient">Permintaan pasien</option><option value="other">Lainnya</option></select></div>
     <div class="fg"><label class="fl">Angina Index</label>
       <select class="fi fsel" id="inp_ang">
@@ -1321,32 +1315,21 @@ var PROTO = {
 /* ════ STATE ════ */
 var curModal = 'treadmill';
 
-/* ════ FARMAKOLOGI TOGGLE ════ */
-function farmToggle(sel, rowId){
-  var v = document.getElementById(sel).value;
-  document.getElementById(rowId).style.display = v ? 'block' : 'none';
+function computeRiskStrat(){
+  function gc(id){ var el=document.getElementById(id); return el?el.checked:false; }
+  var hIds=['risk_h1','risk_h2','risk_h3','risk_h4','risk_h5','risk_h6','risk_h7','risk_h8','risk_h9'];
+  var lIds=['risk_l1','risk_l2','risk_l3','risk_l4','risk_l5','risk_l6','risk_l7'];
+  var hChecked=hIds.filter(gc), lChecked=lIds.filter(gc);
+  var anyHigh=hChecked.length>0, allLow=lChecked.length===lIds.length;
+  var level = anyHigh?'high':(allLow?'low':'moderate');
+  var label = level==='high'?'HIGH RISK':(level==='low'?'LOW RISK':'MODERATE RISK');
+  var color = level==='high'?'bad':(level==='low'?'ok':'warn');
+  return {level:level, label:label, color:color, hChecked:hChecked.length, hTotal:hIds.length, lChecked:lChecked.length, lTotal:lIds.length};
 }
 
-/* bind on change */
-['inp_farm_bb','inp_farm_acei','inp_farm_statin'].forEach(function(id){
-  var el = document.getElementById(id);
-  if(el) el.addEventListener('change', function(){
-    var rowMap = {inp_farm_bb:'farm_bb_dose_row', inp_farm_acei:'farm_acei_dose_row', inp_farm_statin:'farm_statin_dose_row'};
-    farmToggle(id, rowMap[id]);
-  });
-});
-
 function getFarmakologi(){
-  function gv2(id){ var el=document.getElementById(id); return el?el.value:''; }
-  var list = [];
-  var bb = gv2('inp_farm_bb'); if(bb){ var d=gv2('inp_farm_bb_dose'); list.push(bb+(d?' '+d:'')); }
-  var ac = gv2('inp_farm_acei'); if(ac){ var d=gv2('inp_farm_acei_dose'); list.push(ac+(d?' '+d:'')); }
-  var st = gv2('inp_farm_statin'); if(st){ var d=gv2('inp_farm_statin_dose'); list.push(st+(d?' '+d:'')); }
-  var an = gv2('inp_farm_anti'); if(an) list.push(an);
-  var ni = gv2('inp_farm_nitrat'); if(ni) list.push(ni);
-  var di = gv2('inp_farm_diuretik'); if(di) list.push(di);
-  var la = gv2('inp_farm_lain'); if(la) list.push(la);
-  return list;
+  var raw = (document.getElementById('inp_obat')||{}).value||'';
+  return raw.split(/[\n,]+/).map(function(s){return s.trim();}).filter(function(s){return s.length>0;});
 }
 
 /* Drawer removed - layout changed */
@@ -1358,8 +1341,12 @@ function setModal(m){
   curModal = m;
   document.getElementById('btn_tm').className = 'mod-btn'+(m==='treadmill'?' act-tm':'');
   document.getElementById('btn_er').className = 'mod-btn'+(m==='ergocycle'?' act-er':'');
+  document.getElementById('btn_6m').className = 'mod-btn'+(m==='6mwt'?' act-6m':'');
   document.getElementById('fld_tm').style.display = m==='treadmill'?'block':'none';
   document.getElementById('fld_er').style.display = m==='ergocycle'?'block':'none';
+  document.getElementById('fld_6mwt').style.display = m==='6mwt'?'block':'none';
+  document.getElementById('fld_proto_wrap').style.display = m==='6mwt'?'none':'block';
+  if(m==='6mwt') return;
   var ps = document.getElementById('inp_proto');
   ps.innerHTML = '';
   var list = m==='treadmill'
@@ -1493,7 +1480,8 @@ function autoHRMax(){
   var man = parseFloat(document.getElementById('inp_hrmax').value);
   var hm, fm;
   if(!isNaN(man)&&man>0){ hm=man; fm='Manual / measured input: '+man+' bpm'; }
-  else { hm=220-u; fm='Predicted HRmax: 220 − '+u+' = '+hm.toFixed(0)+' bpm'; if(bb==='ya') fm += ' · β-blocker: interpret HR response with caution'; }
+  else if(bb==='ya'){ hm=164-(0.7*u); fm='Predicted HRmax (β-blocker adjusted): 164 − (0,7 × '+u+') = '+hm.toFixed(0)+' bpm'; }
+  else { hm=220-u; fm='Predicted HRmax: 220 − '+u+' = '+hm.toFixed(0)+' bpm'; }
   document.getElementById('hrmax_val').textContent=hm.toFixed(0);
   document.getElementById('hrmax_fm').textContent=fm;
 }
@@ -1602,9 +1590,11 @@ function resetForm(){
   document.getElementById('inp_dur').value=9;
   document.getElementById('inp_dur_er').value=12;
   document.getElementById('inp_st').value=1;
+  document.getElementById('inp_iskemia').value='negatif';
   document.getElementById('inp_ang').value='0';
   document.getElementById('inp_hrmax').value='';
   document.getElementById('inp_betabl').value='tidak';
+  var j6=document.getElementById('inp_jarak_6mwt'); if(j6) j6.value='';
   // Reset stage selectors
   var stm=document.getElementById('inp_stage_tm'); if(stm){ stm.innerHTML='<option value="">— Pilih Stage —</option>'; }
   var ser=document.getElementById('inp_stage_er'); if(ser){ ser.innerHTML='<option value="">— Pilih Stage —</option>'; }
@@ -1614,14 +1604,11 @@ function resetForm(){
   document.getElementById('inp_recovery_type').value='passive';
   var hrrBox=document.getElementById('hrr_preview'); if(hrrBox) hrrBox.style.display='none';
   // Reset farmakologi
-  ['inp_farm_bb','inp_farm_acei','inp_farm_statin','inp_farm_anti','inp_farm_nitrat','inp_farm_diuretik'].forEach(function(id){
-    var el=document.getElementById(id); if(el) el.value='';
-  });
-  ['inp_farm_bb_dose','inp_farm_acei_dose','inp_farm_statin_dose','inp_farm_lain'].forEach(function(id){
-    var el=document.getElementById(id); if(el) el.value='';
-  });
-  ['farm_bb_dose_row','farm_acei_dose_row','farm_statin_dose_row'].forEach(function(id){
-    var el=document.getElementById(id); if(el) el.style.display='none';
+  var obatEl=document.getElementById('inp_obat'); if(obatEl) obatEl.value='';
+  var dxEl=document.getElementById('inp_diagnosis'); if(dxEl) dxEl.value='';
+  var idkEl=document.getElementById('inp_indikasi'); if(idkEl) idkEl.value='';
+  ['risk_h1','risk_h2','risk_h3','risk_h4','risk_h5','risk_h6','risk_h7','risk_h8','risk_h9','risk_l1','risk_l2','risk_l3','risk_l4','risk_l5','risk_l6','risk_l7'].forEach(function(id){
+    var el=document.getElementById(id); if(el) el.checked=false;
   });
   autoHRMax();
   setModal('treadmill');
@@ -1642,6 +1629,9 @@ function hitungSemua(){
   var bwKg     = gn('inp_bb_kg');
   var tbCm     = gn('inp_tb_cm');
   var klinik   = document.getElementById('inp_klinik').value||'—';
+  var diagnosis= document.getElementById('inp_diagnosis').value||'—';
+  var indikasi = document.getElementById('inp_indikasi').value||'—';
+  var riskStrat = computeRiskStrat();
   var dokter   = document.getElementById('inp_dokter').value||'—';
   var spesialis= document.getElementById('inp_spesialis').value||'—';
   var sip      = document.getElementById('inp_sip').value||'—';
@@ -1652,9 +1642,9 @@ function hitungSemua(){
   var hr1rec=parseFloat(document.getElementById('inp_hr1rec').value), recType=gv('inp_recovery_type');
   var hrRest=gn('inp_hrrest'), hrPost=gn('inp_hrpost'), betabl=gv('inp_betabl');
   var manHR=parseFloat(document.getElementById('inp_hrmax').value);
-  var predictedHRmax=220-usia;
+  var predictedHRmax=(betabl==='ya')?(164-(0.7*usia)):(220-usia);
   var hrMax=(!isNaN(manHR)&&manHR>0)?manHR:predictedHRmax;
-  var hrMaxFm=(!isNaN(manHR)&&manHR>0)?('Manual / measured: '+manHR+' bpm'):('Age-predicted: 220 − '+usia+' = '+predictedHRmax.toFixed(0)+' bpm');
+  var hrMaxFm=(!isNaN(manHR)&&manHR>0)?('Manual / measured: '+manHR+' bpm'):(betabl==='ya'?('β-blocker adjusted: 164 − (0,7 × '+usia+') = '+predictedHRmax.toFixed(0)+' bpm'):('Age-predicted: 220 − '+usia+' = '+predictedHRmax.toFixed(0)+' bpm'));
 
   /* GLOBAL DATA-QUALITY VALIDATION — before clinical classification */
   var basicErrors=[];
@@ -1671,12 +1661,15 @@ function hitungSemua(){
   if(basicErrors.length){ alert('PERIKSA DATA\n\n'+basicErrors.join('\n')); return; }
 
   /* --- MODALITAS & PROTO --- */
-  var modal=curModal, proto=gv('inp_proto'), pObj=PROTO[modal][proto], protoName=pObj?pObj.name:proto;
-  var stageCompletion=modal==='treadmill'?gv('inp_stage_completion'):gv('inp_stage_completion_er');
+  var modal=curModal;
+  var proto=modal==='6mwt'?'6mwt':gv('inp_proto');
+  var pObj=modal==='6mwt'?null:PROTO[modal][proto];
+  var protoName=modal==='6mwt'?'6-Minute Walk Test (6MWT)':(pObj?pObj.name:proto);
+  var stageCompletion=modal==='treadmill'?gv('inp_stage_completion'):(modal==='ergocycle'?gv('inp_stage_completion_er'):'full');
   var stageCompletionLabel=stageCompletion==='partial'?'Partial stage':'Full stage';
 
   /* --- ESTIMATED PEAK VO₂ --- */
-  var spd=0,grd=0,watt=0,dur=0,vo2,vo2fm,metsInput=0,stageLabel='';
+  var spd=0,grd=0,watt=0,dur=0,vo2,vo2fm,metsInput=0,stageLabel='',jarak6mwt=0;
   if(modal==='treadmill'){
     dur=gn('inp_dur');
     var stageSel=document.getElementById('inp_stage_tm');
@@ -1684,7 +1677,7 @@ function hitungSemua(){
     var sd=JSON.parse(stageSel.value); spd=sd.kmh; grd=sd.grade; vo2=sd.vo2; metsInput=vo2/3.5;
     stageLabel='Stage '+sd.s+' ('+sd.kmh+' km/jam / '+sd.mph+' MPH / '+sd.grade+'% grade / '+ff(metsInput,1)+' METs)';
     vo2fm='Estimated peak VO₂ dari workload: '+ff(vo2,1)+' mL/kg/min | '+ff(metsInput,1)+' METs';
-  } else {
+  } else if(modal==='ergocycle'){
     dur=gn('inp_dur_er'); var stageErSel=document.getElementById('inp_stage_er');
     if(!stageErSel||!stageErSel.value){alert('Pilih stage / beban yang dicapai pada protokol ergocycle!');return;}
     var se=JSON.parse(stageErSel.value); watt=se.watt; var bwEr=gn('inp_bb_er')||bwKg;
@@ -1692,6 +1685,14 @@ function hitungSemua(){
     var workRate=watt*6.12; vo2=7+(1.8*workRate/bwEr); metsInput=vo2/3.5;
     stageLabel='Stage '+se.s+' ('+watt+' Watt / '+ff(metsInput,1)+' METs)';
     vo2fm='VO₂ = 7 + (1,8 × '+ff(workRate,1)+' / '+ff(bwEr,1)+') = '+ff(vo2,1)+' mL/kg/min';
+  } else {
+    /* 6MWT */
+    dur=6;
+    jarak6mwt=gn('inp_jarak_6mwt');
+    if(jarak6mwt<=0){alert('Isi jarak tempuh 6MWT (meter)!');return;}
+    vo2=(jarak6mwt*0.03)+3.38; metsInput=vo2/3.5;
+    stageLabel='Jarak tempuh '+ff(jarak6mwt,0)+' meter dalam 6 menit ('+ff(metsInput,1)+' METs)';
+    vo2fm='VO₂ (6MWT) = (jarak × 0,03 + 3,38) = '+ff(vo2,1)+' mL/kg/min | METs = VO₂ / 3,5 = '+ff(metsInput,1)+' — estimasi submaksimal';
   }
   var mets=vo2/3.5;
 
@@ -1710,11 +1711,39 @@ function hitungSemua(){
   var pC=pct===null?'gray':pct>=85?'ok':pct>=70?'warn':'bad', pL=pct===null?'Tidak dapat dinilai':pct>=85?'≥85% predicted HRmax':pct>=70?'70–84% predicted HRmax':'<70% predicted HRmax';
   var rC=rpp>=20000?'ok':rpp>=15000?'warn':'bad';
 
-  /* --- HR RESERVE / CHRONOTROPIC RESPONSE --- */
+  /* --- CHRONOTROPIC INCOMPETENCE INDEX --- */
+  /* CI = (HR puncak latihan − HR istirahat) / (HR maksimal prediksi/adjusted − HR istirahat) */
+  /* Cutoff standar 80%; pada pasien beta-blocker (mis. Bisoprolol), cutoff diturunkan menjadi 62% */
   var hrRes=hrMax-hrRest, hrReserveAch=hrRes>0?(hrPost-hrRest)/hrRes:null, ci=hrReserveAch, ciPct=ci!==null?ci*100:null;
-  var cC=ci===null?'bad':ci>=.80?'ok':'warn', cL=ci===null?'Tidak dapat dinilai':ci>=.80?'≥80% HR reserve':'<80% HR reserve';
+  var ciCutoff=(betabl==='ya')?0.62:0.80, ciCutoffPct=ciCutoff*100;
+  var cC=ci===null?'bad':ci>=ciCutoff?'ok':'warn';
+  var cL=ci===null?'Tidak dapat dinilai':(ci>=ciCutoff?('Congruent (≥'+ff(ciCutoffPct,0)+'%'+(betabl==='ya'?', cutoff β-blocker':'')+')'):('Incongruent / Chronotropic Incompetence (<'+ff(ciCutoffPct,0)+'%'+(betabl==='ya'?', cutoff β-blocker':'')+')'));
   var thr40=hrRest+.40*hrRes,thr60=hrRest+.60*hrRes,needle=ci!==null?Math.min(Math.max(ciPct,0),100):0;
   var cBg=catBg(cC),cBrd=catBrd(cC),cCol=catCol(cC);
+
+  /* --- HR RESERVE (bpm) — modality-dependent, dasar penghitungan Karvonen resep latihan --- */
+  /* 6MWT: HR reserve = HR maksimal prediksi (adjusted bila Bisoprolol/beta-blocker) − HR istirahat */
+  /* Treadmill/Ergocycle: HR reserve = HR puncak latihan (terukur) − HR istirahat */
+  var hrReserveBpm = (modal==='6mwt') ? (hrMax-hrRest) : (hrPost-hrRest);
+  var hrReserveBpmFm = (modal==='6mwt')
+    ? ('HR Reserve = HR Max ('+ff(hrMax,0)+') − HR Istirahat ('+ff(hrRest,0)+') = '+ff(hrReserveBpm,0)+' bpm')
+    : ('HR Reserve = HR Puncak Latihan ('+ff(hrPost,0)+') − HR Istirahat ('+ff(hrRest,0)+') = '+ff(hrReserveBpm,0)+' bpm');
+
+  /* --- RESEP LATIHAN / EXERCISE PRESCRIPTION (ACSM GETP intensity table) --- */
+  /* Light: 1.6–<3 METs | 40–<55% HRmax | 20–<40% HRR (Karvonen) | 20–<40% VO2 peak */
+  /* Moderate: 3–<6 METs | 55–<70% HRmax | 40–<60% HRR (Karvonen) | 40–<60% VO2 peak — target akhir resep */
+  function buildRxRow(metsLo,metsHi,hrmaxLo,hrmaxHi,hrrLo,hrrHi,vo2Lo,vo2Hi){
+    return {
+      metsLo:metsLo, metsHi:metsHi,
+      hrLo:Math.round(hrmaxLo*hrMax), hrHi:Math.round(hrmaxHi*hrMax),
+      hrPctLo:hrmaxLo*100, hrPctHi:hrmaxHi*100,
+      karvLo:Math.round(hrrLo*hrReserveBpm+hrRest), karvHi:Math.round(hrrHi*hrReserveBpm+hrRest),
+      hrrPctLo:hrrLo*100, hrrPctHi:hrrHi*100,
+      vo2Lo:vo2Lo*vo2, vo2Hi:vo2Hi*vo2, vo2PctLo:vo2Lo*100, vo2PctHi:vo2Hi*100
+    };
+  }
+  var rxLight = buildRxRow(1.6,3,.40,.55,.20,.40,.20,.40);
+  var rxModerate = buildRxRow(3,6,.55,.70,.40,.60,.40,.60);
 
   /* --- HR RECOVERY --- */
   /* HRR classification: data-quality validity is separate from clinical cutoff classification. */
@@ -1739,8 +1768,15 @@ function hitungSemua(){
 
   /* --- DUKE TREADMILL SCORE: TREADMILL ONLY --- */
   var stDev=gn('inp_st'),stDir=gv('inp_st_dir'),stMorph=gv('inp_st_morph'),ang=parseFloat(gv('inp_ang'));
-  var dts=(modal==='treadmill' && proto==='bruce')?(dur-5*stDev-4*ang):null;
-  var dC=dts===null?'gray':dts>=5?'ok':dts>=-10?'warn':'bad',dShort=dts===null?(modal==='ergocycle'?'Not applicable — ergocycle':'Not calculated — DTS requires standard Bruce duration'):(dts>=5?'Low Risk Category':dts>=-10?'Intermediate Risk Category':'High Risk Category');
+  var iskemia=gv('inp_iskemia');
+  var iskemiaInconclusive=(iskemia==='sugestif'||iskemia==='nondiagnostik');
+  var dts=(modal==='treadmill' && proto==='bruce' && !iskemiaInconclusive)?(dur-5*stDev-4*ang):null;
+  var dC=dts===null?'gray':dts>=5?'ok':dts>=-10?'warn':'bad';
+  var dShort=dts!==null?(dts>=5?'Low Risk Category':dts>=-10?'Intermediate Risk Category':'High Risk Category')
+    :(iskemia==='sugestif'?'Tidak dihitung — respon iskemia Sugestif/Equivocal (NCSNF)'
+    :iskemia==='nondiagnostik'?'Tidak dihitung — respon non-diagnostik'
+    :(modal==='ergocycle'?'Not applicable — ergocycle':(modal==='6mwt'?'Not applicable — 6MWT':'Not calculated — DTS requires standard Bruce duration')));
+  var iskemiaLabel={negatif:'negatif (non-iskemik)',positif:'positif (iskemik)',sugestif:'sugestif / equivocal (NCSNF)',nondiagnostik:'non-diagnostik'}[iskemia]||iskemia;
 
   /* --- BP RESPONSE --- */
   var sbpDelta=(sbpRest>0&&sbp>0)?sbp-sbpRest:null;
@@ -1758,10 +1794,10 @@ function hitungSemua(){
 
   /* --- ALERTS --- */
   var alertTxt='<strong>% Predicted HRmax: '+ff(pct,1)+'%</strong> → '+pL+' &nbsp;|&nbsp; <strong>RPP '+ff(rpp,0)+'</strong> → parameter beban miokard, bukan penentu tunggal adequacy test.';
-  var ciAlert=ci===null?'<strong>Respons kronotropik tidak dapat dinilai.</strong>':ci<.80?'<strong>⚠ Respons HR reserve <80%.</strong> Temuan dapat dipengaruhi usia, obat (termasuk beta-blocker), protokol, dan kondisi klinis.':'<strong>✅ Respons HR reserve ≥80%.</strong> Tidak memenuhi threshold <80% yang digunakan modul ini.';
+  var ciAlert=ci===null?'<strong>Chronotropic Incompetence tidak dapat dinilai.</strong>':ci<ciCutoff?('<strong>⚠ Chronotropic Incompetence Index <'+ff(ciCutoffPct,0)+'%'+(betabl==='ya'?' (cutoff disesuaikan untuk pasien β-blocker)':'')+'.</strong> Diklasifikasikan Incongruent — temuan dapat dipengaruhi usia, obat (termasuk beta-blocker), protokol, dan kondisi klinis.'):('<strong>✅ Chronotropic Incompetence Index ≥'+ff(ciCutoffPct,0)+'%'+(betabl==='ya'?' (cutoff disesuaikan untuk pasien β-blocker)':'')+'.</strong> Diklasifikasikan Congruent — tidak memenuhi threshold chronotropic incompetence yang digunakan modul ini.');
 
   /* --- CLINICAL NARRATIVE CONCLUSION --- */
-  var modalityLabel=modal==='treadmill'?'treadmill':'ergocycle';
+  var modalityLabel=modal==='treadmill'?'treadmill':(modal==='ergocycle'?'ergocycle':'6-Minute Walk Test (6MWT)');
   var recoveryLabel=recType==='active'?'active recovery (upright cool-down)':'passive recovery (abrupt stop/supine)';
   var terminationLabel={
     fatigue:'kelelahan fisik (fatigue)',dyspnea:'dyspnea',chest_pain:'nyeri dada',ecg:'perubahan ECG',
@@ -1788,21 +1824,23 @@ function hitungSemua(){
   }
   var dukeSentence=modal==='treadmill' && dts!==null
     ? 'Duke Treadmill Score (DTS) sebesar <span class="concl-key">'+ff(dts,0)+'</span>, termasuk <span class="concl-key">'+dShort+'</span>.'
-    : 'Duke Treadmill Score tidak dihitung karena modalitas yang digunakan adalah ergocycle.';
+    : (modal==='treadmill' && iskemiaInconclusive
+      ? 'Duke Treadmill Score tidak dihitung karena respon iskemia bersifat <span class="concl-key">'+iskemiaLabel+'</span>.'
+      : 'Duke Treadmill Score tidak dihitung karena modalitas yang digunakan adalah '+modalityLabel+'.');
   var ecgSentence='';
   if(modal==='treadmill'){
     var stDirLabel=stDir==='depression'?'depresi ST':stDir==='elevation'?'elevasi ST':'tidak ada perubahan ST';
     var morphLabel=stMorph==='horizontal'?'horizontal':stMorph==='downsloping'?'downsloping':stMorph==='upsloping'?'upsloping':stMorph;
     ecgSentence='ST Depresi '+ff(stDev,1)+' mm dengan morfologi '+morphLabel+', sedangkan Angina Index sebesar '+ff(ang,0)+'.';
   }
-  var conclTxt='<p class="concl-lead">Pasien <span class="concl-key">'+jkLabel.toLowerCase()+' berusia '+usia+' tahun</span> telah menjalani uji latih beban jantung menggunakan <span class="concl-key">'+protoName+'</span> pada modalitas '+modalityLabel+' dan '+stageSentence+', sebelum pemeriksaan dihentikan akibat '+terminationLabel+'. Respons hemodinamik menunjukkan tekanan darah berubah dari <span class="concl-key">'+sbpRest+'/'+dbpRest+' mmHg</span> saat istirahat menjadi <span class="concl-key">'+sbp+'/'+dbp+' mmHg</span> pada puncak latihan, dengan '+bpSentence+'. Capaian denyut jantung sebesar <span class="concl-key">'+ff(pct,1)+'% predicted HRmax</span> dan HR reserve response sebesar <span class="concl-key">'+(ci!==null?ff(ciPct,1)+'%':'tidak dapat dinilai')+'</span>.</p>'
+  var conclTxt='<p class="concl-lead">Pasien <span class="concl-key">'+jkLabel.toLowerCase()+' berusia '+usia+' tahun</span> telah menjalani uji latih beban jantung menggunakan <span class="concl-key">'+protoName+'</span> pada modalitas '+modalityLabel+' dan '+stageSentence+', sebelum pemeriksaan dihentikan akibat '+terminationLabel+'. Respons hemodinamik menunjukkan tekanan darah berubah dari <span class="concl-key">'+sbpRest+'/'+dbpRest+' mmHg</span> saat istirahat menjadi <span class="concl-key">'+sbp+'/'+dbp+' mmHg</span> pada puncak latihan, dengan '+bpSentence+'. Capaian denyut jantung sebesar <span class="concl-key">'+ff(pct,1)+'% predicted HRmax</span> dan Chronotropic Incompetence Index sebesar <span class="concl-key">'+(ci!==null?ff(ciPct,1)+'%':'tidak dapat dinilai')+'</span>.</p>'
     +'<p>Estimasi kapasitas aerobik puncak tercatat sebesar <span class="concl-key">('+ff(mets,1)+' METs)</span>, yang diklasifikasikan sebagai kapasitas fungsional <span class="concl-key">'+vo2Cat+'</span>. '+dukeSentence+'</p>'
     +'<p>'+hrrNarrative+(ecgSentence?' '+ecgSentence:'')+'</p>'
     +'<p class="validation-note" style="font-size:10.5px;margin-top:10px;padding-top:9px;border-top:1px solid var(--brd2);color:var(--t3)"><strong>Catatan interpretasi:</strong> Klasifikasi kapasitas menggunakan dataset normatif yang tertanam dalam aplikasi dan harus diverifikasi kesesuaiannya dengan populasi, jenis kelamin, usia, modalitas, dan protokol institusi. Hasil ini merupakan ringkasan perhitungan dan klasifikasi parameter exercise test, bukan diagnosis tunggal, dan harus ditinjau serta disahkan oleh dokter penanggung jawab.</p>';
 
 
   /* --- PROTOCOL TABLE --- */
-  var protoTableHTML = buildProtoTable(modal, proto);
+  var protoTableHTML = modal==='6mwt'?'':buildProtoTable(modal, proto);
 
   /* --- BAR SEGMENTS --- */
   var cats6 = ['Very poor','Poor','Fair','Good','Excellent','Superior'];
@@ -1827,9 +1865,9 @@ function hitungSemua(){
     +'<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:10px">'
       +'<div>'
         +'<div style="font-size:8.5px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--t3);margin-bottom:3px">CardioInsight V3.10 &nbsp;·&nbsp; Stress & Exercise Evaluation Suite</div>'
-        +'<div class="rh-title">LAPORAN EVALUASI STRESS & EXERCISE</div>'
+        +'<div class="rh-title">LAPORAN EVALUASI EXERCISE STRESS TEST (EST)</div>'
         +'<div style="font-size:10px;color:var(--t2);margin-top:2px">'
-          +'Modalitas: <strong>'+(modal==='treadmill'?'Treadmill':'Ergocycle')+'</strong>'
+          +'Modalitas: <strong>'+(modal==='treadmill'?'Treadmill':(modal==='ergocycle'?'Ergocycle':'6MWT'))+'</strong>'
           +' &nbsp;·&nbsp; Protokol: <strong>'+protoName+'</strong>'
         +'</div>'
       +'</div>'
@@ -1851,6 +1889,8 @@ function hitungSemua(){
             +'<div style="font-size:13px;font-weight:800;color:var(--t1)">'+nama+'</div>'
             +'<div style="font-size:9.5px;color:var(--t2);margin-top:1px">'+jkLabel+', '+usia+' thn &nbsp;|&nbsp; '+bwKg+' kg</div>'
             +'<div style="font-size:9px;color:var(--t3)">'+klinik+'</div>'
+            +(diagnosis&&diagnosis!=='—'?'<div style="font-size:9px;color:var(--t2);font-weight:700;margin-top:2px">Dx: '+diagnosis+'</div>':'')
+            +(indikasi&&indikasi!=='—'?'<div style="font-size:8.5px;color:var(--t3);margin-top:1px">Indikasi EST: '+indikasi+'</div>':'')
           +'</div>'
         +'</div>'
         /* Farmakologi mini pills */
@@ -1872,6 +1912,13 @@ function hitungSemua(){
       +'</div>'
     +'</div>'
   +'</div></div>';
+
+  /* SKRINING PRA-LATIHAN BADGE */
+  html += '<div style="display:flex;align-items:center;gap:10px;background:'+catBg(riskStrat.color)+';border:1px solid '+catBrd(riskStrat.color)+';border-radius:10px;padding:9px 14px;margin-bottom:10px">'
+    +'<div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--t2)">Skrining Pra-Latihan (AACVPR)</div>'
+    +'<div style="font-size:12px;font-weight:800;color:'+catCol(riskStrat.color)+'">'+riskStrat.label+'</div>'
+    +'<div style="font-size:8.5px;color:var(--t3);margin-left:auto">High: '+riskStrat.hChecked+'/'+riskStrat.hTotal+' &nbsp;·&nbsp; Low: '+riskStrat.lChecked+'/'+riskStrat.lTotal+'</div>'
+  +'</div>';
 
   /* ── SUMMARY 4 + PROTOCOL side by side ── */
   html += '<div class="summary-layout">';
@@ -1907,7 +1954,7 @@ function hitungSemua(){
     /* CI */
     +'<div class="sum-tile '+cC+'">'
       +'<div class="sum-ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="'+catCol(cC)+'" stroke-width="2.3" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg></div>'
-      +'<div class="sum-lbl">HR Reserve Response</div>'
+      +'<div class="sum-lbl">Chronotropic Incompetence</div>'
       +'<div class="sum-val" style="font-size:22px">'+(ci!==null?ff(ciPct,1):'—')+'</div>'
       +'<div class="sum-tag">%</div>'
       +'<div class="sum-unit">'+cL+'</div>'
@@ -1942,7 +1989,7 @@ function hitungSemua(){
   /* Right: protocol table compact */
   if(pObj){
     html += '<div style="min-width:220px">'
-      +'<div class="stb" style="margin-bottom:6px">'+(modal==='treadmill'?'🏃':'🚴')+' PROTOKOL</div>'
+      +'<div class="stb" style="margin-bottom:6px">'+(modal==='treadmill'?'🏃':(modal==='ergocycle'?'🚴':'🚶'))+' PROTOKOL</div>'
       +'<div style="background:linear-gradient(135deg,#f0f9ff,#fdf4ff);border:1px solid #c7d2fe;border-radius:10px;padding:10px 12px;">'
         +'<div style="font-size:9px;font-weight:700;color:#3730a3;margin-bottom:4px">'+protoName+'</div>'
         +'<div style="font-size:8.5px;color:#4338ca;line-height:1.6;margin-bottom:7px">'+pObj.note+'</div>'
@@ -1950,6 +1997,15 @@ function hitungSemua(){
         +(modal==='treadmill'
           ?'<div style="font-size:8px;color:#6366f1;margin-top:5px">≈ = perkiraan METs &nbsp;|&nbsp; 1 MPH = 1.609 km/jam &nbsp;|&nbsp; METs diisi manual sesuai hasil uji</div>'
           :'<div style="font-size:8px;color:#6366f1;margin-top:5px">METs diisi manual sesuai hasil uji ergocycle</div>')
+      +'</div>'
+    +'</div>';
+  } else if(modal==='6mwt'){
+    html += '<div style="min-width:220px">'
+      +'<div class="stb" style="margin-bottom:6px">🚶 6MWT</div>'
+      +'<div style="background:linear-gradient(135deg,#ecfdf5,#f0fdfa);border:1px solid #6ee7b7;border-radius:10px;padding:10px 12px;">'
+        +'<div style="font-size:9px;font-weight:700;color:#065f46;margin-bottom:4px">'+protoName+'</div>'
+        +'<div style="font-size:8.5px;color:#065f46;line-height:1.6">'+stageLabel+'</div>'
+        +'<div style="font-size:8px;color:#059669;margin-top:5px">METs = ((jarak × 0,03) + 3,38) / 3,5 — estimasi submaksimal, bukan uji beban puncak bertingkat.</div>'
       +'</div>'
     +'</div>';
   }
@@ -1961,7 +2017,7 @@ function hitungSemua(){
   /* ACSM Left */
   html += '<div class="acsm-card" style="margin-bottom:0">'
     +'<div class="acsm-head">'
-      +'<div class="acsm-title">📊 ACSM GETP 12 · Table '+(modal==='treadmill'?'3.8':'3.9')+' · '+jkLabel+' · '+getAgeGrp(usia)+' thn</div>'
+      +'<div class="acsm-title">📊 ACSM GETP 12 · Table '+(modal==='ergocycle'?'3.9':'3.8')+' · '+jkLabel+' · '+getAgeGrp(usia)+' thn</div>'
     +'</div>'
     +'<div class="acsm-body">'
       +'<div class="acsm-result-big" style="background:'+vo2Bg+';border-color:'+vo2Brd+';padding:9px">'
@@ -2026,31 +2082,36 @@ function hitungSemua(){
 
   /* Param table */
   html += '<div class="ptbl-wrap"><div class="ptbl-head">Parameter Exercise Test</div><table class="ptbl">'
-    +'<tr><td>Modalitas</td><td>'+(modal==='treadmill'?'🏃 Treadmill':'🚴 Ergocycle')+'</td><td></td><td>'+protoName+'</td></tr>'
+    +'<tr><td>Modalitas</td><td>'+(modal==='treadmill'?'🏃 Treadmill':(modal==='ergocycle'?'🚴 Ergocycle':'🚶 6MWT'))+'</td><td></td><td>'+protoName+'</td></tr>'
     +'<tr><td>Stage Dicapai</td><td>'+stageLabel.split('(')[0].trim()+'</td><td><span class="dot '+(stageCompletion==='partial'?'warn':'ok')+'"></span></td><td>'+stageCompletionLabel+'</td></tr>'
     +'<tr><td>Durasi Latihan</td><td>'+ff(dur,1)+' menit</td><td><span class="dot ok"></span></td><td>—</td></tr>'
     +(modal==='treadmill'
       ?'<tr><td>Speed Treadmill</td><td>'+ff(spd,1)+' km/jam</td><td><span class="dot gray"></span></td><td>'+ff(spd/1.60934,2)+' MPH</td></tr>'
        +'<tr><td>Grade</td><td>'+ff(grd,0)+' %</td><td><span class="dot gray"></span></td><td>—</td></tr>'
-      :'<tr><td>Beban Akhir</td><td>'+watt+' Watt</td><td><span class="dot gray"></span></td><td>—</td></tr>'
-       +'<tr><td>Berat Badan</td><td>'+bwKg+' kg</td><td><span class="dot gray"></span></td><td>—</td></tr>')
+      :(modal==='ergocycle'
+      ?'<tr><td>Beban Akhir</td><td>'+watt+' Watt</td><td><span class="dot gray"></span></td><td>—</td></tr>'
+       +'<tr><td>Berat Badan</td><td>'+bwKg+' kg</td><td><span class="dot gray"></span></td><td>—</td></tr>'
+      :'<tr><td>Jarak Tempuh 6MWT</td><td>'+ff(jarak6mwt,0)+' m</td><td><span class="dot gray"></span></td><td>Estimasi submaksimal</td></tr>'))
     +'<tr><td>Estimated Peak VO₂</td><td>'+ff(vo2,1)+' mL/kg/min</td><td><span class="dot '+vo2Cls+'"></span></td><td>'+vo2Cat+' · P'+vo2Pct+'</td></tr>'
     +'<tr><td>METs Kapasitas</td><td>'+ff(mets,1)+' MET</td><td><span class="dot '+vo2Cls+'"></span></td><td>'+vo2Cat+'</td></tr>'
     +'<tr><td>Duke Treadmill Score</td><td>'+(dts===null?'—':ff(dts,0))+'</td><td><span class="dot '+dC+'"></span></td><td>'+dShort+'</td></tr>'
-    +'<tr><td>Deviasi ST</td><td>'+ff(stDev,1)+' mm</td><td><span class="dot warn"></span></td><td>'+stDir+' · '+stMorph+' — tidak otomatis normal/abnormal</td></tr>'
+    +'<tr><td>Deviasi ST</td><td>'+ff(stDev,1)+' mm</td><td><span class="dot warn"></span></td><td>'+stDir+' · '+stMorph+'</td></tr>'
+    +'<tr><td>Interpretasi Respon Iskemia</td><td colspan="2">'+iskemiaLabel+'</td><td><span class="dot '+(iskemia==='positif'?'bad':iskemia==='negatif'?'ok':'warn')+'"></span></td></tr>'
     +'<tr><td>Angina Index</td><td>'+ang+'</td><td><span class="dot ok"></span></td><td>'+(ang==0?'Tidak ada':ang==1?'Non-limiting':'Limiting')+'</td></tr>'
-    +'<tr><td>HR Reserve Response</td><td>'+(ci!==null?ff(ciPct,1):'—')+'%</td><td><span class="dot '+cC+'"></span></td><td>'+cL+'</td></tr>'
+    +'<tr><td>Chronotropic Incompetence</td><td>'+(ci!==null?ff(ciPct,1):'—')+'%</td><td><span class="dot '+cC+'"></span></td><td>'+cL+'</td></tr>'
     +'</table></div>';
 
   /* Hemo */
-  html += '<div class="hemo-wrap"><div class="ptbl-head">Data '+(modal==='treadmill'?'Treadmill':'Ergocycle')+' & Hemodinamik</div>'
+  html += '<div class="hemo-wrap"><div class="ptbl-head">Data '+(modal==='treadmill'?'Treadmill':(modal==='ergocycle'?'Ergocycle':'6MWT'))+' & Hemodinamik</div>'
     +'<div class="hemo-row"><span class="hemo-lbl">HR Peak Exercise</span><span class="hemo-val">'+hrPost+' bpm</span></div>'
     +'<div class="hemo-row"><span class="hemo-lbl">Stage Dicapai</span><span class="hemo-val" style="font-size:9px">'+stageLabel+'</span></div>'
     +(modal==='treadmill'
       ?'<div class="hemo-row"><span class="hemo-lbl">Speed Treadmill</span><span class="hemo-val">'+ff(spd,1)+' km/jam &nbsp;('+ff(spd/1.60934,2)+' MPH)</span></div>'
        +'<div class="hemo-row"><span class="hemo-lbl">Grade</span><span class="hemo-val">'+ff(grd,0)+' %</span></div>'
-      :'<div class="hemo-row"><span class="hemo-lbl">Beban Akhir</span><span class="hemo-val">'+watt+' Watt</span></div>'
-       +'<div class="hemo-row"><span class="hemo-lbl">Berat Badan</span><span class="hemo-val">'+bwKg+' kg</span></div>')
+      :(modal==='ergocycle'
+      ?'<div class="hemo-row"><span class="hemo-lbl">Beban Akhir</span><span class="hemo-val">'+watt+' Watt</span></div>'
+       +'<div class="hemo-row"><span class="hemo-lbl">Berat Badan</span><span class="hemo-val">'+bwKg+' kg</span></div>'
+      :'<div class="hemo-row"><span class="hemo-lbl">Jarak Tempuh</span><span class="hemo-val">'+ff(jarak6mwt,0)+' m</span></div>'))
     +'<div class="hemo-row"><span class="hemo-lbl">BP Rest</span><span class="hemo-val">'+sbpRest+'/'+dbpRest+' mmHg</span></div>'
     +'<div class="hemo-row"><span class="hemo-lbl">BP Peak</span><span class="hemo-val">'+sbp+'/'+dbp+' mmHg</span></div>'
     +'<div class="hemo-row"><span class="hemo-lbl">BP Response</span><span class="hemo-val">'+bpResponse+'</span></div>'
@@ -2073,10 +2134,10 @@ function hitungSemua(){
   /* RIGHT: CI CARD */
   html += '<div class="ci-wrap">'
     +'<div class="ci-top" style="background:linear-gradient(135deg,'+cBg+',#fff)">'
-      +'<div class="ci-head-lbl">HR Reserve Response (% HR Reserve)</div>'
+      +'<div class="ci-head-lbl">Chronotropic Incompetence Index</div>'
       +'<div class="ci-big-row"><div class="ci-big-num" style="color:'+cCol+'">'+(ci!==null?ff(ciPct,1):'—')+'</div><div class="ci-big-pct" style="color:'+cCol+'">%</div></div>'
       +'<div class="ci-pill" style="background:'+cBg+';color:'+cCol+';border-color:'+cBrd+'">'+cL+'</div>'
-      +'<div class="ci-sublbl">% HR Reserve Achieved</div>'
+      +'<div class="ci-sublbl">% Chronotropic Incompetence Achieved</div>'
       +'<div class="ci-formula">'
         +'= (HR post − HR rest) ÷ (HR max − HR rest)<br>'
         +'= ('+hrPost+' − '+hrRest+') ÷ ('+hrMax.toFixed(0)+' − '+hrRest+')<br>'
@@ -2084,29 +2145,57 @@ function hitungSemua(){
       +'</div>'
     +'</div>'
     +'<div class="ci-gauge-wrap">'
-      +'<div class="ci-gauge-lbl">HR Reserve Response Scale &nbsp;<strong>'+ff(ciPct,1)+'%</strong></div>'
+      +'<div class="ci-gauge-lbl">Chronotropic Incompetence Scale &nbsp;<strong>'+ff(ciPct,1)+'%</strong></div>'
       +'<div class="ci-track">'
-        +'<div class="ci-cut" style="left:70%;background:#b45309"></div>'
-        +'<div class="ci-cut" style="left:80%;background:#059669"></div>'
+        +'<div class="ci-cut" style="left:'+(ciCutoffPct-10)+'%;background:#b45309"></div>'
+        +'<div class="ci-cut" style="left:'+ciCutoffPct+'%;background:#059669"></div>'
         +(ci!==null?'<div class="ci-needle" style="left:'+needle+'%"></div>':'')
       +'</div>'
-      +'<div class="ci-tlabels"><span>0%</span><span>Incompetent</span><span style="color:#b45309">70%</span><span style="color:#059669">80%</span><span>100%</span></div>'
+      +'<div class="ci-tlabels"><span>0%</span><span>Incompetent</span><span style="color:#b45309">'+(ciCutoffPct-10)+'%</span><span style="color:#059669">'+ciCutoffPct+'%</span><span>100%</span></div>'
     +'</div>'
     +'<div class="ci-mets-grid">'
       +'<div class="ci-met"><div class="ci-met-lbl">HR Rest</div><div class="ci-met-val">'+hrRest+'</div><div class="ci-met-unit">bpm</div></div>'
       +'<div class="ci-met"><div class="ci-met-lbl">HR Post</div><div class="ci-met-val">'+hrPost+'</div><div class="ci-met-unit">bpm</div></div>'
       +'<div class="ci-met"><div class="ci-met-lbl">HR Max</div><div class="ci-met-val pur">'+hrMax.toFixed(0)+'</div><div class="ci-met-unit">bpm</div></div>'
-      +'<div class="ci-met"><div class="ci-met-lbl">HR Reserve</div><div class="ci-met-val">'+ff(hrMax-hrRest,0)+'</div><div class="ci-met-unit">bpm</div></div>'
+      +'<div class="ci-met"><div class="ci-met-lbl">HR Reserve ('+(modal==='6mwt'?'HRmax−rest':'peak−rest')+')</div><div class="ci-met-val">'+ff(hrReserveBpm,0)+'</div><div class="ci-met-unit">bpm</div></div>'
     +'</div>'
     +'<div class="ci-karv-grid">'
       +'<div class="ci-kv"><div class="ci-kv-lbl">Target 40% Reserve</div><div class="ci-kv-val">'+ff(thr40,0)+'</div><div class="ci-kv-unit">bpm (Karvonen)</div></div>'
       +'<div class="ci-kv"><div class="ci-kv-lbl">Target 60% Reserve</div><div class="ci-kv-val">'+ff(thr60,0)+'</div><div class="ci-kv-unit">bpm (Karvonen)</div></div>'
     +'</div>'
     +'<div class="ci-alert '+cC+'">'+ciAlert+'</div>'
-    +'<div class="ci-fn">HR basis: '+hrMaxFm+'. &nbsp;&lt;80% HR reserve = reduced response; interpretasikan bersama obat, protokol, dan konteks klinis.</div>'
+    +'<div class="ci-fn">HR basis: '+hrMaxFm+'. &nbsp;'+hrReserveBpmFm+'. &nbsp;Cutoff Chronotropic Incompetence: '+ff(ciCutoffPct,0)+'%'+(betabl==='ya'?' (disesuaikan untuk β-blocker)':'')+' — interpretasikan bersama obat, protokol, dan konteks klinis.</div>'
     +'</div>';
 
   html += '</div>'; /* end two-col */
+
+  /* RESEP LATIHAN / EXERCISE PRESCRIPTION */
+  html += '<div class="rcard" style="margin-bottom:8px"><div style="padding:12px 16px">'
+    +'<div style="display:flex;align-items:center;gap:7px;margin-bottom:8px">'
+      +'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--ok-d)" stroke-width="2.3" stroke-linecap="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>'
+      +'<span style="font-size:12px;font-weight:800;color:var(--t1)">Resep Latihan (Exercise Prescription)</span>'
+    +'</div>'
+    +'<table style="width:100%;border-collapse:collapse;font-size:10.5px">'
+      +'<tr style="background:var(--brd2)"><th style="padding:6px 8px;text-align:left">Intensitas</th><th style="padding:6px 8px;text-align:left">METs Target</th><th style="padding:6px 8px;text-align:left">Target HR (%HRmax)</th><th style="padding:6px 8px;text-align:left">Target HR (Karvonen/HRR)</th><th style="padding:6px 8px;text-align:left">Target VO₂</th></tr>'
+      +'<tr><td style="padding:6px 8px;font-weight:700;color:var(--t2)">Light <span style="font-weight:400;color:var(--t3)">(awal latihan)</span></td>'
+        +'<td style="padding:6px 8px">'+ff(rxLight.metsLo,1)+'–'+ff(rxLight.metsHi,1)+' METs</td>'
+        +'<td style="padding:6px 8px">'+rxLight.hrLo+'–'+rxLight.hrHi+' bpm <span style="color:var(--t3)">('+ff(rxLight.hrPctLo,0)+'–'+ff(rxLight.hrPctHi,0)+'%)</span></td>'
+        +'<td style="padding:6px 8px">'+rxLight.karvLo+'–'+rxLight.karvHi+' bpm <span style="color:var(--t3)">('+ff(rxLight.hrrPctLo,0)+'–'+ff(rxLight.hrrPctHi,0)+'% HRR)</span></td>'
+        +'<td style="padding:6px 8px">'+ff(rxLight.vo2Lo,1)+'–'+ff(rxLight.vo2Hi,1)+' mL/kg/min</td></tr>'
+      +'<tr style="background:var(--ok-bg)"><td style="padding:6px 8px;font-weight:800;color:var(--ok-t)">Moderate <span style="font-weight:700;color:var(--ok-d)">— Target Akhir</span></td>'
+        +'<td style="padding:6px 8px;font-weight:700">'+ff(rxModerate.metsLo,1)+'–'+ff(rxModerate.metsHi,1)+' METs</td>'
+        +'<td style="padding:6px 8px;font-weight:700">'+rxModerate.hrLo+'–'+rxModerate.hrHi+' bpm <span style="color:var(--t3);font-weight:400">('+ff(rxModerate.hrPctLo,0)+'–'+ff(rxModerate.hrPctHi,0)+'%)</span></td>'
+        +'<td style="padding:6px 8px;font-weight:700">'+rxModerate.karvLo+'–'+rxModerate.karvHi+' bpm <span style="color:var(--t3);font-weight:400">('+ff(rxModerate.hrrPctLo,0)+'–'+ff(rxModerate.hrrPctHi,0)+'% HRR)</span></td>'
+        +'<td style="padding:6px 8px;font-weight:700">'+ff(rxModerate.vo2Lo,1)+'–'+ff(rxModerate.vo2Hi,1)+' mL/kg/min</td></tr>'
+    +'</table>'
+    +'<div style="font-size:8.5px;color:var(--t3);margin-top:6px;line-height:1.5">Progresi: mulai dengan intensitas <strong>Light</strong> saat mengawali latihan inti, tingkatkan bertahap menuju target akhir intensitas <strong>Moderate</strong>. Target HR (Karvonen/HRR) = %HRR × HR Reserve + HR Istirahat, dengan HR Reserve = '+ff(hrReserveBpm,0)+' bpm ('+hrReserveBpmFm+'). Referensi: ACSM GETP 12th ed., klasifikasi intensitas objektif.</div>'
+    +'<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px">'
+      +'<div style="background:var(--brd2);border-radius:8px;padding:8px 9px"><div style="font-size:8px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.4px">Frequency</div><div style="font-size:11px;font-weight:800;color:var(--t1);margin-top:2px">3–5×/minggu</div></div>'
+      +'<div style="background:var(--brd2);border-radius:8px;padding:8px 9px"><div style="font-size:8px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.4px">Intensity</div><div style="font-size:11px;font-weight:800;color:var(--t1);margin-top:2px">Light → Moderate</div></div>'
+      +'<div style="background:var(--brd2);border-radius:8px;padding:8px 9px"><div style="font-size:8px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.4px">Time</div><div style="font-size:11px;font-weight:800;color:var(--t1);margin-top:2px">30–60 menit/sesi</div></div>'
+      +'<div style="background:var(--brd2);border-radius:8px;padding:8px 9px"><div style="font-size:8px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.4px">Type</div><div style="font-size:10.5px;font-weight:800;color:var(--t1);margin-top:2px">Cardio: jogging, sepeda, renang</div></div>'
+    +'</div>'
+  +'</div></div>';
 
   /* KESIMPULAN + TTD */
   html += '<div class="two-col" style="margin-bottom:8px">'
@@ -2127,6 +2216,16 @@ function hitungSemua(){
       +'<div class="sign-sip">SIP. '+sip+'</div>'
     +'</div>'
     +'</div>';
+
+  /* SAVE PDF BUTTON — bottom of report */
+  html += '<button class="btn-pdf-bottom" id="btn_pdf" onclick="exportPDF()">'
+    +'<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round">'
+      +'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>'
+      +'<polyline points="14 2 14 8 20 8"/>'
+      +'<line x1="12" y1="18" x2="12" y2="12"/><polyline points="9 15 12 18 15 15"/>'
+    +'</svg>'
+    +'<span>Simpan sebagai PDF</span>'
+  +'</button>';
 
   /* Generate real QR code with dokter + SIP data */
   (function(){
@@ -2149,21 +2248,23 @@ function hitungSemua(){
 
   /* ── Store computed data for the redesigned single-page A4 PDF export ── */
   window.__ciReportData = {
-    nama:nama, jkLabel:jkLabel, usia:usia, bwKg:bwKg, klinik:klinik, dokter:dokter, spesialis:spesialis, sip:sip,
+    nama:nama, jkLabel:jkLabel, usia:usia, bwKg:bwKg, klinik:klinik, diagnosis:diagnosis, indikasi:indikasi, dokter:dokter, spesialis:spesialis, sip:sip,
     lapId:lapId, tgl:tgl, jam:jam,
-    modal:modal, protoName:protoName, modalityLabel:modalityLabel,
+    modal:modal, protoName:protoName, modalityLabel:modalityLabel, jarak6mwt:jarak6mwt,
     predictedHRmax:predictedHRmax, hrMax:hrMax, tgt85:tgt85, pct:pct, pC:pC,
-    hrPost:hrPost, hrRest:hrRest,
+    hrPost:hrPost, hrRest:hrRest, hrReserveBpm:hrReserveBpm, hrReserveBpmFm:hrReserveBpmFm,
     vo2:vo2, mets:mets, vo2Cat:vo2Cat, vo2Cls:vo2Cls, vo2Pct:vo2Pct,
     imt:imt, imtCat:imtCat, tbCm:tbCm,
     rpp:rpp,
-    dts:dts, dC:dC, dShort:dShort,
-    ci:ci, ciPct:ciPct, cC:cC, cL:cL,
+    dts:dts, dC:dC, dShort:dShort, iskemia:iskemia, iskemiaLabel:iskemiaLabel,
+    ci:ci, ciPct:ciPct, cC:cC, cL:cL, ciCutoff:ciCutoff, ciCutoffPct:ciCutoffPct,
+    rxLight:rxLight, rxModerate:rxModerate, riskStrat:riskStrat,
     hrrVal:hrrVal, hrrCutoff:hrrCutoff, hrrStatus:hrrStatus, hrrNormal:hrrNormal,
     sbpRest:sbpRest, dbpRest:dbpRest, sbp:sbp, dbp:dbp, bpResponse:bpResponse, betabl:betabl,
     grd:grd, spd:spd, watt:watt,
     stageSentence:stageSentence, terminationLabel:terminationLabel, bpSentence:bpSentence,
     dukeSentence:dukeSentence, hrrNarrative:hrrNarrative, ecgSentence:ecgSentence,
+    farmList:farmList,
     catatan:catatan
   };
 
@@ -2245,7 +2346,7 @@ function pdfHrrShort(status){
 }
 
 function buildPdfReportHTML(d, qrImgTag){
-  var modalityText = d.modal==='treadmill' ? 'Treadmill' : 'Ergocycle';
+  var modalityText = d.modal==='treadmill' ? 'Treadmill' : (d.modal==='ergocycle' ? 'Ergocycle' : '6MWT');
   var pctVal = (d.pct===null||isNaN(d.pct)) ? 0 : d.pct;
   var arcVal = Math.max(0, Math.min(100, pctVal)).toFixed(1);
   var pctLabel = d.pct===null ? 'Tidak dapat dinilai' : (d.pct>=85?'≥85% predicted HRmax':d.pct>=70?'70–84% predicted HRmax':'<70% predicted HRmax');
@@ -2259,11 +2360,11 @@ function buildPdfReportHTML(d, qrImgTag){
   var hrrShort = pdfHrrShort(d.hrrStatus);
   var gradeRow = d.modal==='treadmill'
     ? '<td class="label">Grade</td><td class="value">'+ff(d.grd,0)+'%</td>'
-    : '<td class="label">Beban</td><td class="value">'+d.watt+' Watt</td>';
+    : (d.modal==='ergocycle' ? '<td class="label">Beban</td><td class="value">'+d.watt+' Watt</td>' : '<td class="label">Jarak Tempuh</td><td class="value">'+ff(d.jarak6mwt,0)+' m</td>');
 
   var k1 = 'Pasien '+d.jkLabel.toLowerCase()+' berusia '+d.usia+' tahun telah menjalani uji latih beban jantung menggunakan <span class="concl-key">'+d.protoName+'</span> pada modalitas '+d.modalityLabel+' dan '+d.stageSentence+', sebelum pemeriksaan dihentikan akibat '+d.terminationLabel+'.';
   var k2 = 'Respons hemodinamik menunjukkan tekanan darah berubah dari <span class="concl-key">'+d.sbpRest+'/'+d.dbpRest+' mmHg</span> saat istirahat menjadi <span class="concl-key">'+d.sbp+'/'+d.dbp+' mmHg</span> pada puncak latihan, dengan '+d.bpSentence+'.';
-  var k3 = 'Capaian denyut jantung sebesar <span class="concl-key">'+ff(d.pct,1)+'% predicted HRmax</span> dan HR reserve response sebesar <span class="concl-key">'+(d.ci!==null?ff(d.ciPct,1)+'%':'tidak dapat dinilai')+'</span>.';
+  var k3 = 'Capaian denyut jantung sebesar <span class="concl-key">'+ff(d.pct,1)+'% predicted HRmax</span> dan Chronotropic Incompetence Index sebesar <span class="concl-key">'+(d.ci!==null?ff(d.ciPct,1)+'%':'tidak dapat dinilai')+'</span>.';
   var k4 = 'Estimasi kapasitas aerobik puncak tercatat sebesar <span class="concl-key">'+ff(d.vo2,1)+' mL/kg/min ('+ff(d.mets,1)+' METs)</span>, yang diklasifikasikan sebagai kapasitas fungsional <span class="concl-key">'+d.vo2Cat+'</span>.';
   var k5 = d.dukeSentence;
   var k6 = d.hrrNarrative + (d.ecgSentence ? ' '+d.ecgSentence : '');
@@ -2288,7 +2389,7 @@ function buildPdfReportHTML(d, qrImgTag){
     +'.brand-text .name .cardio{color:var(--navy);}.brand-text .name .insight{color:var(--red);}'
     +'.brand-text .tagline{font-size:7.3px;letter-spacing:2px;color:var(--navy);font-weight:700;margin-top:3px;}'
     +'.patient-report-tab{background:var(--navy-dark);color:#fff;font-weight:700;font-size:12px;letter-spacing:1px;padding:6px 18px 6px 24px;position:absolute;top:-7mm;right:-8mm;clip-path:polygon(14px 0,100% 0,100% 100%,0 100%);}'
-    +'.title-block h1{font-size:18px;color:var(--navy);margin:0 0 8px 0;font-weight:800;letter-spacing:.2px;white-space:nowrap;}'
+    +'.title-block h1{font-size:15px;color:var(--navy);margin:0 0 8px 0;font-weight:800;letter-spacing:.2px;white-space:nowrap;}'
     +'.badges{display:flex;gap:10px;}'
     +'.badge{border:1px solid var(--blue-border);background:#fff;border-radius:7px;padding:5px 12px;font-size:10px;font-weight:700;color:#22314a;display:flex;align-items:center;gap:6px;}'
     +'.badge svg{width:13px;height:13px;}'
@@ -2333,6 +2434,21 @@ function buildPdfReportHTML(d, qrImgTag){
     +'table.dt td.icon-cell svg{width:12px;height:12px;fill:var(--navy);}'
     +'table.dt td.label{color:#3a4867;font-weight:700;width:38%;}'
     +'table.dt td.value{font-weight:800;color:#16233a;}'
+    +'table.rx-tbl{width:100%;border-collapse:collapse;font-size:8.6px;margin-bottom:4px;border:1px solid var(--blue-border);border-radius:8px;overflow:hidden;}'
+    +'table.rx-tbl th{background:var(--navy);color:#fff;padding:5px 7px;text-align:left;font-weight:700;font-size:8px;}'
+    +'table.rx-tbl td{padding:5px 7px;border-bottom:1px solid var(--blue-border);}'
+    +'table.rx-tbl tr.rx-final{background:#e6f7ee;}'
+    +'.rx-note{font-size:7.5px;color:var(--gray-text);line-height:1.5;margin-bottom:4px;}'
+    +'.riskstrat-badge{display:flex;align-items:center;gap:10px;border-radius:8px;padding:6px 12px;margin:8px 0;font-size:9px;}'
+    +'.riskstrat-badge .rs-lbl{font-weight:700;letter-spacing:.4px;color:#3a4867;}'
+    +'.riskstrat-badge .rs-val{font-weight:800;font-size:11px;}'
+    +'.riskstrat-badge .rs-sub{margin-left:auto;color:var(--gray-text);font-size:8px;}'
+    +'.riskstrat-bad{background:#fdecec;border:1px solid #f2b8b5;} .riskstrat-bad .rs-val{color:var(--bad);}'
+    +'.riskstrat-warn{background:#fdf3e3;border:1px solid #f0cd94;} .riskstrat-warn .rs-val{color:var(--amber);}'
+    +'.riskstrat-ok{background:#e8f7ee;border:1px solid #a9dfbb;} .riskstrat-ok .rs-val{color:var(--green);}'
+    +'table.fitt-tbl{width:100%;border-collapse:separate;border-spacing:4px;margin-bottom:4px;}'
+    +'table.fitt-tbl td{background:var(--blue-light);border-radius:6px;padding:5px 7px;font-size:7.8px;color:#22314a;width:25%;text-align:left;}'
+    +'table.fitt-tbl td b{display:block;font-size:6.8px;text-transform:uppercase;letter-spacing:.4px;color:var(--navy);margin-bottom:1px;}'
     +'.hrr-box{flex:1;border:1px solid var(--blue-border);border-radius:9px;background:#fbfcfe;padding:9px 10px;display:flex;flex-direction:column;position:relative;}'
     +'.hrr-box .htitle{font-size:9px;font-weight:800;color:var(--navy);letter-spacing:.3px;}'
     +'.hrr-box .hval{font-size:26px;font-weight:800;color:#16233a;margin-top:2px;}'
@@ -2377,7 +2493,7 @@ function buildPdfReportHTML(d, qrImgTag){
     +'</div></div>'
     +'<div class="patient-report-tab">PATIENT REPORT</div>'
     +'<div class="top-section">'
-      +'<div class="title-block"><h1>LAPORAN EVALUASI STRESS &amp; EXERCISE</h1>'
+      +'<div class="title-block"><h1>LAPORAN EVALUASI EXERCISE STRESS TEST (EST)</h1>'
         +'<div class="badges">'
           +'<div class="badge"><svg viewBox="0 0 24 24" fill="none" stroke="#173a63" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="17" cy="5" r="2"/><path d="M9 22l2-8-3-3 1-6 5 4 4-1M13 11l4 2 3 5"/><path d="M4 22l4-5 3-2"/></svg>Modalitas: '+modalityText+'</div>'
           +'<div class="badge"><svg viewBox="0 0 24 24" fill="none" stroke="#173a63" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M8 2v4M16 2v4M3 10h18"/><path d="M9 15l2 2 4-4"/></svg>Protokol: '+d.protoName+'</div>'
@@ -2388,6 +2504,8 @@ function buildPdfReportHTML(d, qrImgTag){
           +'<div class="prow"><svg viewBox="0 0 24 24"><path d="M12 12a5 5 0 100-10 5 5 0 000 10z"/></svg>'+d.jkLabel+', '+d.usia+' tahun | '+d.bwKg+' kg</div>'
           +'<div class="prow"><svg viewBox="0 0 24 24"><path d="M7 2v3M17 2v3M3 9h18M4 5h16a1 1 0 011 1v13a1 1 0 01-1 1H4a1 1 0 01-1-1V6a1 1 0 011-1z"/></svg>'+d.tgl+'</div>'
           +'<div class="prow"><svg viewBox="0 0 24 24"><path d="M12 22s7-6.5 7-12a7 7 0 10-14 0c0 5.5 7 12 7 12z"/></svg>'+d.klinik+'</div>'
+          +(d.diagnosis&&d.diagnosis!=='—'?'<div class="prow" style="font-weight:700"><svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>Dx: '+d.diagnosis+'</div>':'')
+          +(d.indikasi&&d.indikasi!=='—'?'<div class="prow"><svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>Indikasi EST: '+d.indikasi+'</div>':'')
           +'<div class="prow"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>ID Laporan: '+d.lapId+'</div>'
         +'</div></div>'
         +'<div class="doctor-card"><div class="doctor-tab">DOKTER PENANGGUNG JAWAB</div>'
@@ -2396,6 +2514,8 @@ function buildPdfReportHTML(d, qrImgTag){
         +'</div>'
       +'</div>'
     +'</div>'
+
+    +'<div class="riskstrat-badge riskstrat-'+d.riskStrat.color+'"><span class="rs-lbl">SKRINING PRA-LATIHAN (AACVPR)</span><span class="rs-val">'+d.riskStrat.label+'</span><span class="rs-sub">High: '+d.riskStrat.hChecked+'/'+d.riskStrat.hTotal+' · Low: '+d.riskStrat.lChecked+'/'+d.riskStrat.lTotal+'</span></div>'
 
     +'<div class="section-banner">RINGKASAN KLINIS</div>'
     +'<div class="stat-row">'
@@ -2413,7 +2533,7 @@ function buildPdfReportHTML(d, qrImgTag){
       +'<div class="stat-card"><div class="lbl"><svg viewBox="0 0 24 24" fill="none" stroke="#173a63" stroke-width="2"><path d="M6 20c-2 0-3-1.5-3-3.5S4 13 6 13c.3-2.5 2-4 4-4M18 20c2 0 3-1.5 3-3.5S20 13 18 13c-.3-2.5-2-4-4-4"/><path d="M10 9c0-2 1-4 2-4s2 2 2 4-1 8-2 8-2-6-2-8z"/></svg>ESTIMATED PEAK VO2</div><div class="val">'+ff(d.vo2,1)+'</div><div class="unit">mL/kg/min</div><div class="sub strong">'+d.vo2Cat+'</div></div>'
       +'<div class="stat-card"><div class="lbl"><svg viewBox="0 0 24 24" fill="#173a63"><path d="M13 3L4 14h6l-1 7 9-11h-6l1-7z"/></svg>METS KAPASITAS</div><div class="val">'+ff(d.mets,1)+'</div><div class="unit">MET</div><div class="sub strong">'+vo2PctLabel+' • '+d.vo2Cat+'</div></div>'
       +'<div class="stat-card"><div class="lbl"><svg viewBox="0 0 24 24" fill="none" stroke="#173a63" stroke-width="2"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>IMT</div><div class="val">'+imtDisp+'</div><div class="unit">kg/m²</div><div class="sub strong">'+d.imtCat+'</div></div>'
-      +'<div class="stat-card"><div class="lbl"><svg viewBox="0 0 24 24" fill="#d81f26"><path d="M12 21s-7.5-4.7-10-9.3C.5 8.5 2.5 4 7 4c2.5 0 4 1.3 5 3 1-1.7 2.5-3 5-3 4.5 0 6.5 4.5 5 7.7C19.5 16.3 12 21 12 21z"/></svg>HR RESERVE RESPONSE</div><div class="val">'+ciDisp+'%</div><div class="sub">'+d.cL+'</div></div>'
+      +'<div class="stat-card"><div class="lbl"><svg viewBox="0 0 24 24" fill="#d81f26"><path d="M12 21s-7.5-4.7-10-9.3C.5 8.5 2.5 4 7 4c2.5 0 4 1.3 5 3 1-1.7 2.5-3 5-3 4.5 0 6.5 4.5 5 7.7C19.5 16.3 12 21 12 21z"/></svg>CHRONOTROPIC INCOMPETENCE</div><div class="val">'+ciDisp+'%</div><div class="sub">'+d.cL+'</div></div>'
       +'<div class="stat-card"><div class="lbl"><svg viewBox="0 0 24 24" fill="none" stroke="#d81f26" stroke-width="2.2"><path d="M2 12h4l2-6 4 12 3-9 2 3h5"/></svg>HRR MENIT KE-1</div><div class="val">'+hrrDisp+'</div><div class="unit">bpm</div><div class="sub">'+hrrShort+'</div></div>'
       +'<div class="stat-card note"><div class="lbl"><svg viewBox="0 0 24 24" fill="none" stroke="#173a63" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v5h1"/></svg>INFO</div>'
         +'<p>% Predicted HRmax: '+ff(d.pct,1)+'% → '+pctLabel+'</p>'
@@ -2421,7 +2541,7 @@ function buildPdfReportHTML(d, qrImgTag){
       +'</div>'
     +'</div>'
 
-    +'<div class="section-banner">DATA '+(d.modal==='treadmill'?'TREADMILL':'ERGOCYCLE')+' &amp; HEMODINAMIK</div>'
+    +'<div class="section-banner">DATA '+(d.modal==='treadmill'?'TREADMILL':(d.modal==='ergocycle'?'ERGOCYCLE':'6MWT'))+' &amp; HEMODINAMIK</div>'
     +'<div class="flex-row">'
       +'<div class="data-table-wrap"><table class="dt">'
         +'<tr><td class="icon-cell"><svg viewBox="0 0 24 24"><path d="M12 21s-7.5-4.7-10-9.3C.5 8.5 2.5 4 7 4c2.5 0 4 1.3 5 3 1-1.7 2.5-3 5-3 4.5 0 6.5 4.5 5 7.7C19.5 16.3 12 21 12 21z"/></svg></td><td class="label">HR Peak Exercise</td><td class="value">'+d.hrPost+' bpm</td>'+gradeRow+'</tr>'
@@ -2437,6 +2557,21 @@ function buildPdfReportHTML(d, qrImgTag){
         +'<svg class="heart-icon" viewBox="0 0 24 24" fill="none" stroke="#2e9e4f" stroke-width="1.6"><path d="M12 21s-7.5-4.7-10-9.3C.5 8.5 2.5 4 7 4c2.5 0 4 1.3 5 3 1-1.7 2.5-3 5-3 4.5 0 6.5 4.5 5 7.7C19.5 16.3 12 21 12 21z"/><path d="M3 12h4l1.5-3 2 5 1.5-3h9" stroke="#2e9e4f"/></svg>'
       +'</div>'
     +'</div>'
+
+    +'<div class="section-banner">RESEP LATIHAN (EXERCISE PRESCRIPTION)</div>'
+    +'<table class="rx-tbl">'
+      +'<tr><th>Intensitas</th><th>METs Target</th><th>Target HR (%HRmax)</th><th>Target HR (Karvonen/HRR)</th><th>Target VO₂</th></tr>'
+      +'<tr><td><b>Light</b> (awal latihan)</td><td>'+ff(d.rxLight.metsLo,1)+'–'+ff(d.rxLight.metsHi,1)+' METs</td>'
+        +'<td>'+d.rxLight.hrLo+'–'+d.rxLight.hrHi+' bpm ('+ff(d.rxLight.hrPctLo,0)+'–'+ff(d.rxLight.hrPctHi,0)+'%)</td>'
+        +'<td>'+d.rxLight.karvLo+'–'+d.rxLight.karvHi+' bpm ('+ff(d.rxLight.hrrPctLo,0)+'–'+ff(d.rxLight.hrrPctHi,0)+'% HRR)</td>'
+        +'<td>'+ff(d.rxLight.vo2Lo,1)+'–'+ff(d.rxLight.vo2Hi,1)+' mL/kg/min</td></tr>'
+      +'<tr class="rx-final"><td><b>Moderate — Target Akhir</b></td><td>'+ff(d.rxModerate.metsLo,1)+'–'+ff(d.rxModerate.metsHi,1)+' METs</td>'
+        +'<td>'+d.rxModerate.hrLo+'–'+d.rxModerate.hrHi+' bpm ('+ff(d.rxModerate.hrPctLo,0)+'–'+ff(d.rxModerate.hrPctHi,0)+'%)</td>'
+        +'<td>'+d.rxModerate.karvLo+'–'+d.rxModerate.karvHi+' bpm ('+ff(d.rxModerate.hrrPctLo,0)+'–'+ff(d.rxModerate.hrrPctHi,0)+'% HRR)</td>'
+        +'<td>'+ff(d.rxModerate.vo2Lo,1)+'–'+ff(d.rxModerate.vo2Hi,1)+' mL/kg/min</td></tr>'
+    +'</table>'
+    +'<div class="rx-note">Progresi: mulai intensitas Light saat mengawali latihan inti, tingkatkan bertahap menuju target akhir Moderate. HR Reserve basis: '+ff(d.hrReserveBpm,0)+' bpm ('+d.hrReserveBpmFm+'). Referensi: ACSM GETP 12th ed.</div>'
+    +'<table class="fitt-tbl"><tr><td><b>Frequency</b><br>3–5×/minggu</td><td><b>Intensity</b><br>Light → Moderate</td><td><b>Time</b><br>30–60 menit/sesi</td><td><b>Type</b><br>Cardio: jogging, sepeda, renang</td></tr></table>'
 
     +'<div class="section-banner">KESIMPULAN</div>'
     +'<div class="kesimpulan-box"><div class="kes-grid">'
