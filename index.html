@@ -2112,10 +2112,10 @@ function hitungSemua(){
       ?'<div class="hemo-row"><span class="hemo-lbl">Beban Akhir</span><span class="hemo-val">'+watt+' Watt</span></div>'
        +'<div class="hemo-row"><span class="hemo-lbl">Berat Badan</span><span class="hemo-val">'+bwKg+' kg</span></div>'
       :'<div class="hemo-row"><span class="hemo-lbl">Jarak Tempuh</span><span class="hemo-val">'+ff(jarak6mwt,0)+' m</span></div>'))
-    +'<div class="hemo-row"><span class="hemo-lbl">BP Rest</span><span class="hemo-val">'+sbpRest+'/'+dbpRest+' mmHg</span></div>'
+    +'<div class="hemo-row"><span class="hemo-lbl">BP Resting</span><span class="hemo-val">'+sbpRest+'/'+dbpRest+' mmHg</span></div>'
     +'<div class="hemo-row"><span class="hemo-lbl">BP Peak</span><span class="hemo-val">'+sbp+'/'+dbp+' mmHg</span></div>'
     +'<div class="hemo-row"><span class="hemo-lbl">BP Response</span><span class="hemo-val">'+bpResponse+'</span></div>'
-    +'<div class="hemo-row"><span class="hemo-lbl">HR Istirahat</span><span class="hemo-val">'+hrRest+' bpm</span></div>'
+    +'<div class="hemo-row"><span class="hemo-lbl">HR Istirahat/Resting</span><span class="hemo-val">'+hrRest+' bpm</span></div>'
     +'<div class="hemo-row"><span class="hemo-lbl">HR Recovery Menit 1</span><span class="hemo-val" style="color:'+((hrrStatus==='INVALID'||hrrStatus==='REVIEW')?'var(--warn-d)':hrrStatus==='NOT_ASSESSED'?'var(--t3)':hrrNormal?'var(--ok-d)':'var(--bad-d)')+'">'+(hrrStatus==='INVALID'?'Periksa Data':hrrStatus==='REVIEW'?'Review Data':hrrVal!==null?hrrVal+' bpm':'—')+'</span></div>'
     +'<div class="hemo-row"><span class="hemo-lbl">HRR₁ Status</span><span class="hemo-val" style="font-size:9px;color:'+((hrrStatus==='INVALID'||hrrStatus==='REVIEW')?'var(--warn-d)':hrrStatus==='NOT_ASSESSED'?'var(--t3)':hrrNormal?'var(--ok-d)':'var(--bad-d)')+'">'+hrrLabel+'</span></div>'
     +'<div class="hemo-row"><span class="hemo-lbl">Beta-blocker</span><span class="hemo-val" style="font-size:8.5px">'+(betabl==='ya'?'Ya':'Tidak')+'</span></div>'
