@@ -6,6 +6,8 @@
 <title>CardioInsight V3.4 – Stress & Exercise Evaluation Suite</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{
@@ -66,6 +68,26 @@ body{display:flex;flex-direction:column;min-height:100vh}
   font-size:13.5px;font-weight:700;color:#fff;
   box-shadow:0 3px 10px rgba(16,185,129,.4);transition:.15s}
 .btn-pdf-bottom:hover{opacity:.9;transform:translateY(-1px)}
+.tb-gdrive-btn{display:flex;align-items:center;gap:5px;padding:5px 12px;
+  background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);
+  border-radius:8px;cursor:pointer;font-family:var(--ff);
+  font-size:11px;font-weight:700;color:#fff;flex-shrink:0;transition:.15s}
+.tb-gdrive-btn:hover{background:rgba(255,255,255,.18)}
+.tb-gdrive-btn.connected{background:rgba(16,185,129,.25);border-color:rgba(16,185,129,.5)}
+.gdrive-overlay{position:fixed;inset:0;background:rgba(15,20,35,.6);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px}
+.gdrive-panel{background:#fff;border-radius:14px;max-width:440px;width:100%;max-height:88vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.gdrive-panel-head{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--brd);font-weight:800;font-size:13px;color:var(--t1)}
+.gdrive-close{background:none;border:none;font-size:16px;cursor:pointer;color:var(--t3);padding:2px 6px}
+.gdrive-panel-body{padding:14px 16px}
+.gdrive-status-box{font-size:10.5px;padding:8px 10px;border-radius:8px;background:var(--brd2);color:var(--t2);border:1px solid var(--brd)}
+.gdrive-status-box.ok{background:var(--ok-bg);color:var(--ok-d);border-color:var(--ok-b)}
+.gdrive-status-box.bad{background:var(--bad-bg);color:var(--bad-d);border-color:var(--bad-b)}
+.gdrive-help{margin-top:12px;padding-top:10px;border-top:1px dashed var(--brd);font-size:9px;color:var(--t3);line-height:1.7}
+.gdrive-toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);z-index:10000;
+  background:#173a63;color:#fff;padding:10px 18px;border-radius:99px;font-size:11.5px;font-weight:600;
+  box-shadow:0 8px 24px rgba(0,0,0,.25);display:flex;align-items:center;gap:7px;max-width:90vw}
+.gdrive-toast.ok{background:#059669}
+.gdrive-toast.bad{background:#c0392b}
 
 /* ── LAYOUT ── */
 .app-body{flex:1}
@@ -920,7 +942,48 @@ table.ptbl td:last-child{width:30%;}
       <div class="tb-pill">📊 ACSM GETP 12</div>
       <div class="tb-pill">💓 Duke Score · HRR</div>
     </div>
+    <button class="tb-gdrive-btn" id="btn_gdrive" onclick="openGDrivePanel()" title="Google Drive">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M7.71 3.5L1.15 15l3.43 6 6.56-11.5L7.71 3.5z"/><path d="M9.4 21h9.15l3.43-6H12.83L9.4 21z"/><path d="M14.29 3.5l6.56 11.5-3.43 6L10.86 9.5l3.43-6z"/></svg>
+      <span id="gdrive_status_txt">Drive</span>
+    </button>
 </header>
+
+<!-- GOOGLE DRIVE PANEL -->
+<div id="gdrive-overlay" class="gdrive-overlay" style="display:none">
+  <div class="gdrive-panel">
+    <div class="gdrive-panel-head">
+      <span>🔗 Integrasi Google Drive</span>
+      <button class="gdrive-close" onclick="closeGDrivePanel()">✕</button>
+    </div>
+    <div class="gdrive-panel-body">
+      <div id="gdrive_status_box" class="gdrive-status-box">Belum terhubung ke Google Drive.</div>
+
+      <label class="fl" style="margin-top:8px">Google OAuth Client ID</label>
+      <input class="fi" id="inp_gdrive_clientid" type="text" placeholder="xxxxxxxxxx.apps.googleusercontent.com">
+
+      <label class="fl" style="margin-top:8px">Folder ID Tujuan <span class="fu">opsional</span></label>
+      <input class="fi" id="inp_gdrive_folderid" type="text" placeholder="Kosongkan untuk simpan di My Drive (root)">
+
+      <label class="chk-row" style="margin-top:10px"><input type="checkbox" id="inp_gdrive_autoupload" checked> Otomatis unggah PDF ke Drive setiap kali klik "Hitung Semua"</label>
+
+      <button class="btn-calc" style="margin-top:10px" onclick="saveAndConnectGDrive()">Simpan &amp; Hubungkan Google Drive</button>
+      <button class="btn-reset" id="btn_gdrive_disconnect" style="display:none" onclick="disconnectGDrive()">Putuskan Koneksi</button>
+
+      <div class="gdrive-help">
+        <b>Cara mendapatkan Client ID:</b><br>
+        1. Buka <span style="font-family:var(--fm)">console.cloud.google.com</span> → buat project baru.<br>
+        2. Aktifkan <b>Google Drive API</b> (APIs &amp; Services → Library).<br>
+        3. Buat kredensial → <b>OAuth client ID</b> → tipe <b>Web application</b>.<br>
+        4. Tambahkan domain tempat file ini di-hosting ke <b>Authorized JavaScript origins</b> (harus https:// atau http://localhost — tidak bisa file:// lokal).<br>
+        5. Tempel Client ID di atas, klik Hubungkan, lalu login &amp; izinkan akses.<br>
+        Aplikasi hanya meminta izin <span style="font-family:var(--fm)">drive.file</span> — hanya bisa mengakses file yang dibuat aplikasi ini, tidak bisa membaca file Drive lain.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- GDRIVE TOAST -->
+<div id="gdrive-toast" class="gdrive-toast" style="display:none"></div>
 
 <!-- PDF OVERLAY -->
 <div id="pdf-overlay">
@@ -981,7 +1044,7 @@ table.ptbl td:last-child{width:30%;}
       <div class="sh-ic"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#5b21b6" stroke-width="2.3" stroke-linecap="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78z"/></svg></div>
       <span class="sh-tx">Data Dasar Pasien</span>
     </div>
-    <div class="fg"><label class="fl">HR Istirahat <span class="fu">bpm</span></label><input class="fi" id="inp_hrrest" type="number" value="68"></div>
+    <div class="fg"><label class="fl">HR Resting <span class="fu">bpm</span></label><input class="fi" id="inp_hrrest" type="number" value="68"></div>
     <div class="fg"><label class="fl">Beta-blocker?</label>
       <select class="fi fsel" id="inp_betabl" onchange="autoHRMax()">
         <option value="tidak">Tidak — predicted HRmax: 220 − usia</option>
@@ -1063,7 +1126,7 @@ table.ptbl td:last-child{width:30%;}
       <span class="sh-tx">Stress &amp; Exercise</span>
     </div>
     <div class="fg"><label class="fl">HR Peak Exercise <span class="fu">bpm</span></label><input class="fi" id="inp_hrpost" type="number" value="128"></div>
-    <div class="frow"><div class="fg"><label class="fl">SBP Rest <span class="fu">mmHg</span></label><input class="fi" id="inp_sbp_rest" type="number" value="120"></div><div class="fg"><label class="fl">DBP Rest <span class="fu">mmHg</span></label><input class="fi" id="inp_dbp_rest" type="number" value="80"></div></div>
+    <div class="frow"><div class="fg"><label class="fl">SBP Resting <span class="fu">mmHg</span></label><input class="fi" id="inp_sbp_rest" type="number" value="120"></div><div class="fg"><label class="fl">DBP Resting <span class="fu">mmHg</span></label><input class="fi" id="inp_dbp_rest" type="number" value="80"></div></div>
     <div class="frow"><div class="fg"><label class="fl">SBP Peak <span class="fu">mmHg</span></label><input class="fi" id="inp_sbp" type="number" value="150"></div><div class="fg"><label class="fl">DBP Peak <span class="fu">mmHg</span></label><input class="fi" id="inp_dbp" type="number" value="80"></div></div>
     <div class="fg"><label class="fl">HR 1 Menit Recovery <span class="fu">bpm</span></label><input class="fi" id="inp_hr1rec" type="number" placeholder="HR tepat 1 menit setelah terminasi exercise"></div>
     <div class="fg"><label class="fl">Jenis Recovery</label>
@@ -1128,7 +1191,7 @@ table.ptbl td:last-child{width:30%;}
       <span class="sh-tx">Duke Treadmill Score</span>
     </div>
     <div class="fg"><label class="fl">Deviasi ST Terbesar <span class="fu">mm</span></label><input class="fi" id="inp_st" type="number" step="0.5" value="1" min="0"></div>
-    <div class="frow"><div class="fg"><label class="fl">Arah ST</label><select class="fi fsel" id="inp_st_dir"><option value="depression">ST depression</option><option value="elevation">ST elevation</option></select></div><div class="fg"><label class="fl">Morfologi ST</label><select class="fi fsel" id="inp_st_morph"><option value="horizontal">Horizontal</option><option value="downsloping">Downsloping</option><option value="upsloping">Upsloping</option><option value="unknown">Tidak dinilai</option></select></div></div>
+    <div class="frow"><div class="fg"><label class="fl">Perubahan Segmen ST</label><select class="fi fsel" id="inp_st_dir"><option value="depression">ST depression</option><option value="elevation">ST elevation</option></select></div><div class="fg"><label class="fl">Morfologi ST</label><select class="fi fsel" id="inp_st_morph"><option value="horizontal">Horizontal</option><option value="downsloping">Downsloping</option><option value="upsloping">Upsloping</option><option value="unknown">Tidak dinilai</option></select></div></div>
     <div class="fg"><label class="fl">Interpretasi Respon Iskemia</label><select class="fi fsel" id="inp_iskemia">
       <option value="negatif">Negatif (non-iskemik)</option>
       <option value="positif">Positif (iskemik)</option>
@@ -1726,8 +1789,8 @@ function hitungSemua(){
   /* Treadmill/Ergocycle: HR reserve = HR puncak latihan (terukur) − HR istirahat */
   var hrReserveBpm = (modal==='6mwt') ? (hrMax-hrRest) : (hrPost-hrRest);
   var hrReserveBpmFm = (modal==='6mwt')
-    ? ('HR Reserve = HR Max ('+ff(hrMax,0)+') − HR Istirahat ('+ff(hrRest,0)+') = '+ff(hrReserveBpm,0)+' bpm')
-    : ('HR Reserve = HR Puncak Latihan ('+ff(hrPost,0)+') − HR Istirahat ('+ff(hrRest,0)+') = '+ff(hrReserveBpm,0)+' bpm');
+    ? ('HR Reserve = HR Max ('+ff(hrMax,0)+') − HR Resting ('+ff(hrRest,0)+') = '+ff(hrReserveBpm,0)+' bpm')
+    : ('HR Reserve = HR Puncak Latihan ('+ff(hrPost,0)+') − HR Resting ('+ff(hrRest,0)+') = '+ff(hrReserveBpm,0)+' bpm');
 
   /* --- RESEP LATIHAN / EXERCISE PRESCRIPTION (ACSM GETP intensity table) --- */
   /* Light: 1.6–<3 METs | 40–<55% HRmax | 20–<40% HRR (Karvonen) | 20–<40% VO2 peak */
@@ -2115,7 +2178,7 @@ function hitungSemua(){
     +'<div class="hemo-row"><span class="hemo-lbl">BP Resting</span><span class="hemo-val">'+sbpRest+'/'+dbpRest+' mmHg</span></div>'
     +'<div class="hemo-row"><span class="hemo-lbl">BP Peak</span><span class="hemo-val">'+sbp+'/'+dbp+' mmHg</span></div>'
     +'<div class="hemo-row"><span class="hemo-lbl">BP Response</span><span class="hemo-val">'+bpResponse+'</span></div>'
-    +'<div class="hemo-row"><span class="hemo-lbl">HR Istirahat/Resting</span><span class="hemo-val">'+hrRest+' bpm</span></div>'
+    +'<div class="hemo-row"><span class="hemo-lbl">HR Resting</span><span class="hemo-val">'+hrRest+' bpm</span></div>'
     +'<div class="hemo-row"><span class="hemo-lbl">HR Recovery Menit 1</span><span class="hemo-val" style="color:'+((hrrStatus==='INVALID'||hrrStatus==='REVIEW')?'var(--warn-d)':hrrStatus==='NOT_ASSESSED'?'var(--t3)':hrrNormal?'var(--ok-d)':'var(--bad-d)')+'">'+(hrrStatus==='INVALID'?'Periksa Data':hrrStatus==='REVIEW'?'Review Data':hrrVal!==null?hrrVal+' bpm':'—')+'</span></div>'
     +'<div class="hemo-row"><span class="hemo-lbl">HRR₁ Status</span><span class="hemo-val" style="font-size:9px;color:'+((hrrStatus==='INVALID'||hrrStatus==='REVIEW')?'var(--warn-d)':hrrStatus==='NOT_ASSESSED'?'var(--t3)':hrrNormal?'var(--ok-d)':'var(--bad-d)')+'">'+hrrLabel+'</span></div>'
     +'<div class="hemo-row"><span class="hemo-lbl">Beta-blocker</span><span class="hemo-val" style="font-size:8.5px">'+(betabl==='ya'?'Ya':'Tidak')+'</span></div>'
@@ -2154,7 +2217,7 @@ function hitungSemua(){
       +'<div class="ci-tlabels"><span>0%</span><span>Incompetent</span><span style="color:#b45309">'+(ciCutoffPct-10)+'%</span><span style="color:#059669">'+ciCutoffPct+'%</span><span>100%</span></div>'
     +'</div>'
     +'<div class="ci-mets-grid">'
-      +'<div class="ci-met"><div class="ci-met-lbl">HR Rest</div><div class="ci-met-val">'+hrRest+'</div><div class="ci-met-unit">bpm</div></div>'
+      +'<div class="ci-met"><div class="ci-met-lbl">HR Resting</div><div class="ci-met-val">'+hrRest+'</div><div class="ci-met-unit">bpm</div></div>'
       +'<div class="ci-met"><div class="ci-met-lbl">HR Post</div><div class="ci-met-val">'+hrPost+'</div><div class="ci-met-unit">bpm</div></div>'
       +'<div class="ci-met"><div class="ci-met-lbl">HR Max</div><div class="ci-met-val pur">'+hrMax.toFixed(0)+'</div><div class="ci-met-unit">bpm</div></div>'
       +'<div class="ci-met"><div class="ci-met-lbl">HR Reserve ('+(modal==='6mwt'?'HRmax−rest':'peak−rest')+')</div><div class="ci-met-val">'+ff(hrReserveBpm,0)+'</div><div class="ci-met-unit">bpm</div></div>'
@@ -2188,7 +2251,7 @@ function hitungSemua(){
         +'<td style="padding:6px 8px;font-weight:700">'+rxModerate.karvLo+'–'+rxModerate.karvHi+' bpm <span style="color:var(--t3);font-weight:400">('+ff(rxModerate.hrrPctLo,0)+'–'+ff(rxModerate.hrrPctHi,0)+'% HRR)</span></td>'
         +'<td style="padding:6px 8px;font-weight:700">'+ff(rxModerate.vo2Lo,1)+'–'+ff(rxModerate.vo2Hi,1)+' mL/kg/min</td></tr>'
     +'</table>'
-    +'<div style="font-size:8.5px;color:var(--t3);margin-top:6px;line-height:1.5">Progresi: mulai dengan intensitas <strong>Light</strong> saat mengawali latihan inti, tingkatkan bertahap menuju target akhir intensitas <strong>Moderate</strong>. Target HR (Karvonen/HRR) = %HRR × HR Reserve + HR Istirahat, dengan HR Reserve = '+ff(hrReserveBpm,0)+' bpm ('+hrReserveBpmFm+'). Referensi: ACSM GETP 12th ed., klasifikasi intensitas objektif.</div>'
+    +'<div style="font-size:8.5px;color:var(--t3);margin-top:6px;line-height:1.5">Progresi: mulai dengan intensitas <strong>Light</strong> saat mengawali latihan inti, tingkatkan bertahap menuju target akhir intensitas <strong>Moderate</strong>. Target HR (Karvonen/HRR) = %HRR × HR Reserve + HR Resting, dengan HR Reserve = '+ff(hrReserveBpm,0)+' bpm ('+hrReserveBpmFm+'). Referensi: ACSM GETP 12th ed., klasifikasi intensitas objektif.</div>'
     +'<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px">'
       +'<div style="background:var(--brd2);border-radius:8px;padding:8px 9px"><div style="font-size:8px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.4px">Frequency</div><div style="font-size:11px;font-weight:800;color:var(--t1);margin-top:2px">3–5×/minggu</div></div>'
       +'<div style="background:var(--brd2);border-radius:8px;padding:8px 9px"><div style="font-size:8px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.4px">Intensity</div><div style="font-size:11px;font-weight:800;color:var(--t1);margin-top:2px">Light → Moderate</div></div>'
@@ -2272,11 +2335,15 @@ function hitungSemua(){
     // scroll to results
     setTimeout(function(){document.getElementById('main_panel').scrollIntoView({behavior:'smooth',block:'start'});},200);
   }
+
+  /* Auto-upload ke Google Drive (jika terhubung & auto-upload aktif) */
+  setTimeout(function(){ autoUploadReportToDrive(); }, 400);
 }
 
 /* ════ INIT ════ */
 autoHRMax();
 setModal('treadmill');
+updateGDriveTopbarBtn();
 
 /* ════════════════════════════════════════════════
    QR CODE — menggunakan QR Server API
@@ -2378,111 +2445,113 @@ function buildPdfReportHTML(d, qrImgTag){
     +'*{box-sizing:border-box;}html,body{margin:0;padding:0;}'
     +'body{font-family:Arial,Helvetica,sans-serif;color:#16233a;-webkit-font-smoothing:antialiased;}'
     +'@page{size:A4 portrait;margin:0;}'
-    +'.page{width:210mm;height:297mm;position:relative;padding:7mm 8mm 6mm 8mm;overflow:hidden;display:flex;flex-direction:column;}'
+    +'.page{width:210mm;min-height:297mm;position:relative;padding:6mm 8mm 5mm 8mm;overflow:visible;display:flex;flex-direction:column;}'
     +'.header-row{display:flex;justify-content:space-between;align-items:flex-start;position:relative;}'
-    +'.top-section{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-top:6px;}'
-    +'.top-section .title-block{flex:1;margin-top:6px;}'
-    +'.top-section .top-right{flex:0 0 70mm;width:70mm;}'
-    +'.brand{display:flex;align-items:center;gap:8px;}'
-    +'.brand svg{width:44px;height:44px;flex-shrink:0;}'
-    +'.brand-text .name{font-size:26px;font-weight:800;letter-spacing:.3px;line-height:1;}'
+    +'.top-section{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-top:4px;}'
+    +'.top-section .title-block{flex:1;margin-top:4px;}'
+    +'.top-section .top-right{flex:0 0 60mm;width:60mm;}'
+    +'.brand{display:flex;align-items:center;gap:6px;}'
+    +'.brand svg{width:32px;height:32px;flex-shrink:0;}'
+    +'.brand-text .name{font-size:19px;font-weight:800;letter-spacing:.2px;line-height:1;}'
     +'.brand-text .name .cardio{color:var(--navy);}.brand-text .name .insight{color:var(--red);}'
-    +'.brand-text .tagline{font-size:7.3px;letter-spacing:2px;color:var(--navy);font-weight:700;margin-top:3px;}'
-    +'.patient-report-tab{background:var(--navy-dark);color:#fff;font-weight:700;font-size:12px;letter-spacing:1px;padding:6px 18px 6px 24px;position:absolute;top:-7mm;right:-8mm;clip-path:polygon(14px 0,100% 0,100% 100%,0 100%);}'
-    +'.title-block h1{font-size:15px;color:var(--navy);margin:0 0 8px 0;font-weight:800;letter-spacing:.2px;white-space:nowrap;}'
-    +'.badges{display:flex;gap:10px;}'
-    +'.badge{border:1px solid var(--blue-border);background:#fff;border-radius:7px;padding:5px 12px;font-size:10px;font-weight:700;color:#22314a;display:flex;align-items:center;gap:6px;}'
-    +'.badge svg{width:13px;height:13px;}'
-    +'.info-card{border:1px solid var(--blue-border);background:#fbfcfe;border-radius:9px;padding:8px 10px;font-size:9px;}'
-    +'.patient-card{display:flex;gap:8px;}'
-    +'.patient-card .avatar{width:30px;height:30px;border-radius:50%;background:var(--navy);display:flex;align-items:center;justify-content:center;flex-shrink:0;}'
-    +'.patient-card .avatar svg{width:16px;height:16px;fill:#fff;}'
-    +'.patient-card .pname{font-size:12.5px;font-weight:800;color:var(--navy);margin-bottom:2px;}'
-    +'.patient-card .prow{display:flex;align-items:center;gap:5px;margin-top:3px;color:#33415c;font-size:9px;}'
-    +'.patient-card .prow svg{width:10px;height:10px;flex-shrink:0;fill:var(--navy);}'
-    +'.doctor-card{margin-top:6px;}'
-    +'.doctor-tab{background:var(--navy);color:#fff;font-size:8px;font-weight:700;letter-spacing:.5px;padding:4px 9px;border-radius:5px 5px 0 0;display:inline-block;}'
-    +'.doctor-body{border:1px solid var(--blue-border);border-top:none;border-radius:0 8px 8px 8px;padding:7px 9px;display:flex;gap:7px;align-items:flex-start;background:#fbfcfe;}'
-    +'.doctor-body svg{width:20px;height:20px;flex-shrink:0;margin-top:1px;}'
-    +'.doctor-body .dname{font-weight:800;font-size:10px;color:var(--navy);}'
-    +'.doctor-body .dsub{font-size:8.3px;color:var(--gray-text);margin-top:1px;line-height:1.35;}'
-    +'.section-banner{background:var(--navy);color:#fff;font-weight:800;font-size:11px;letter-spacing:.6px;padding:6px 14px;display:inline-flex;align-items:center;clip-path:polygon(0 0,calc(100% - 10px) 0,100% 100%,0 100%);margin:10px 0 6px 0;min-width:260px;}'
-    +'.stat-row{display:flex;gap:6px;margin-bottom:8px;}'
-    +'.stat-card{flex:1;min-width:0;border:1px solid var(--blue-border);background:var(--blue-light);border-radius:9px;padding:7px 8px;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;}'
-    +'.stat-card .lbl{font-size:6.6px;font-weight:800;letter-spacing:.4px;color:#4a5877;display:flex;align-items:center;gap:3px;margin-bottom:3px;text-transform:uppercase;}'
-    +'.stat-card .lbl svg{width:9px;height:9px;}'
-    +'.stat-card .val{font-size:19px;font-weight:800;color:var(--navy);line-height:1.05;}'
-    +'.stat-card .unit{font-size:8px;color:#4a5877;font-weight:600;margin-top:1px;}'
-    +'.stat-card .sub{font-size:7.3px;color:#6a7690;margin-top:3px;}'
+    +'.brand-text .tagline{font-size:6.4px;letter-spacing:1.6px;color:var(--navy);font-weight:700;margin-top:2px;}'
+    +'.patient-report-tab{background:var(--navy-dark);color:#fff;font-weight:700;font-size:10px;letter-spacing:.8px;padding:5px 16px 5px 20px;position:absolute;top:-6mm;right:-8mm;clip-path:polygon(14px 0,100% 0,100% 100%,0 100%);}'
+    +'.title-block h1{font-size:12.5px;color:var(--navy);margin:0 0 5px 0;font-weight:800;letter-spacing:.1px;white-space:nowrap;}'
+    +'.badges{display:flex;gap:7px;}'
+    +'.badge{border:1px solid var(--blue-border);background:#fff;border-radius:6px;padding:4px 9px;font-size:8.6px;font-weight:700;color:#22314a;display:flex;align-items:center;gap:5px;}'
+    +'.badge svg{width:11px;height:11px;}'
+    +'.info-card{border:1px solid var(--blue-border);background:#fbfcfe;border-radius:8px;padding:6px 8px;font-size:9px;}'
+    +'.patient-card{display:flex;gap:6px;}'
+    +'.patient-card .avatar{width:22px;height:22px;border-radius:50%;background:var(--navy);display:flex;align-items:center;justify-content:center;flex-shrink:0;}'
+    +'.patient-card .avatar svg{width:12px;height:12px;fill:#fff;}'
+    +'.patient-card .pname{font-size:10.5px;font-weight:800;color:var(--navy);margin-bottom:1px;}'
+    +'.patient-card .prow{display:flex;align-items:center;gap:4px;margin-top:1.5px;color:#33415c;font-size:7.8px;line-height:1.25;}'
+    +'.patient-card .prow svg{width:8.5px;height:8.5px;flex-shrink:0;fill:var(--navy);}'
+    +'.doctor-card{margin-top:4px;}'
+    +'.doctor-tab{background:var(--navy);color:#fff;font-size:6.8px;font-weight:700;letter-spacing:.4px;padding:3px 7px;border-radius:4px 4px 0 0;display:inline-block;}'
+    +'.doctor-body{border:1px solid var(--blue-border);border-top:none;border-radius:0 7px 7px 7px;padding:5px 7px;display:flex;gap:5px;align-items:flex-start;background:#fbfcfe;}'
+    +'.doctor-body svg{width:15px;height:15px;flex-shrink:0;margin-top:1px;}'
+    +'.doctor-body .dname{font-weight:800;font-size:8.6px;color:var(--navy);}'
+    +'.doctor-body .dsub{font-size:7.2px;color:var(--gray-text);margin-top:1px;line-height:1.25;}'
+    +'.section-banner{background:var(--navy);color:#fff;font-weight:800;font-size:9.5px;letter-spacing:.5px;padding:4.5px 12px;display:inline-flex;align-items:center;clip-path:polygon(0 0,calc(100% - 10px) 0,100% 100%,0 100%);margin:6px 0 4px 0;min-width:260px;}'
+    +'.stat-row{display:flex;gap:5px;margin-bottom:6px;}'
+    +'.stat-card{flex:1;min-width:0;border:1px solid var(--blue-border);background:var(--blue-light);border-radius:8px;padding:5px 6px;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;}'
+    +'.stat-card .lbl{font-size:6.2px;font-weight:800;letter-spacing:.3px;color:#4a5877;display:flex;align-items:center;gap:2px;margin-bottom:2px;text-transform:uppercase;}'
+    +'.stat-card .lbl svg{width:8px;height:8px;}'
+    +'.stat-card .val{font-size:16px;font-weight:800;color:var(--navy);line-height:1.05;}'
+    +'.stat-card .unit{font-size:7px;color:#4a5877;font-weight:600;margin-top:1px;}'
+    +'.stat-card .sub{font-size:6.7px;color:#6a7690;margin-top:2px;}'
     +'.stat-card .sub.strong{font-weight:800;color:#2b3750;}'
-    +'.donut-wrap{width:52px;height:52px;position:relative;margin:2px 0 3px 0;}'
-    +'.donut-wrap svg{width:52px;height:52px;transform:rotate(-90deg);}'
-    +'.donut-center{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:var(--navy);}'
-    +'.stat-card.wide{flex:1.9;display:flex;flex-direction:row;padding:7px 4px;gap:2px;}'
-    +'.stat-card.wide .sub-stat{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;border-right:1px solid var(--blue-border);padding:0 4px;}'
+    +'.donut-wrap{width:42px;height:42px;position:relative;margin:1px 0 2px 0;}'
+    +'.donut-wrap svg{width:42px;height:42px;transform:rotate(-90deg);}'
+    +'.donut-center{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:9.5px;font-weight:800;color:var(--navy);}'
+    +'.stat-card.wide{flex:1.9;display:flex;flex-direction:row;padding:5px 3px;gap:2px;}'
+    +'.stat-card.wide .sub-stat{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;border-right:1px solid var(--blue-border);padding:0 3px;}'
     +'.stat-card.wide .sub-stat:last-child{border-right:none;}'
-    +'.stat-card.wide .val{font-size:16px;}'
+    +'.stat-card.wide .val{font-size:14px;}'
     +'.stat-card.note{text-align:left;align-items:flex-start;}'
     +'.stat-card.note .lbl{color:var(--navy);}'
-    +'.stat-card.note p{font-size:7.3px;line-height:1.4;margin:2px 0 0 0;color:#3a4867;}'
-    +'.flex-row{display:flex;gap:6px;align-items:stretch;}'
-    +'.data-table-wrap{flex:1.65;border:1px solid var(--blue-border);border-radius:9px;overflow:hidden;}'
-    +'table.dt{width:100%;border-collapse:collapse;font-size:9px;}'
-    +'table.dt td{padding:6px 9px;border-bottom:1px solid var(--blue-border);vertical-align:middle;}'
+    +'.stat-card.note p{font-size:6.7px;line-height:1.3;margin:1.5px 0 0 0;color:#3a4867;}'
+    +'.flex-row{display:flex;gap:5px;align-items:stretch;}'
+    +'.data-table-wrap{flex:1.65;border:1px solid var(--blue-border);border-radius:8px;overflow:hidden;}'
+    +'table.dt{width:100%;border-collapse:collapse;font-size:8px;}'
+    +'table.dt td{padding:4px 8px;border-bottom:1px solid var(--blue-border);vertical-align:middle;}'
     +'table.dt tr:last-child td{border-bottom:none;}'
-    +'table.dt td.icon-cell{width:14px;padding-right:4px;}'
-    +'table.dt td.icon-cell svg{width:12px;height:12px;fill:var(--navy);}'
+    +'table.dt td.icon-cell{width:12px;padding-right:3px;}'
+    +'table.dt td.icon-cell svg{width:11px;height:11px;fill:var(--navy);}'
     +'table.dt td.label{color:#3a4867;font-weight:700;width:38%;}'
     +'table.dt td.value{font-weight:800;color:#16233a;}'
-    +'table.rx-tbl{width:100%;border-collapse:collapse;font-size:8.6px;margin-bottom:4px;border:1px solid var(--blue-border);border-radius:8px;overflow:hidden;}'
-    +'table.rx-tbl th{background:var(--navy);color:#fff;padding:5px 7px;text-align:left;font-weight:700;font-size:8px;}'
-    +'table.rx-tbl td{padding:5px 7px;border-bottom:1px solid var(--blue-border);}'
+    +'table.rx-tbl{width:100%;border-collapse:collapse;font-size:7.8px;margin-bottom:3px;border:1px solid var(--blue-border);border-radius:7px;overflow:hidden;}'
+    +'table.rx-tbl th{background:var(--navy);color:#fff;padding:4px 6px;text-align:left;font-weight:700;font-size:7.2px;}'
+    +'table.rx-tbl td{padding:4px 6px;border-bottom:1px solid var(--blue-border);}'
     +'table.rx-tbl tr.rx-final{background:#e6f7ee;}'
-    +'.rx-note{font-size:7.5px;color:var(--gray-text);line-height:1.5;margin-bottom:4px;}'
-    +'.riskstrat-badge{display:flex;align-items:center;gap:10px;border-radius:8px;padding:6px 12px;margin:8px 0;font-size:9px;}'
-    +'.riskstrat-badge .rs-lbl{font-weight:700;letter-spacing:.4px;color:#3a4867;}'
-    +'.riskstrat-badge .rs-val{font-weight:800;font-size:11px;}'
-    +'.riskstrat-badge .rs-sub{margin-left:auto;color:var(--gray-text);font-size:8px;}'
+    +'.rx-note{font-size:6.8px;color:var(--gray-text);line-height:1.4;margin-bottom:3px;}'
+    +'.riskstrat-badge{display:flex;align-items:center;gap:8px;border-radius:7px;padding:5px 10px;margin:5px 0;font-size:8px;}'
+    +'.riskstrat-badge .rs-lbl{font-weight:700;letter-spacing:.3px;color:#3a4867;}'
+    +'.riskstrat-badge .rs-val{font-weight:800;font-size:9.5px;}'
+    +'.riskstrat-badge .rs-sub{margin-left:auto;color:var(--gray-text);font-size:7px;}'
     +'.riskstrat-bad{background:#fdecec;border:1px solid #f2b8b5;} .riskstrat-bad .rs-val{color:var(--bad);}'
     +'.riskstrat-warn{background:#fdf3e3;border:1px solid #f0cd94;} .riskstrat-warn .rs-val{color:var(--amber);}'
     +'.riskstrat-ok{background:#e8f7ee;border:1px solid #a9dfbb;} .riskstrat-ok .rs-val{color:var(--green);}'
-    +'table.fitt-tbl{width:100%;border-collapse:separate;border-spacing:4px;margin-bottom:4px;}'
-    +'table.fitt-tbl td{background:var(--blue-light);border-radius:6px;padding:5px 7px;font-size:7.8px;color:#22314a;width:25%;text-align:left;}'
-    +'table.fitt-tbl td b{display:block;font-size:6.8px;text-transform:uppercase;letter-spacing:.4px;color:var(--navy);margin-bottom:1px;}'
-    +'.hrr-box{flex:1;border:1px solid var(--blue-border);border-radius:9px;background:#fbfcfe;padding:9px 10px;display:flex;flex-direction:column;position:relative;}'
-    +'.hrr-box .htitle{font-size:9px;font-weight:800;color:var(--navy);letter-spacing:.3px;}'
-    +'.hrr-box .hval{font-size:26px;font-weight:800;color:#16233a;margin-top:2px;}'
-    +'.hrr-box .hval span{font-size:11px;font-weight:700;color:#4a5877;}'
-    +'.badge-pill{font-size:8.5px;font-weight:800;letter-spacing:.5px;padding:3px 10px;border-radius:5px;display:inline-block;margin-top:5px;width:fit-content;color:#fff;}'
+    +'table.fitt-tbl{width:100%;border-collapse:separate;border-spacing:3px;margin-bottom:3px;}'
+    +'table.fitt-tbl td{background:var(--blue-light);border-radius:5px;padding:4px 6px;font-size:7px;color:#22314a;width:25%;text-align:left;}'
+    +'table.fitt-tbl td b{display:block;font-size:6.1px;text-transform:uppercase;letter-spacing:.3px;color:var(--navy);margin-bottom:1px;}'
+    +'.hrr-box{flex:1;border:1px solid var(--blue-border);border-radius:8px;background:#fbfcfe;padding:6px 8px;display:flex;flex-direction:column;position:relative;}'
+    +'.hrr-box .htitle{font-size:8px;font-weight:800;color:var(--navy);letter-spacing:.2px;}'
+    +'.hrr-box .hval{font-size:19px;font-weight:800;color:#16233a;margin-top:1px;}'
+    +'.hrr-box .hval span{font-size:9.5px;font-weight:700;color:#4a5877;}'
+    +'.badge-pill{font-size:7.5px;font-weight:800;letter-spacing:.4px;padding:2px 8px;border-radius:4px;display:inline-block;margin-top:3px;width:fit-content;color:#fff;}'
     +'.badge-pill.ok{background:var(--green);}.badge-pill.bad{background:var(--bad);}.badge-pill.warn{background:var(--amber);}.badge-pill.gray{background:#8a94a6;}'
-    +'.hrr-box p{font-size:7.6px;color:#4a5877;line-height:1.35;margin:6px 0 0 0;}'
-    +'.hrr-box .heart-icon{position:absolute;right:10px;bottom:9px;width:34px;height:34px;opacity:.9;}'
-    +'.kesimpulan-box{border:1px solid var(--blue-border);border-radius:9px;padding:9px 12px;margin-top:2px;}'
-    +'.kes-grid{display:flex;gap:14px;}.kes-col{flex:1;}'
-    +'.kes-item{display:flex;gap:7px;margin-bottom:7px;align-items:flex-start;}.kes-item:last-child{margin-bottom:0;}'
-    +'.kes-item svg{width:13px;height:13px;flex-shrink:0;fill:var(--navy);margin-top:1px;}'
-    +'.kes-item p{font-size:8.3px;line-height:1.42;margin:0;color:#26324a;}'
+    +'.hrr-box p{font-size:6.8px;color:#4a5877;line-height:1.3;margin:4px 0 0 0;}'
+    +'.hrr-box .heart-icon{position:absolute;right:8px;bottom:7px;width:26px;height:26px;opacity:.9;}'
+    +'.kesimpulan-box{border:1px solid var(--blue-border);border-radius:8px;padding:7px 10px;margin-top:1px;}'
+    +'.kes-grid{display:flex;gap:12px;}.kes-col{flex:1;}'
+    +'.kes-item{display:flex;gap:6px;margin-bottom:5px;align-items:flex-start;}.kes-item:last-child{margin-bottom:0;}'
+    +'.kes-item svg{width:11px;height:11px;flex-shrink:0;fill:var(--navy);margin-top:1px;}'
+    +'.kes-item p{font-size:7.6px;line-height:1.32;margin:0;color:#26324a;}'
     +'.concl-key{font-weight:800;color:#16233a;}'
     +'.concl-status.ok{color:var(--green);font-weight:800;}.concl-status.bad{color:var(--bad);font-weight:800;}.concl-status.warn{color:var(--amber);font-weight:800;}'
-    +'.bottom-row{display:flex;gap:6px;margin-top:12px;}'
-    +'.bottom-card{border:1px solid var(--blue-border);border-radius:9px;padding:9px 11px;background:#fff;}'
-    +'.bottom-card h4{font-size:8.3px;letter-spacing:.6px;color:var(--navy);margin:0 0 6px 0;font-weight:800;text-transform:uppercase;}'
-    +'.catatan{flex:1.5;}.catatan p{font-size:7.6px;line-height:1.45;color:#3a4867;margin:0;}'
+    +'.bottom-row{display:flex;gap:5px;margin-top:7px;}'
+    +'.bottom-card{border:1px solid var(--blue-border);border-radius:8px;padding:6px 9px;background:#fff;}'
+    +'.bottom-card h4{font-size:7.2px;letter-spacing:.4px;color:var(--navy);margin:0 0 4px 0;font-weight:800;text-transform:uppercase;}'
+    +'.catatan{flex:1.5;}.catatan p{font-size:6.8px;line-height:1.38;color:#3a4867;margin:0;}'
     +'.ttd{flex:1;text-align:center;}'
-    +'.ttd .sig{font-family:"Brush Script MT",cursive;font-size:22px;color:#22314a;margin:6px 0 2px 0;}'
-    +'.ttd .line{border-top:1px solid #33415c;width:80%;margin:0 auto 5px auto;}'
-    +'.ttd .dname{font-size:8.6px;font-weight:800;color:#16233a;}'
-    +'.ttd .dsub{font-size:7.3px;color:var(--gray-text);margin-top:1px;}'
-    +'.qr{flex:.9;text-align:center;}.qr .qrimg{width:56px;height:56px;margin:2px auto 4px auto;display:block;}'
-    +'.qr p{font-size:6.8px;color:var(--gray-text);margin:0;line-height:1.3;}'
-    +'.footer{margin-top:auto;padding-top:10px;}'
-    +'.footer-top{border-top:2px solid var(--navy);padding-top:5px;display:flex;align-items:center;gap:8px;font-size:7.6px;color:#3a4867;}'
-    +'.footer-top .fshield{width:14px;height:14px;flex-shrink:0;fill:var(--navy);}'
+    +'.ttd .sig{font-family:"Brush Script MT",cursive;font-size:17px;color:#22314a;margin:4px 0 1px 0;}'
+    +'.ttd .line{border-top:1px solid #33415c;width:80%;margin:0 auto 4px auto;}'
+    +'.ttd .dname{font-size:7.6px;font-weight:800;color:#16233a;}'
+    +'.ttd .dsub{font-size:6.6px;color:var(--gray-text);margin-top:1px;}'
+    +'.qr{flex:.9;text-align:center;}.qr .qrimg{width:42px;height:42px;margin:1px auto 3px auto;display:block;}'
+    +'.qr p{font-size:6px;color:var(--gray-text);margin:0;line-height:1.25;}'
+    +'.footer{margin-top:auto;padding-top:6px;}'
+    +'.footer-top{border-top:2px solid var(--navy);padding-top:4px;display:flex;align-items:center;gap:7px;font-size:6.8px;color:#3a4867;}'
+    +'.footer-top .fshield{width:12px;height:12px;flex-shrink:0;fill:var(--navy);}'
     +'.footer-top .fright{margin-left:auto;font-weight:700;color:#22314a;white-space:nowrap;}'
-    +'.footer-ref{font-size:7.2px;color:var(--gray-text);margin-top:3px;}.footer-ref b{color:#3a4867;}'
-    +'.footer-credit{font-size:7px;color:#8a94a6;margin-top:5px;text-align:center;padding-top:5px;border-top:1px dotted var(--blue-border);}'
+    +'.footer-ref{font-size:6.5px;color:var(--gray-text);margin-top:2px;}.footer-ref b{color:#3a4867;}'
+    +'.footer-credit{font-size:6.2px;color:#8a94a6;margin-top:3px;text-align:center;padding-top:3px;border-top:1px dotted var(--blue-border);}'
     +'.footer-credit b{color:#3a4867;}.footer-credit a{color:var(--navy);text-decoration:none;font-weight:700;}'
-    +'@media print{ html,body{width:210mm;height:297mm;} }';
+    +'@media print{ html,body{width:210mm;min-height:297mm;} }'
+    +'.stat-card,.stat-row,.data-table-wrap,.hrr-box,.rx-tbl,.fitt-tbl,.kes-item,.bottom-card,.riskstrat-badge,tr,.hemo-wrap{page-break-inside:avoid;break-inside:avoid;}'
+    +'.section-banner{page-break-after:avoid;break-after:avoid;}';
 
   var body = ''
     +'<div class="page">'
@@ -2524,17 +2593,14 @@ function buildPdfReportHTML(d, qrImgTag){
       +'<div class="stat-card"><div class="lbl">% ACHIEVED HR</div><div class="donut-wrap"><svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="16" fill="none" stroke="#d7e2f0" stroke-width="5"/><circle cx="20" cy="20" r="16" fill="none" stroke="#173a63" stroke-width="5" stroke-dasharray="'+arcVal+' 100.5" stroke-linecap="round"/></svg><div class="donut-center">'+ff(d.pct,1)+'%</div></div><div class="sub">'+pctLabel+'</div></div>'
       +'<div class="stat-card"><div class="lbl"><svg viewBox="0 0 24 24" fill="#d81f26"><path d="M12 21s-7.5-4.7-10-9.3C.5 8.5 2.5 4 7 4c2.5 0 4 1.3 5 3 1-1.7 2.5-3 5-3 4.5 0 6.5 4.5 5 7.7C19.5 16.3 12 21 12 21z"/></svg>HR POST</div><div class="val">'+d.hrPost+'</div><div class="unit">bpm</div></div>'
       +'<div class="stat-card wide">'
-        +'<div class="sub-stat"><div class="lbl"><svg viewBox="0 0 24 24" fill="none" stroke="#173a63" stroke-width="2"><path d="M6 20c-2 0-3-1.5-3-3.5S4 13 6 13c.3-2.5 2-4 4-4M18 20c2 0 3-1.5 3-3.5S20 13 18 13c-.3-2.5-2-4-4-4"/><path d="M10 9c0-2 1-4 2-4s2 2 2 4-1 8-2 8-2-6-2-8z"/></svg>PEAK VO2</div><div class="val">'+ff(d.vo2,1)+'</div><div class="unit">mL/kg/min</div><div class="sub strong">METS '+ff(d.mets,1)+'<br>('+d.vo2Cat+')</div></div>'
         +'<div class="sub-stat"><div class="lbl"><svg viewBox="0 0 24 24" fill="none" stroke="#e08a1e" stroke-width="2"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zM12 12L18 9"/></svg>RPP</div><div class="val" style="font-size:14px;">'+ff(d.rpp,0)+'</div><div class="sub">Myocardial workload</div></div>'
         +'<div class="sub-stat"><div class="lbl"><svg viewBox="0 0 24 24" fill="none" stroke="#173a63" stroke-width="2"><path d="M12 2l7 3v6c0 5-3 8.5-7 11-4-2.5-7-6-7-11V5l7-3z"/></svg>DUKE SCORE</div><div class="val">'+duke+'</div><div class="sub strong">'+d.dShort+'</div></div>'
       +'</div>'
     +'</div>'
     +'<div class="stat-row">'
-      +'<div class="stat-card"><div class="lbl"><svg viewBox="0 0 24 24" fill="none" stroke="#173a63" stroke-width="2"><path d="M6 20c-2 0-3-1.5-3-3.5S4 13 6 13c.3-2.5 2-4 4-4M18 20c2 0 3-1.5 3-3.5S20 13 18 13c-.3-2.5-2-4-4-4"/><path d="M10 9c0-2 1-4 2-4s2 2 2 4-1 8-2 8-2-6-2-8z"/></svg>ESTIMATED PEAK VO2</div><div class="val">'+ff(d.vo2,1)+'</div><div class="unit">mL/kg/min</div><div class="sub strong">'+d.vo2Cat+'</div></div>'
-      +'<div class="stat-card"><div class="lbl"><svg viewBox="0 0 24 24" fill="#173a63"><path d="M13 3L4 14h6l-1 7 9-11h-6l1-7z"/></svg>METS KAPASITAS</div><div class="val">'+ff(d.mets,1)+'</div><div class="unit">MET</div><div class="sub strong">'+vo2PctLabel+' • '+d.vo2Cat+'</div></div>'
+      +'<div class="stat-card"><div class="lbl"><svg viewBox="0 0 24 24" fill="none" stroke="#173a63" stroke-width="2"><path d="M6 20c-2 0-3-1.5-3-3.5S4 13 6 13c.3-2.5 2-4 4-4M18 20c2 0 3-1.5 3-3.5S20 13 18 13c-.3-2.5-2-4-4-4"/><path d="M10 9c0-2 1-4 2-4s2 2 2 4-1 8-2 8-2-6-2-8z"/></svg>PEAK VO2</div><div class="val">'+ff(d.vo2,1)+'</div><div class="unit">mL/kg/min</div><div class="sub strong">METS '+ff(d.mets,1)+' • '+vo2PctLabel+' ('+d.vo2Cat+')</div></div>'
       +'<div class="stat-card"><div class="lbl"><svg viewBox="0 0 24 24" fill="none" stroke="#173a63" stroke-width="2"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>IMT</div><div class="val">'+imtDisp+'</div><div class="unit">kg/m²</div><div class="sub strong">'+d.imtCat+'</div></div>'
       +'<div class="stat-card"><div class="lbl"><svg viewBox="0 0 24 24" fill="#d81f26"><path d="M12 21s-7.5-4.7-10-9.3C.5 8.5 2.5 4 7 4c2.5 0 4 1.3 5 3 1-1.7 2.5-3 5-3 4.5 0 6.5 4.5 5 7.7C19.5 16.3 12 21 12 21z"/></svg>CHRONOTROPIC INCOMPETENCE</div><div class="val">'+ciDisp+'%</div><div class="sub">'+d.cL+'</div></div>'
-      +'<div class="stat-card"><div class="lbl"><svg viewBox="0 0 24 24" fill="none" stroke="#d81f26" stroke-width="2.2"><path d="M2 12h4l2-6 4 12 3-9 2 3h5"/></svg>HRR MENIT KE-1</div><div class="val">'+hrrDisp+'</div><div class="unit">bpm</div><div class="sub">'+hrrShort+'</div></div>'
       +'<div class="stat-card note"><div class="lbl"><svg viewBox="0 0 24 24" fill="none" stroke="#173a63" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v5h1"/></svg>INFO</div>'
         +'<p>% Predicted HRmax: '+ff(d.pct,1)+'% → '+pctLabel+'</p>'
         +'<p>RPP '+ff(d.rpp,0)+' → parameter beban miokard, bukan penentu tunggal adequacy test.</p>'
@@ -2545,9 +2611,9 @@ function buildPdfReportHTML(d, qrImgTag){
     +'<div class="flex-row">'
       +'<div class="data-table-wrap"><table class="dt">'
         +'<tr><td class="icon-cell"><svg viewBox="0 0 24 24"><path d="M12 21s-7.5-4.7-10-9.3C.5 8.5 2.5 4 7 4c2.5 0 4 1.3 5 3 1-1.7 2.5-3 5-3 4.5 0 6.5 4.5 5 7.7C19.5 16.3 12 21 12 21z"/></svg></td><td class="label">HR Peak Exercise</td><td class="value">'+d.hrPost+' bpm</td>'+gradeRow+'</tr>'
-        +'<tr><td class="icon-cell"><svg viewBox="0 0 24 24"><path d="M6 2l10 10-3 3L3 5l3-3zM13 12l3-3 6 6a3 3 0 11-4 4l-5-7z"/></svg></td><td class="label">BP Rest</td><td class="value">'+d.sbpRest+'/'+d.dbpRest+' mmHg</td><td class="label">BP Peak</td><td class="value">'+d.sbp+'/'+d.dbp+' mmHg</td></tr>'
+        +'<tr><td class="icon-cell"><svg viewBox="0 0 24 24"><path d="M6 2l10 10-3 3L3 5l3-3zM13 12l3-3 6 6a3 3 0 11-4 4l-5-7z"/></svg></td><td class="label">BP Resting</td><td class="value">'+d.sbpRest+'/'+d.dbpRest+' mmHg</td><td class="label">BP Peak</td><td class="value">'+d.sbp+'/'+d.dbp+' mmHg</td></tr>'
         +'<tr><td class="icon-cell"><svg viewBox="0 0 24 24"><path d="M3 17l5-5 4 4 8-9"/></svg></td><td class="label">BP Response</td><td class="value" colspan="3">'+d.bpResponse+'</td></tr>'
-        +'<tr><td class="icon-cell"><svg viewBox="0 0 24 24"><path d="M12 21s-7.5-4.7-10-9.3C.5 8.5 2.5 4 7 4c2.5 0 4 1.3 5 3 1-1.7 2.5-3 5-3 4.5 0 6.5 4.5 5 7.7C19.5 16.3 12 21 12 21z"/></svg></td><td class="label">HR Istirahat</td><td class="value">'+d.hrRest+' bpm</td><td class="label">Beta-blocker</td><td class="value">'+(d.betabl==='ya'?'Ya':'Tidak')+'</td></tr>'
+        +'<tr><td class="icon-cell"><svg viewBox="0 0 24 24"><path d="M12 21s-7.5-4.7-10-9.3C.5 8.5 2.5 4 7 4c2.5 0 4 1.3 5 3 1-1.7 2.5-3 5-3 4.5 0 6.5 4.5 5 7.7C19.5 16.3 12 21 12 21z"/></svg></td><td class="label">HR Resting</td><td class="value">'+d.hrRest+' bpm</td><td class="label">Beta-blocker</td><td class="value">'+(d.betabl==='ya'?'Ya':'Tidak')+'</td></tr>'
         +'<tr><td class="icon-cell"><svg viewBox="0 0 24 24" fill="none" stroke="#173a63" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></td><td class="label">HR Recovery Menit 1 (HRR1)</td><td class="value">'+hrrDisp+' bpm</td><td class="label">HR Max Basis</td><td class="value">'+ff(d.hrMax,0)+' bpm</td></tr>'
         +'<tr><td class="icon-cell"><svg viewBox="0 0 24 24" fill="none" stroke="#173a63" stroke-width="2"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg></td><td class="label">BB / TB</td><td class="value">'+d.bwKg+' kg / '+d.tbCm+' cm</td><td class="label">IMT</td><td class="value">'+imtDisp+' ('+d.imtCat+')</td></tr>'
       +'</table></div>'
@@ -2611,6 +2677,205 @@ function buildPdfReportHTML(d, qrImgTag){
 /* ════════════════════════════════════════════════
    EXPORT PDF — via print window (single-page A4 report)
 ════════════════════════════════════════════════ */
+/* ══════════════════════════════════════
+   GOOGLE DRIVE INTEGRATION
+   Menggunakan Google Identity Services (GIS) untuk OAuth token client,
+   scope drive.file (hanya file yang dibuat aplikasi ini).
+   html2pdf.js dipakai untuk membuat PDF blob di sisi client tanpa dialog print.
+══════════════════════════════════════ */
+var gdriveTokenClient = null;
+var gdriveAccessToken = null;
+var gdriveTokenExpiry = 0;
+
+function gdLoadConfig(){
+  return {
+    clientId: localStorage.getItem('gdrive_client_id') || '',
+    folderId: localStorage.getItem('gdrive_folder_id') || '',
+    autoUpload: localStorage.getItem('gdrive_auto_upload') !== 'false'
+  };
+}
+
+function openGDrivePanel(){
+  var cfg = gdLoadConfig();
+  document.getElementById('inp_gdrive_clientid').value = cfg.clientId;
+  document.getElementById('inp_gdrive_folderid').value = cfg.folderId;
+  document.getElementById('inp_gdrive_autoupload').checked = cfg.autoUpload;
+  gdRefreshStatusBox();
+  document.getElementById('gdrive-overlay').style.display = 'flex';
+}
+function closeGDrivePanel(){
+  document.getElementById('gdrive-overlay').style.display = 'none';
+}
+
+function gdRefreshStatusBox(){
+  var box = document.getElementById('gdrive_status_box');
+  var connected = gdriveAccessToken && Date.now() < gdriveTokenExpiry;
+  var disc = document.getElementById('btn_gdrive_disconnect');
+  if(connected){
+    box.className = 'gdrive-status-box ok';
+    box.textContent = '✅ Terhubung ke Google Drive. Token aktif sampai ' + new Date(gdriveTokenExpiry).toLocaleTimeString('id-ID') + '.';
+    if(disc) disc.style.display = 'block';
+  } else {
+    box.className = 'gdrive-status-box';
+    box.textContent = 'Belum terhubung ke Google Drive. Masukkan Client ID lalu klik Hubungkan.';
+    if(disc) disc.style.display = 'none';
+  }
+  updateGDriveTopbarBtn();
+}
+
+function updateGDriveTopbarBtn(){
+  var btn = document.getElementById('btn_gdrive');
+  var txt = document.getElementById('gdrive_status_txt');
+  var connected = gdriveAccessToken && Date.now() < gdriveTokenExpiry;
+  if(!btn) return;
+  btn.className = 'tb-gdrive-btn' + (connected?' connected':'');
+  if(txt) txt.textContent = connected ? 'Drive ✓' : 'Drive';
+}
+
+function saveAndConnectGDrive(){
+  var clientId = document.getElementById('inp_gdrive_clientid').value.trim();
+  var folderId = document.getElementById('inp_gdrive_folderid').value.trim();
+  var autoUpload = document.getElementById('inp_gdrive_autoupload').checked;
+  if(!clientId){ alert('Isi Google OAuth Client ID terlebih dahulu. Lihat panduan di bawah form.'); return; }
+  localStorage.setItem('gdrive_client_id', clientId);
+  localStorage.setItem('gdrive_folder_id', folderId);
+  localStorage.setItem('gdrive_auto_upload', autoUpload ? 'true' : 'false');
+  connectGDrive(clientId);
+}
+
+function connectGDrive(clientId){
+  if(typeof google === 'undefined' || !google.accounts || !google.accounts.oauth2){
+    alert('Google Identity Services belum termuat. Periksa koneksi internet lalu coba lagi.');
+    return;
+  }
+  try{
+    gdriveTokenClient = google.accounts.oauth2.initTokenClient({
+      client_id: clientId,
+      scope: 'https://www.googleapis.com/auth/drive.file',
+      callback: function(resp){
+        if(resp && resp.access_token){
+          gdriveAccessToken = resp.access_token;
+          gdriveTokenExpiry = Date.now() + ((resp.expires_in||3300)*1000);
+          gdRefreshStatusBox();
+          showGDriveToast('✅ Google Drive terhubung.', 'ok');
+        } else {
+          showGDriveToast('⚠ Gagal menghubungkan Google Drive.', 'bad');
+        }
+      }
+    });
+    gdriveTokenClient.requestAccessToken({prompt:'consent'});
+  }catch(e){
+    alert('Gagal inisialisasi Google OAuth: '+e.message+'\n\nPastikan file ini diakses via https:// atau http://localhost (bukan file:// lokal), dan domain sudah ditambahkan ke Authorized JavaScript origins di Google Cloud Console.');
+  }
+}
+
+function disconnectGDrive(){
+  if(gdriveAccessToken && typeof google!=='undefined' && google.accounts && google.accounts.oauth2){
+    try{ google.accounts.oauth2.revoke(gdriveAccessToken, function(){}); }catch(e){}
+  }
+  gdriveAccessToken = null;
+  gdriveTokenExpiry = 0;
+  gdRefreshStatusBox();
+  showGDriveToast('Koneksi Google Drive diputuskan.', '');
+}
+
+function showGDriveToast(msg, cls){
+  var t = document.getElementById('gdrive-toast');
+  if(!t) return;
+  t.className = 'gdrive-toast' + (cls?(' '+cls):'');
+  t.textContent = msg;
+  t.style.display = 'flex';
+  clearTimeout(window.__gdToastTimer);
+  window.__gdToastTimer = setTimeout(function(){ t.style.display='none'; }, 4500);
+}
+
+/* Build a PDF Blob (client-side, no print dialog) from the current report data */
+function buildReportPdfBlob(d){
+  return new Promise(function(resolve, reject){
+    if(typeof html2pdf === 'undefined'){ reject(new Error('html2pdf.js belum termuat')); return; }
+    var qrCanvas = document.getElementById('qr_canvas');
+    var qrImgTag = '<svg class="qrimg" viewBox="0 0 88 88"><rect width="88" height="88" fill="#fff"/></svg>';
+    try{ if(qrCanvas){ qrImgTag = '<img class="qrimg" src="'+qrCanvas.toDataURL('image/png')+'" width="56" height="56">'; } }catch(e){}
+
+    var fullHTML = buildPdfReportHTML(d, qrImgTag);
+    var bodyMatch = fullHTML.match(/<body>([\s\S]*)<\/body>/);
+    var styleMatch = fullHTML.match(/<style>([\s\S]*)<\/style>/);
+    var holder = document.createElement('div');
+    holder.style.cssText = 'position:fixed;left:-99999px;top:0;width:210mm;background:#fff';
+    holder.id = 'gdrive-pdf-render-holder';
+    var styleTag = document.createElement('style');
+    styleTag.textContent = (styleMatch?styleMatch[1]:'');
+    holder.appendChild(styleTag);
+    var content = document.createElement('div');
+    content.innerHTML = bodyMatch ? bodyMatch[1] : fullHTML;
+    holder.appendChild(content);
+    document.body.appendChild(holder);
+
+    html2pdf().set({
+      margin:0,
+      filename:'report.pdf',
+      image:{type:'jpeg',quality:0.95},
+      html2canvas:{scale:2,useCORS:true,backgroundColor:'#ffffff'},
+      jsPDF:{unit:'mm',format:'a4',orientation:'portrait'},
+      pagebreak:{mode:['css','legacy']}
+    }).from(content).toPdf().get('pdf').then(function(pdf){
+      var blob = pdf.output('blob');
+      document.body.removeChild(holder);
+      resolve(blob);
+    }).catch(function(err){
+      if(holder.parentNode) document.body.removeChild(holder);
+      reject(err);
+    });
+  });
+}
+
+/* Upload a Blob to Google Drive via multipart upload */
+function uploadBlobToDrive(blob, filename, folderId){
+  return new Promise(function(resolve, reject){
+    if(!gdriveAccessToken || Date.now() >= gdriveTokenExpiry){
+      reject(new Error('NOT_CONNECTED'));
+      return;
+    }
+    var metadata = {name: filename, mimeType: 'application/pdf'};
+    if(folderId) metadata.parents = [folderId];
+    var form = new FormData();
+    form.append('metadata', new Blob([JSON.stringify(metadata)], {type:'application/json'}));
+    form.append('file', blob);
+    fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,webViewLink', {
+      method:'POST',
+      headers:{'Authorization':'Bearer '+gdriveAccessToken},
+      body:form
+    }).then(function(r){
+      if(!r.ok) throw new Error('HTTP '+r.status);
+      return r.json();
+    }).then(resolve).catch(reject);
+  });
+}
+
+/* Called automatically right after hitungSemua() finishes rendering the report */
+function autoUploadReportToDrive(){
+  var cfg = gdLoadConfig();
+  if(!cfg.autoUpload) return;
+  if(!gdriveAccessToken || Date.now() >= gdriveTokenExpiry){
+    return; /* not connected — stay silent, user can connect manually via Drive button */
+  }
+  if(!window.__ciReportData) return;
+  var d = window.__ciReportData;
+  var filename = 'CardioInsight_'+(d.nama||'Laporan').replace(/[^a-zA-Z0-9]+/g,'_')+'_'+(d.lapId||Date.now())+'.pdf';
+  showGDriveToast('⏳ Mengirim laporan ke Google Drive...', '');
+  buildReportPdfBlob(d).then(function(blob){
+    return uploadBlobToDrive(blob, filename, cfg.folderId);
+  }).then(function(res){
+    showGDriveToast('✅ Laporan tersimpan di Google Drive.', 'ok');
+  }).catch(function(err){
+    if(err && err.message === 'NOT_CONNECTED'){
+      showGDriveToast('⚠ Google Drive belum terhubung. Klik tombol Drive di header.', 'bad');
+    } else {
+      showGDriveToast('⚠ Gagal mengunggah ke Google Drive: '+(err&&err.message?err.message:'error'), 'bad');
+    }
+  });
+}
+
 function exportPDF(){
   var panel = document.getElementById('main_panel');
   if(!panel || panel.querySelector('.placeholder') || !window.__ciReportData){
